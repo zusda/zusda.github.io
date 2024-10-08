@@ -3,13 +3,18 @@
   <entry>
     <title>test_my_site</title>
     <url>/2024/10/07/test-my-site/</url>
-    <content><![CDATA[<h2 id="test"><a href="#test" class="headerlink" title="test"></a>test</h2><p>test</p>
-<p><img src="/test-my-site.assets/image-20241007170652100.png" alt="image-20241007170652100"> </p>
-<p><img src="/test-my-site.assets/image-20241007170936036.png" alt="image-20241007170936036"> </p>
-<p><img src="/../../sourece/imgs/test-my-site/image-20241008202831268.png" alt="image-20241008202831268"> </p>
-<p><img src="/../imgs/test-my-site/image-20241008203615358.png" alt="image-20241008203615358"> </p>
-<p>test2</p>
-]]></content>
+    <content><![CDATA[<div class="hbe hbe-container" id="hexo-blog-encrypt" data-wpm="Oh, this is an invalid password. Check and try again, please." data-whm="OOPS, these decrypted content may changed, but you can still have a look.">
+  <script id="hbeData" type="hbeData" data-hmacdigest="09dd1f2a38e4e656b557c973234c3a1d8a81a23fd1be08d443ee2ccca1c4cab9">10d79030e8222445804370796b90fca106f15dd47c03b7cc3ac7fb0590359f37a7d173e8bddb0ba3488b259314ce3f4682f1cb76d9f3445339aada56777497610c9410e3de8e29f7f183b50ff51a75b527844e1e076f0f3ceaf2d37dd06b692e3831bf578af928d61ac80e0fa159e12aa1aa820ba2fe75cc473ed71d7c8844d7312e42ad9945209bec36e5fffd971652e89604338543f74c2297941bfc5ea90cd41cf241eaed50c43092201412b0b390134725845b7fb7bc3a3ed23b20d55e9dc5b54d2fd9dbafbb346207cc243a71d3ed0046dd0923ccfadf3ad2ed6039341203fc8e88d7d79488e9cffaebba19c2629a0c9a9d1c3864b936f353c6b98c04454530087763ad33ca8519a53690d0a00fbecc6224443bcd833e3d779f576cc6509d2ce8465b008bb099f897e01882bf91faed49273071520e328364eb491047694a398befaf26d52c080799da3201cceb1761aa4705f9555c63fb4bb65ab0a9ce6faa530f3e5002c6a9f16dd87518c965a3cae2e34cb7b6b70664ba214c388dfd3705ae06916b0d34198e1d9c6b888953975381499d45d9ca04a3db64dc66f9dc91124b11b8e4b04efccb47c4c6188acfb167c3aae8df468ce7f993b6c7244286dc635a239b1d33e147d4999e9447932668366cbb7d8d135e5aa7ec43d14b1225a035d3c6927ad133fdba0b0f1ea8ed9034fa928b502fb6ee85b103c6d72c3a8e8c69e06e82bb122e37f9c02b01c18b2d37e80c931aa72983b9f8426db04786e9</script>
+  <div class="hbe hbe-content">
+    <div class="hbe hbe-input hbe-input-default">
+      <input class="hbe hbe-input-field hbe-input-field-default" type="password" id="hbePass">
+      <label class="hbe hbe-input-label hbe-input-label-default" for="hbePass">
+        <span class="hbe hbe-input-label-content hbe-input-label-content-default">Hey, password is required here.</span>
+      </label>
+    </div>
+  </div>
+</div>
+<script data-pjax src="/lib/hbe.js"></script><link href="/css/hbe.style.css" rel="stylesheet" type="text/css">]]></content>
   </entry>
   <entry>
     <title>Hello World</title>
