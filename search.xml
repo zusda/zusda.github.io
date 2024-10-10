@@ -19,6 +19,16 @@
 ]]></content>
   </entry>
   <entry>
+    <title>java审计1:ModelAttribute</title>
+    <url>/2024/10/10/java%E5%AE%A1%E8%AE%A11/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本章节是按照 <a href="https://aluvion.github.io/2019/04/02/%E8%87%AA%E5%8A%A8%E7%BB%91%E5%AE%9A%E6%BC%8F%E6%B4%9E-war%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/">文章</a> 进行 @ModelAttribute 功能点的漏洞审计，以及实际debug中各种执行。</p>
+<p>程序 shop.exe 可以在原博客主中下载。</p>
+]]></content>
+      <tags>
+        <tag>java代码审计</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>test_my_site</title>
     <url>/2024/10/07/test-my-site/</url>
     <content><![CDATA[<div class="hbe hbe-container" id="hexo-blog-encrypt" data-wpm="Oh, this is an invalid password. Check and try again, please." data-whm="OOPS, these decrypted content may changed, but you can still have a look.">
@@ -39,16 +49,6 @@
       <tags>
         <tag>jQuery_1_test</tag>
         <tag>jQuery_1_test2 3</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>java审计1:ModelAttribute</title>
-    <url>/2024/10/10/java%E5%AE%A1%E8%AE%A11/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本章节是按照 <a href="https://aluvion.github.io/2019/04/02/%E8%87%AA%E5%8A%A8%E7%BB%91%E5%AE%9A%E6%BC%8F%E6%B4%9E-war%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/">文章</a> 进行 @ModelAttribute 功能点的漏洞审计，以及实际debug中各种执行。</p>
-<p>程序 shop.exe 可以在原博客主中下载。</p>
-]]></content>
-      <tags>
-        <tag>java代码审计</tag>
       </tags>
   </entry>
 </search>
