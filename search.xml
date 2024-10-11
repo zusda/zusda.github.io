@@ -23,6 +23,8 @@
     <url>/2024/10/10/java%E5%AE%A1%E8%AE%A11/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本章节是按照 <a href="https://aluvion.github.io/2019/04/02/%E8%87%AA%E5%8A%A8%E7%BB%91%E5%AE%9A%E6%BC%8F%E6%B4%9E-war%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/">文章</a> 进行 @ModelAttribute 功能点的漏洞审计，以及实际debug中各种执行。</p>
 <p>程序 shop1.war可以在原博客主中下载。</p>
+<span id="more"></span>
+
 <h2 id="配置debug环境"><a href="#配置debug环境" class="headerlink" title="配置debug环境"></a>配置debug环境</h2><p>tomcat + idea 远程调试代码</p>
 <p><strong>1.安装tomcat</strong></p>
 <p>• Tomcat 9.x：支持 Java 8、Java 11、Java 17（及更高版本）。</p>
