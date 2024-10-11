@@ -224,9 +224,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2024-10-10 20:13:04 / 修改时间：20:22:29" itemprop="dateCreated datePublished" datetime="2024-10-10T20:13:04+08:00">2024-10-10</time>
+      <time title="创建时间：2024-10-10 20:13:04" itemprop="dateCreated datePublished" datetime="2024-10-10T20:13:04+08:00">2024-10-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-10-11 15:01:00" itemprop="dateModified" datetime="2024-10-11T15:01:00+08:00">2024-10-11</time>
     </span>
 
   
@@ -240,7 +246,110 @@
     
     <div class="post-body" itemprop="articleBody">
           <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本章节是按照 <a target="_blank" rel="noopener" href="https://aluvion.github.io/2019/04/02/%E8%87%AA%E5%8A%A8%E7%BB%91%E5%AE%9A%E6%BC%8F%E6%B4%9E-war%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/">文章</a> 进行 @ModelAttribute 功能点的漏洞审计，以及实际debug中各种执行。</p>
-<p>程序 shop.exe 可以在原博客主中下载。</p>
+<p>程序 shop1.war可以在原博客主中下载。</p>
+<h2 id="配置debug环境"><a href="#配置debug环境" class="headerlink" title="配置debug环境"></a>配置debug环境</h2><p>tomcat + idea 远程调试代码</p>
+<p><strong>1.安装tomcat</strong></p>
+<p>• Tomcat 9.x：支持 Java 8、Java 11、Java 17（及更高版本）。</p>
+<p>• Tomcat 10.x：要求 Java 11 或更高版本，主要用于支持 Servlet 4.0 规范及其相关特性。</p>
+<p>主机里只有1.8，因此我们用的tomcat 9</p>
+<p><a target="_blank" rel="noopener" href="https://tomcat.apache.org/download-90.cgi">https://tomcat.apache.org/download-90.cgi</a></p>
+<p>点击如下zip进行下载</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241010202936176.png" alt="image-20241010202936176"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ unzip apache-tomcat-9.0.95.zip</span><br><span class="line"></span><br><span class="line">$ <span class="built_in">cd</span> apache-tomcat-9.0.95/</span><br><span class="line"></span><br><span class="line">$ TC=$(<span class="built_in">pwd</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>2.war包存放路径</strong></p>
+<p>$TC&#x2F;webapps&#x2F;shop-1.0.0.war</p>
+<p><strong>3.tomcat开启远程调试端口</strong></p>
+<p>修改文件 catalina.sh，在注释后第一行添加如下</p>
+<p>CATALINA_OPTS&#x3D;”-Xdebug -Xrunjdwp:transport&#x3D;dt_socket,address&#x3D;<strong>8000</strong>,suspend&#x3D;n,server&#x3D;y”</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241010203111195.png" alt="image-20241010203111195"></p>
+<p>apache开启与关闭</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$TC</span>/bin/catalina.sh start</span><br><span class="line"></span><br><span class="line"><span class="variable">$TC</span>/bin/catalina.sh stop</span><br></pre></td></tr></table></figure>
+
+<p>检测调试端口是否开启成功</p>
+<p>netstat -tuln | grep 8000</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241010203208761.png" alt="image-20241010203208761"> </p>
+<p>如果你想url的根路径就是你的war包的话，可以修改&#x2F;opt&#x2F;apache-tomcat-9.0.17&#x2F;conf&#x2F;server.xml</p>
+<blockquote>
+<Host name="localhost"  appBase="" unpackWARs="true" autoDeploy="true">
+
+<Context path="" docBase="/home/student/FSWA/module-2/apache-tomcat-9.0.95/webapps/shop-1.0.0" debug="0" reloadable="true" crossContext="true"/>
+</blockquote>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241010203315018.png" alt="image-20241010203315018"> </p>
+<p>默认web服务开放端口8080</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241010203330170.png" alt="image-20241010203330170"></p>
+<p>开启apache后，通过浏览器访问即可</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241010203442840.png" alt="image-20241010203442840"> </p>
+<p><strong>4.idea2024配置</strong></p>
+<p>由于我们是war包，因此得反编译相同结构的java文件内容才行。</p>
+<p>如果是当前项目打包好的war放到tomcat中直接debug应该是没啥问题的，但如果是war包反编译弄成java代码后进行debug的话，可能会有行数不一致的情况</p>
+<p>在classes文件夹隔壁，新创建一个java文件夹</p>
+<p>打开如下设置</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145226148.png" alt="image-20241011145226148"> </p>
+<p>选择刚才新创建的java文件夹，然后按照如下进行设置</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145243568.png" alt="image-20241011145243568"> </p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145256100.png" alt="image-20241011145256100"> </p>
+<p>然后吧classes中所有文件复制过去，把.class文件换成反编译后的.java文件</p>
+<p>当然，弄过去后会一堆报错，但实际没关系，关闭语法报错提示正常调试</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145327715.png" alt="image-20241011145327715"> </p>
+<p>java文件滑动条这里右键出来</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/1.png" alt="file://C:/Users/admin/AppData/Local/Temp/.MWY8U2/1.png"> </p>
+<p>接下来配置调试器</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145449711.png" alt="image-20241011145449711"> </p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145454446.png" alt="image-20241011145454446"> </p>
+<p>关联到之前apache开放的调试端口</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145507746.png" alt="image-20241011145507746"> </p>
+<h2 id="开始调试"><a href="#开始调试" class="headerlink" title="开始调试"></a>开始调试</h2><p>在 Java Web 开发中，框架默认是否开启<strong>参数自动绑定</strong>取决于所使用的框架。Spring MVC 框架默认开启自动绑定，会根据请求中的参数自动将其绑定到控制器方法中的对象或参数。</p>
+<p><strong>对象绑定</strong>：当请求中的参数名与对象的属性名一致时，Spring MVC 会自动将请求参数的值绑定到对象的对应属性上。例如：</p>
+<p>如果请求中有 balance&#x3D;100 这样的参数，Spring 会将其自动赋值给 user 对象中的 balance 属性。</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241010202743976.png" alt="image-20241010202743976"> </p>
+<h3 id="1-buy路径"><a href="#1-buy路径" class="headerlink" title="1.buy路径"></a>1.buy路径</h3><p>路由中我们看到buy路径有 @ModelAttribute 修饰的对象 user</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145557343.png" alt="image-20241011145557343"> </p>
+<p>这意味着我们能够修改user中的任意属性</p>
+<p>我们查看他有哪些属性</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145608992.png" alt="image-20241011145608992"> </p>
+<p>我们能看到代码中有一段使用了setBalance将修改当前的user对象内容。（自动绑定我理解为只是在当前函数中，使用到该参数时，才替换成我们绑定的值，但对象实际的值并不会修改）</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145640382.png" alt="image-20241011145640382"> </p>
+<p>那么我们修改user对象中balance的值，就能够修改当前user.getBalance()的内容了。</p>
+<p>当然，源代码中也有对该参数进行禁止绑定的配置，但是能够通过大小写进行绕过。</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145652303.png" alt="image-20241011145652303"> </p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145658795.png" alt="image-20241011145658795"> </p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145704590.png" alt="image-20241011145704590"> </p>
+<h3 id="2-profile路径"><a href="#2-profile路径" class="headerlink" title="2.profile路径"></a>2.profile路径</h3><p>除了&#x2F;buy以外，&#x2F;profile也使用了 @ModelAttribute 修饰user</p>
+<p>并且注意到cart.add中利用user的内容进行添加。</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145757832.png" alt="image-20241011145757832"> </p>
+<p>那么我们把productId为4的flag添加到我们购物车中即可</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145807571.png" alt="image-20241011145807571"> </p>
+<p>还是先debug查看需要什么</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145818220.png" alt="image-20241011145818220"> </p>
+<p>那么我们修改这个id即可，注意User中对cart的赋值使用的是 setCartItems，因此传参的时候，传的是 cartItems（大小写应该无所谓）</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145829136.png" alt="image-20241011145829136"> </p>
+<p>cartItems[0].id&#x3D;4</p>
+<p>因为是get请求，因此需要全部url编码</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145841144.png" alt="image-20241011145841144"> </p>
+<p>（我应该设置的[0]，不过不知道为什么所有item都变了）</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145857520.png" alt="image-20241011145857520"> </p>
+<p>当然，我们也能用post请求</p>
+<p>别直接GET改POST，burp中有修改post功能，帮你添加上post需要的字段</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145909441.png" alt="image-20241011145909441"> </p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145913975.png" alt="image-20241011145913975"> </p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145923473.png" alt="image-20241011145923473"> </p>
+<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><p>正如之前所说，自动绑定修改的是当前函数修饰的对象所用到的值，对象本身并没改变，因此刷新当前页面就恢复了</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011145949334.png" alt="image-20241011145949334"> </p>
+<h2 id="修复"><a href="#修复" class="headerlink" title="修复"></a>修复</h2><ol>
+<li></li>
+</ol>
+<p>使用 DTO 模式，在对象中放入能修改的字段，在后续进行更新</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011150017124.png" alt="image-20241011150017124"> </p>
+<p>这样，就不能直接自动绑定到user的balance等字段了。</p>
+<ol start="2">
+<li></li>
+</ol>
+<p>@InitBinder：通过 WebDataBinder 的 setDisallowedFields() 方法指定哪些字段不被绑定。</p>
+<p>如源程序中定义了如下</p>
+<p><img src="/../imgs/java%E5%AE%A1%E8%AE%A11/image-20241011150046952.png" alt="image-20241011150046952"> </p>
+<p>但是由于大小写原因，使用Balance也能进行绑定。。</p>
+<p>虽然也有办法检测传输来的参数然后进行手动验证，但感觉还是dto方式好点，直接禁了</p>
 
       
     </div>
