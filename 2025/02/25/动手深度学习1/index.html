@@ -39,6 +39,13 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="1前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的可以直接指正。或者不清晰的可以直接查看原文部分。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250225233408156.png">
+<meta property="og:image" content="http://example.com/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226213039241.png">
+<meta property="og:image" content="http://example.com/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226214637799.png">
+<meta property="og:image" content="http://example.com/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226215105779.png">
+<meta property="og:image" content="http://example.com/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226221037001.png">
+<meta property="og:image" content="http://example.com/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226221057789.png">
+<meta property="og:image" content="http://example.com/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226221104631.png">
 <meta property="article:published_time" content="2025-02-25T13:39:22.000Z">
 <meta property="article:modified_time" content="2025-02-26T14:30:28.664Z">
 <meta property="article:author" content="John Doe">
@@ -46,6 +53,7 @@
 <meta property="article:tag" content="动手学习深度学习">
 <meta property="article:tag" content="第3节">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250225233408156.png">
 
 
 <link rel="canonical" href="http://example.com/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/">
@@ -171,7 +179,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-count">7</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -273,9 +281,7 @@ Regression）的核心思想就是<strong>找到一条最优的直线来拟合�
 <p><span class="math display">\[
 \hat{y}{}^{(i)}={x}^{(i)}_{1}{w}_{1}+{x}^{(i)}_{2}{w}_{2}+b
 \]</span> 假设y是房价，房屋面积是x1，房龄是x2。</p>
-<p>其中 <span class="math inline">\({w}_{1}\)</span> 和 <span
-class="math inline">\({w}_{2}\)</span> 是权重（weight），<span
-class="math inline">\(b\)</span>
+<p>其中 <span class="math inline">\({w}_{1}\)</span> 和 <span class="math inline">\({w}_{2}\)</span> 是权重（weight），<span class="math inline">\(b\)</span>
 是偏差（bias），且均为标量。它们是线性回归模型的参数（parameter）。</p>
 <h2 id="模型训练的概念">3.模型训练的概念</h2>
 <h3 id="收集训练数据">3.1 收集训练数据</h3>
@@ -284,19 +290,14 @@ class="math inline">\(b\)</span>
 \hat{y}{}^{(i)}={x}^{(i)}_{1}{w}_{1}+{x}^{(i)}_{2}{w}_{2}+b
 \]</span> ​</p>
 <h3 id="损失函数">3.2 损失函数</h3>
-<p>所谓的损失，就是模型预测值<span
-class="math inline">\(\hat{y}\)</span>与实际值y之间的误差。</p>
-<p>即我们当前的$ ({w}<em>{1},{w}</em>{2},b)<span
-class="math inline">\(固定情况下，输入\)</span>{x}<em>{1}，{x}</em>{2}<span
-class="math inline">\(经过模型计算获得的估计值\)</span>$ 和 样本中 <span
-class="math inline">\(({x}_{1},{x}_{2},y)\)</span>中已经有实际的y
+<p>所谓的损失，就是模型预测值<span class="math inline">\(\hat{y}\)</span>与实际值y之间的误差。</p>
+<p>即我们当前的$ ({w}<em>{1},{w}</em>{2},b)<span class="math inline">\(固定情况下，输入\)</span>{x}<em>{1}，{x}</em>{2}<span class="math inline">\(经过模型计算获得的估计值\)</span>$ 和 样本中 <span class="math inline">\(({x}_{1},{x}_{2},y)\)</span>中已经有实际的y
 之间的误差。</p>
 <p>损失函数有许多,
 这里使用的<strong>平方误差函数</strong>也称为平方损失（square loss）
 <span class="math display">\[
 {L}^{(i)}({w}_{1},{w}_{2},b)=\frac {1} {2}(\hat{y}^{(i)}−y(i))^2
-\]</span> 由于有n个样本，我们选平均值作为整体的损失函数 <span
-class="math display">\[
+\]</span> 由于有n个样本，我们选平均值作为整体的损失函数 <span class="math display">\[
 {L}({w}_{1},{w}_{2},b)
 =
 \frac {1} {n}\sum ^{n}_{i=1} {L}^{(i)}({w}_{1},{w}_{2},b)
@@ -304,52 +305,33 @@ class="math display">\[
 \frac {1} {n}\sum ^{n}_{i=1} {\frac {1} {2}(\hat{y}^{(i)}−y^{(i)})^{2} }
 \]</span>
 在线性回归中使用平方差作为损失函数有很多好处，最重要的一点在于它是一个<strong>凸函数</strong>，这意味着它只有一个最小值，确保了我们可以通过优化算法（如梯度下降）找到最优解。它的导数是连续且容易计算的，这使得求解优化问题变得更简单。</p>
-<p>这样我们就能求出最优的参数 <span
-class="math inline">\(({w}_{1},{w}_{2},b)\)</span></p>
+<p>这样我们就能求出最优的参数 <span class="math inline">\(({w}_{1},{w}_{2},b)\)</span></p>
 <h3 id="优化算法">3.3 优化算法</h3>
 <p>当模型和损失函数形式较为简单时，上面的<strong>误差最小化问题的解可以直接用公式表达出来</strong>。这类解叫作<strong>解析解（analytical
 solution）</strong></p>
 <p>然而，大多数深度学习模型并没有解析解，只能<strong>通过优化算法有限次迭代模型参数</strong>来尽可能降低损失函数的值。这类解叫作<strong>数值解（numerical
 solution）</strong>。</p>
-<p>这里我们通过偏导数对 <span
-class="math inline">\(({w}_{1},{w}_{2},b)\)</span> 进行优化，使得模型的
+<p>这里我们通过偏导数对 <span class="math inline">\(({w}_{1},{w}_{2},b)\)</span> 进行优化，使得模型的
 <span class="math inline">\(({w}_{1},{w}_{2},b)\)</span>
-越来越接近实际的 <span
-class="math inline">\(({w}_{1},{w}_{2},b)\)</span>
+越来越接近实际的 <span class="math inline">\(({w}_{1},{w}_{2},b)\)</span>
 ，也就是说我们在此通过模型求出它的数值解</p>
 <h4 id="对偏导的解释">2.3.1 对偏导的解释</h4>
-<p>我们知道一元方程中 <span
-class="math inline">\(y=a{x}^{2}\)</span>，x的导数是<span
-class="math inline">\(2ax\)</span>，同时也代表着该点<span
-class="math inline">\((x,y)\)</span>的斜率是<span
-class="math inline">\(2ax\)</span></p>
+<p>我们知道一元方程中 <span class="math inline">\(y=a{x}^{2}\)</span>，x的导数是<span class="math inline">\(2ax\)</span>，同时也代表着该点<span class="math inline">\((x,y)\)</span>的斜率是<span class="math inline">\(2ax\)</span></p>
 <figure>
-<img
-src="../imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250225233408156.png"
-alt="image-20250225233408156" />
+<img src="/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250225233408156.png" alt="image-20250225233408156">
 <figcaption aria-hidden="true">image-20250225233408156</figcaption>
 </figure>
-<p>在 <span class="math inline">\(x=0\)</span> 处，斜率/导数 <span
-class="math inline">\(ax=0\)</span>。这也是该函数最低点。</p>
-<p>我们随机在<span class="math inline">\(x&gt;0\)</span>处选取点<span
-class="math inline">\(({x}_{1},{y}_{1})\)</span>，此时的斜率 <span
-class="math inline">\(2a{x}_{1}&gt;0\)</span>，那么优化更新<span
-class="math inline">\({x}_{1}\)</span>的时候 <span
-class="math inline">\(({x}_{1})&#39; = {x}_{1} - 2a{x}_{1}\)</span>
-的话，$({x}<em>{1})' 必定在x<span
-class="math inline">\(1的左侧，即**\)</span>{x}</em>{1}$减去该处的斜率**会向最低点的x==0移动。</p>
-<p>在<span class="math inline">\(x&lt;0\)</span>处取值也是同理，<span
-class="math inline">\(2a{x}_{1}&lt;0\)</span>，那么<span
-class="math inline">\(({x}_{1})&#39; = {x}_{1} - 2a{x}_{1}\)</span>
+<p>在 <span class="math inline">\(x=0\)</span> 处，斜率/导数 <span class="math inline">\(ax=0\)</span>。这也是该函数最低点。</p>
+<p>我们随机在<span class="math inline">\(x&gt;0\)</span>处选取点<span class="math inline">\(({x}_{1},{y}_{1})\)</span>，此时的斜率 <span class="math inline">\(2a{x}_{1}&gt;0\)</span>，那么优化更新<span class="math inline">\({x}_{1}\)</span>的时候 <span class="math inline">\(({x}_{1})&#39; = {x}_{1} - 2a{x}_{1}\)</span>
+的话，$({x}<em>{1})' 必定在x<span class="math inline">\(1的左侧，即**\)</span>{x}</em>{1}$减去该处的斜率**会向最低点的x==0移动。</p>
+<p>在<span class="math inline">\(x&lt;0\)</span>处取值也是同理，<span class="math inline">\(2a{x}_{1}&lt;0\)</span>，那么<span class="math inline">\(({x}_{1})&#39; = {x}_{1} - 2a{x}_{1}\)</span>
 的话，相当于<span class="math inline">\({x}_{1}\)</span>向右边移动。</p>
 <p>那么这里说明一个问题，<strong>我们所求出来的偏导实际上要的只是这个值的正负</strong>，其数值大小并不重要（当然这里y=ax²中，x越大斜率越大的特点能加快到达最小值，但其它函数就不一定了）</p>
 <p>倘若该 <span class="math inline">\(({x}_{1},{y}_{1})\)</span>
 并非处于最低点的斜率k=0的位置的话，就会不断移动，最终到达该点（收敛）</p>
 <p>（当然这就引出局部最优或者未到达局部最优但是斜率为0的位置等问题，应该以后其他课程会解决）</p>
 <h3 id="继续">3.3.2 继续</h3>
-<p>重新回到本章节的损失函数中，我们的目的是让模型预测的y尽可能接近真实数据<span
-class="math inline">\(\hat{y}\)</span>，因此损失越小越好。 <span
-class="math display">\[
+<p>重新回到本章节的损失函数中，我们的目的是让模型预测的y尽可能接近真实数据<span class="math inline">\(\hat{y}\)</span>，因此损失越小越好。 <span class="math display">\[
 {L}({w}_{1},{w}_{2},b)
 =
 \frac {1} {n}\sum ^{n}_{i=1} {L}^{(i)}({w}_{1},{w}_{2},b)
@@ -357,14 +339,10 @@ class="math display">\[
 \frac {1} {n}\sum ^{n}_{i=1} {\frac {1} {2}(\hat{y}^{(i)}−y^{(i)})^{2} }
 \]</span> 再解析y获得如下完整w参数的loss函数（手打公式打麻了）</p>
 <figure>
-<img
-src="../imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226213039241.png"
-alt="image-20250226213039241" />
+<img src="/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226213039241.png" alt="image-20250226213039241">
 <figcaption aria-hidden="true">image-20250226213039241</figcaption>
 </figure>
-<p>上面公式举例对<span
-class="math inline">\({w}_{1}\)</span>进行求导，利用链式法则 <span
-class="math display">\[
+<p>上面公式举例对<span class="math inline">\({w}_{1}\)</span>进行求导，利用链式法则 <span class="math display">\[
 E=L^{(i)}={x}^{(i)}_{1}{w}_{1}+{x}^{(i)}_{2}{w}_{2}+b−y^{(i)}
 \]</span></p>
 <p><span class="math display">\[
@@ -376,38 +354,30 @@ J=E^2
 \]</span></p>
 <p>因此得到如下更新公式（2是常数所以去掉了）</p>
 <figure>
-<img
-src="../imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226214637799.png"
-alt="image-20250226214637799" />
+<img src="/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226214637799.png" alt="image-20250226214637799">
 <figcaption aria-hidden="true">image-20250226214637799</figcaption>
 </figure>
 <p>在上式中，<span class="math inline">\(∣B∣\)</span>
-代表每个小批量中的样本个数（批量大小，batch size），<span
-class="math inline">\(η\)</span> 称作学习率（learning
+代表每个小批量中的样本个数（批量大小，batch size），<span class="math inline">\(η\)</span> 称作学习率（learning
 rate）并取正数。</p>
 <h2 id="线性回归的表示方法">4 线性回归的表示方法</h2>
 <h3 id="神经网络图">4.1 神经网络图</h3>
 <p>线性回归是一个单层神经网络</p>
 <figure>
-<img
-src="../imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226215105779.png"
-alt="image-20250226215105779" />
+<img src="/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226215105779.png" alt="image-20250226215105779">
 <figcaption aria-hidden="true">image-20250226215105779</figcaption>
 </figure>
-<p>输入<span
-class="math inline">\({x}_{1},{x}_{2}\)</span>等参数，接受并输出层o的内部的每个节点计算都类似
+<p>输入<span class="math inline">\({x}_{1},{x}_{2}\)</span>等参数，接受并输出层o的内部的每个节点计算都类似
 <span class="math inline">\(y={x}_{1}{w}_{1}+{x}_{2}{w}_{2}+b\)</span>
 ,然后改节点的输出为y。</p>
 <h3 id="矢量计算表达式">4.2 矢量计算表达式</h3>
-<p>举例3个数据，每个数据2个特征，进行如下计算获得3个输出 <span
-class="math display">\[
+<p>举例3个数据，每个数据2个特征，进行如下计算获得3个输出 <span class="math display">\[
 \hat{y}^{(1)}=x^{(1)}_{1}w_{1}+x^{(1)}_{2}w_{1}+b
 \\
 \hat{y}^{(2)}=x^{(2)}_{1}w_{1}+x^{(2)}_{2}w_{1}+b
 \\
 \hat{y}^{(3)}=x^{(3)}_{1}w_{1}+x^{(3)}_{2}w_{1}+b
-\]</span> 现在，我们将上面3个等式转化成矢量计算。设 <span
-class="math display">\[
+\]</span> 现在，我们将上面3个等式转化成矢量计算。设 <span class="math display">\[
 \mathbf{\hat{y}} = \begin{bmatrix} \hat{y}^{(1)} \\ \hat{y}^{(2)} \\
 \hat{y}^{(3)} \end{bmatrix},&amp;\mathbf{X} = \begin{bmatrix}
 x^{(1)}_{1}&amp;x^{(1)}_{2} \\ x^{(2)}_{1}&amp;x^{(2)}_{2} \\
@@ -417,22 +387,16 @@ x^{(3)}_{1}&amp;x^{(3)}_{2} \end{bmatrix},&amp; \mathbf{w} =
 \mathbf{\hat{y}}=\mathbf{X}\mathbf{w}+b
 \]</span> 原本的损失函数变成矢量如下</p>
 <figure>
-<img
-src="../imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226221037001.png"
-alt="image-20250226221037001" />
+<img src="/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226221037001.png" alt="image-20250226221037001">
 <figcaption aria-hidden="true">image-20250226221037001</figcaption>
 </figure>
 <p>小批量随机梯度下降的迭代步骤将相应地改写为</p>
 <figure>
-<img
-src="../imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226221057789.png"
-alt="image-20250226221057789" />
+<img src="/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226221057789.png" alt="image-20250226221057789">
 <figcaption aria-hidden="true">image-20250226221057789</figcaption>
 </figure>
 <figure>
-<img
-src="../imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226221104631.png"
-alt="image-20250226221104631" />
+<img src="/2025/02/25/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/imgs/%E5%8A%A8%E6%89%8B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/image-20250226221104631.png" alt="image-20250226221104631">
 <figcaption aria-hidden="true">image-20250226221104631</figcaption>
 </figure>
 
@@ -458,6 +422,9 @@ alt="image-20250226221104631" />
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2025/02/26/test/" rel="next" title="test">
+                  test <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
