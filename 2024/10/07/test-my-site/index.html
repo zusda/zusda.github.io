@@ -67,7 +67,11 @@
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
   </noscript>
-</head>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
 
 <body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
   <div class="headband"></div>
@@ -165,7 +169,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-count">6</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -176,7 +180,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -252,13 +256,6 @@
     </span>
 
   
-    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
-      <span class="post-meta-item-icon">
-        <i class="far fa-eye"></i>
-      </span>
-      <span class="post-meta-item-text">阅读次数：</span>
-      <span id="busuanzi_value_page_pv"></span>
-    </span>
 </div>
 
         </div>
@@ -268,7 +265,7 @@
     
     
     <div class="post-body" itemprop="articleBody"><div class="hbe hbe-container" id="hexo-blog-encrypt" data-wpm="Oh, this is an invalid password. Check and try again, please." data-whm="OOPS, these decrypted content may changed, but you can still have a look.">
-  <script id="hbeData" type="hbeData" data-hmacdigest="680c953555c1fa0ff8e8d2435f82c5df1c0e3235e414925f1a10a270a59dbc43">10d79030e8222445804370796b90fca14b3382df4730eb0fe3a9f1aa6acbfdf977f308135c251cf4014cb9472e5eb4c7010efd08fb0e3bdf1ebef1844b47b7bbdce99f87d5af857ca0ff659bfd7ff8403889b6c438821c099230c528e1e072086db67c3268f0c3fbef4285ecdfb74d10c44a10a54b42bc087ce2562c8b1b0d82c747e40ef6687175228e1aa7de665ca0630685dfdfd49a11eb58a99d311c252752a333719030d038bb8d865dd3e440bff3cd209fe3ca3a26fb5772705760421ee28b997bb286ef46d1032c18074a8e2467687ee2de62e54453291130c47094a4db080c4ef9c4f7fd496049e6d15bd17cd931502fd1715f8817e55a19355cce4985fa7f9772840bacbb9b88402e282c3da437526ab4347b73fe1d8d4a4323f53bc745b4be5ac262148221c89ce28704b3ad5502b5309ad215ac40cf87c45bca8283e6da4b8de1bad3610e9bff41a87dcb0125424778ddda88039a9e3a9a4f1a639f1e85055324f7bfcf7121d13e6a0a5c3384d0af048537a18f37c5503df28071186b25002486840dfa9154c0458440617658b58806cb411b1cd4cbb9d2bc4d5137663c3214d49a745da066da421b1212a3b2c01dd9ac452c7c26cc2b84b32607fd3ca3a4e2447349820d5a844e1187aa358f48a26cbd2e93b9ac9e3ee52822e7d418b275d4849dcdd99c01ed940a6894c1c36b936565492c95c65f5a093ac3d3762e861ee4395a27708c4cec1806e246f46267a5411eb2cfc1d7b27bcfae5ad8821b7ea099ee3f5e643c2ac9ec4d14c0daaee394102d6e3c3ebbf1acaefa00384fb42ee5a9bbb5504dd7b92c8c6f9af720eb4390fe170f52b390c1f9c6d0cc4a6e44d58f558e89e859542a95212507c4539200236a355f93b24012e1803f584261c37012ce6e0b3f9e3a3a394018fb27da185437f7f0f310815520fddadac04e0aeeaeac79efefee110e8ab750021c9e21b7ba0265aa5d3a21e06dba5138d8c596a0ba431de661046635c7f7f68e13a4</script>
+  <script id="hbeData" type="hbeData" data-hmacdigest="e1d97e1a8ac8c2211e16b80878e09b93b4fe8748e75b22757bb81c1b78cb65ad">10d79030e8222445804370796b90fca14b3382df4730eb0fe3a9f1aa6acbfdf977f308135c251cf4014cb9472e5eb4c7010efd08fb0e3bdf1ebef1844b47b7bbdce99f87d5af857ca0ff659bfd7ff8403889b6c438821c099230c528e1e072086db67c3268f0c3fbef4285ecdfb74d10c44a10a54b42bc087ce2562c8b1b0d82c747e40ef6687175228e1aa7de665ca0630685dfdfd49a11eb58a99d311c252752a333719030d038bb8d865dd3e440bff3cd209fe3ca3a26fb5772705760421ee28b997bb286ef46d1032c18074a8e2467687ee2de62e54453291130c47094a422bc930e55aadd9d024a587e442f34bf75eb6a08da22b9f89a8b762f5a38a8e3144e980f5d7731a6c69dbdef7260561ec4d7de4af1b2423a2032be5b43ebc41d14c9d3a7e186a0947551028165f104eec39b0dba0f0a31d9c005e6f7d0513cabb90408ef7c89542bb23590f24368cc22f184edbb836c206af1d2ff2bd8ee6219f635c56a2c0622a86a0941de086df384fa5082fbc773b66fa4c77defdf4bd9d39b822ff42df9498af0500f83944a76d10a9c10a4a3396ba60c86aab892c8fe5a2b6a6fd389e92c65d5a03e40fa122568da682f20638acbecf6a6b20ee43c87fa37e41842faf7a46ec5386d305a92eea65dd1997d4f2fb12ec0748a3556a6d7227e7e159b6e71683e348a198b6b37c20ee8e0c602dea347035345b7285257e960f3fca955c08d8b3de54c34bbc9529367569c853707661ca74e66ac783fb5c6045f0e76c9b407ef665d07591e106fd284aa7b4e9127c015680d360e62b9b267bfe8c54a044b5b75965a6c00c1200a0ee99b868ec67be86456fc7bd320791af861883d19375c7a3bc75257993a9a5ecd75dc72b16c35afdadea8adc0fa16ae7a03126e31113ba12a0daef356558ca4a7e0bf2e61b08f118aeea3b33e0791f97e678f09671491900a166cfdae900191c27c9362434082683ad0bfab8aba7578f65207cd9f634b0e810db7c7afbcf4ebfe0354788c3322a9042dcde886d26bf3e59ee3f09ad5bd55d832fd9905656504a4f16a9d0c39985bab64ae13f5f30328ea49099297b1d0da36e2af13bb646f307076d8c00b5517d6d0ba8a493dd4a1ec26f6a5830e20421b1fc100f38436161dac0be25f3fa25c8ae65e19cc3d51e7ed64c89a9d9d2561ede1cf9216ef561325c7a60bc7ef48f98c30cd6895a2eecf8c1886d7eac041361ab4bb5300b3ee5f8142d2b39a2720ddf4e7276accd79adb741780239e89c0a677067ff88b96af465f8f8245202fae30e4c0cb5f6f5e3b3b792e27577c918ded9775e388d0531dd9a4b87300710987882b10e46ca34fa4b5583bc09ed27af8c44a7e477c190275a2f951483418aecfc3d3f8753f8f5a12df02234648e60bcdfa68f6ec4e84023b39e70203b8c0f0b769522fb205ea6e837ad9a5aa</script>
   <div class="hbe hbe-content">
     <div class="hbe hbe-input hbe-input-default">
       <input class="hbe hbe-input-field hbe-input-field-default" type="password" id="hbePass">
@@ -325,24 +322,6 @@
     </span>
     <span class="author" itemprop="copyrightHolder">John Doe</span>
   </div>
-<div class="busuanzi-count">
-    <span class="post-meta-item" id="busuanzi_container_site_uv">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-user"></i>
-      </span>
-      <span class="site-uv" title="总访客量">
-        <span id="busuanzi_value_site_uv"></span>
-      </span>
-    </span>
-    <span class="post-meta-item" id="busuanzi_container_site_pv">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-eye"></i>
-      </span>
-      <span class="site-pv" title="总访问量">
-        <span id="busuanzi_value_site_pv"></span>
-      </span>
-    </span>
-</div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
 
@@ -381,7 +360,6 @@
 
 
   
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
     <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
       <span class="post-meta-item-icon">
         <i class="fa fa-fa fa-user"></i>
@@ -400,6 +378,12 @@
       </span>
     </span>
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
 
 
 
