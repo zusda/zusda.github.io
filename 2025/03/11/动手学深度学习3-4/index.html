@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《动手学深度学习》3.4 softmax回归">
+<meta property="og:url" content="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311102451667.png">
+<meta property="og:image" content="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311102822395.png">
+<meta property="og:image" content="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311105027439.png">
+<meta property="og:image" content="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/1.png">
+<meta property="og:image" content="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/1-1741661478996-2.png">
+<meta property="og:image" content="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/1-1741661490775-4.png">
+<meta property="og:image" content="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311105203493.png">
+<meta property="og:image" content="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311145719398.png">
+<meta property="article:published_time" content="2025-03-11T02:11:31.000Z">
+<meta property="article:modified_time" content="2025-03-11T07:01:11.632Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="动手学习深度学习">
+<meta property="article:tag" content="第3节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311102451667.png">
+
+
+<link rel="canonical" href="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/","path":"2025/03/11/动手学深度学习3-4/","title":"《动手学深度学习》3.4 softmax回归"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>《动手学深度学习》3.4 softmax回归 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">1.分类问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#softmax%E5%9B%9E%E5%BD%92%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">2.softmax回归模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E6%A0%B7%E6%9C%AC%E5%88%86%E7%B1%BB%E7%9A%84%E7%9F%A2%E9%87%8F%E8%AE%A1%E7%AE%97%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">3.单样本分类的矢量计算表达式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E6%89%B9%E9%87%8F%E6%A0%B7%E6%9C%AC%E5%88%86%E7%B1%BB%E7%9A%84%E7%9F%A2%E9%87%8F%E8%AE%A1%E7%AE%97%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">5.</span> <span class="nav-text">4.小批量样本分类的矢量计算表达式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="nav-number">6.</span> <span class="nav-text">5.交叉熵损失函数</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="《动手学深度学习》3.4 softmax回归 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《动手学深度学习》3.4 softmax回归
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-03-11 10:11:31 / 修改时间：15:01:11" itemprop="dateCreated datePublished" datetime="2025-03-11T10:11:31+08:00">2025-03-11</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<h2 id="分类问题">1.分类问题</h2>
+<p><strong>softmax模型是用来解决分类问题的一种方法</strong>。</p>
+<p>我们将图像中的4像素分别记为<span class="math inline">\(x_1,x_2,x_3,x_4\)</span>。</p>
+<p>假设训练数据集中图像的真实标签为狗、猫或鸡（假设可以用4像素表示出这3种动物），这些标签分别对应离散值<span class="math inline">\(y_1,y_2,y_3\)</span>。</p>
+<p>举个例子，第i个图像样本<span class="math inline">\(x^{(i)}=[x_1,x_2,x_3,x_4]\)</span>，在经过了相应大小的的w和b进行计算后，该第i图像样本对应的输出为<span class="math inline">\(y^{(i)}=[y_1,y_2,y_3]\)</span>，其中<span class="math inline">\(y_1,y_2,y_3\)</span>结果对应狗、猫、鸡3个结果。</p>
+<p>以该图像是狗为例，在样本的label中<span class="math inline">\(\hat{y}^{(i)}=[1,0,0]\)</span>，而我们计算结果可能是<span class="math inline">\(y^{(i)}=[0.8,0.1,0.07]\)</span></p>
+<h2 id="softmax回归模型">2.softmax回归模型</h2>
+<p>softmax回归跟线性回归一样将输入特征与权重做线性叠加。</p>
+<p>与线性回归的一个主要不同在于，softmax回归的输出值个数等于标签里的类别数。
+<span class="math display">\[
+o_1=x_1w_{11}+x_2w_{21}+x_3w_{31}+x_4w_{41}+b_1\\
+o_2=x_1w_{12}+x_2w_{22}+x_3w_{32}+x_4w_{42}+b_2\\
+o_3=x_1w_{13}+x_2w_{23}+x_3w_{33}+x_4w_{43}+b_3
+\]</span>
+<img src="/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311102451667.png" alt="image-20250311102451667" style="zoom: 67%;"></p>
+<p>softmax回归同线性回归一样，也是一个单层神经网络。</p>
+<p>由于每个输出<span class="math inline">\(o_1,o_2,o_3\)</span>的计算都要依赖于所有的输入<span class="math inline">\(x_1,x_2,x_3,x_4\)</span>，softmax回归的输出层也是一个全连接层。</p>
+<p>softmax运算符（softmax
+operator）通过下式将输出值变换成值为正且和为1的概率分布： <span class="math display">\[
+\hat{y}_1,\hat{y}_2,\hat{y}_3 = softmax(o_1,o_2,o_3)
+\]</span> 其内部具体计算为</p>
+<p><img src="/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311102822395.png" alt="image-20250311102822395" style="zoom:67%;"></p>
+<p>容易看出 <span class="math inline">\(\hat{y}_1+\hat{y}_2+\hat{y}_3=1
+且 0&lt;=\hat{y}_1,\hat{y}_2,\hat{y}_3&lt;=1\)</span>。</p>
+<p>其中exp 代表的是指数函数，即 e 的幂次运算，数学上表示为：<span class="math inline">\(exp(x)=e^x\)</span></p>
+<p>指数函数 <span class="math inline">\(exp(x) = e^x\)</span>
+会放大较大的数值，而较小的数值则被压缩得更接近 0。例如： <span class="math display">\[
+exp(3)=20.09,\quad exp(1)=2.72,\quad exp(-1)=0.37\\
+\\
+y_1=\frac {20.09} {20.09+2.72+0.37}=0.86,\quad y_1=0.12 \quad y_3=0.02
+\]</span> 可以看到 较大的值 <span class="math inline">\(o_1\)</span>
+产生的概率明显更高。</p>
+<p>这种特性可以让模型在做决策时更明确，避免输出值之间的差距太小，导致不确定性过高。</p>
+<h2 id="单样本分类的矢量计算表达式">3.单样本分类的矢量计算表达式</h2>
+<p>为了提高计算效率，我们可以将单样本分类通过矢量计算来表达。</p>
+<p>在上面的图像分类问题中，假设softmax回归的权重和偏差参数分别为</p>
+<figure>
+<img src="/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311105027439.png" alt="image-20250311105027439">
+<figcaption aria-hidden="true">image-20250311105027439</figcaption>
+</figure>
+<p>设高和宽分别为2个像素的图像样本i的特征为</p>
+<figure>
+<img src="/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/1.png" alt="file://C:/Users/admin/AppData/Local/Temp/.P1C322/1.png">
+<figcaption aria-hidden="true">file://C:/Users/admin/AppData/Local/Temp/.P1C322/1.png</figcaption>
+</figure>
+<p>输出层的输出为</p>
+<figure>
+<img src="/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/1-1741661478996-2.png" alt="file://C:/Users/admin/AppData/Local/Temp/.P1C322/1.png">
+<figcaption aria-hidden="true">file://C:/Users/admin/AppData/Local/Temp/.P1C322/1.png</figcaption>
+</figure>
+<p>预测为狗、猫或鸡的概率分布为</p>
+<figure>
+<img src="/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/1-1741661490775-4.png" alt="file://C:/Users/admin/AppData/Local/Temp/.P1C322/1.png">
+<figcaption aria-hidden="true">file://C:/Users/admin/AppData/Local/Temp/.P1C322/1.png</figcaption>
+</figure>
+<p>综上，softmax回归对样本i分类的矢量计算表达式为</p>
+<figure>
+<img src="/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311105203493.png" alt="image-20250311105203493">
+<figcaption aria-hidden="true">image-20250311105203493</figcaption>
+</figure>
+<h2 id="小批量样本分类的矢量计算表达式">4.小批量样本分类的矢量计算表达式</h2>
+<p><span class="math display">\[
+\mathbf{O=XW+b} \\
+\mathbf{\hat{Y}}=softmax(\mathbf{O})
+\]</span></p>
+<p>其中<span class="math inline">\(\mathbf{X}\)</span>是多个<span class="math inline">\(x^{(i)}\)</span>排列而成。</p>
+<h2 id="交叉熵损失函数">5.交叉熵损失函数</h2>
+<p><span class="math display">\[
+H(y^{(i)},\hat{y}^{(i)}) = -\sum ^{q}_{j=1}
+{y^{(i)}_jlog\hat{y}^{(i)}_j}
+\]</span></p>
+<p>其中<span class="math inline">\(y^{(i)}_j\)</span>是向量<span class="math inline">\(y^{(i)}\)</span>中非0即1的元素</p>
+<p>在上式中，我们知道向量<span class="math inline">\(y^{(i)}\)</span>中只有第k个元素<span class="math inline">\(y^{(i)}_k\)</span>为1，其余全为0，因此我们能够改写如下
+<span class="math display">\[
+H(y^{(i)},\hat{y}^{(i)}) = -log\hat{y}^{(i)}_k
+\]</span> 举例 <span class="math display">\[
+y^{(i)}=[0,1,0]
+\]</span> 代入交叉熵公式中 <span class="math display">\[
+H(y^{(i)},\hat{y}^{(i)}) =
+-(0*log\hat{y}^{(i)}_1+1*log\hat{y}^{(i)}_2+0*log\hat{y}^{(i)}_3)=-log\hat{y}^{(i)}_2
+\]</span></p>
+<p>因此我们能看出损失函数<span class="math inline">\(H(y^{(i)},\hat{y}^{(i)})\)</span>实际上是一个log函数</p>
+<p>如果模型对真实类别的<strong>预测概率高</strong>（接近 1），那么
+-log(概率) 也就小，<strong>损失低</strong>，说明模型预测正确。</p>
+<p>如果模型对真实类别的<strong>预测概率低</strong>（接近 0），那么
+-log(概率) 会变大，<strong>损失也就更高</strong>，说明模型预测错误。</p>
+<p><img src="/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311145719398.png" alt="image-20250311145719398" style="zoom:67%;"></p>
+<p>假设训练数据集的样本数为n，交叉熵损失函数定义为 <span class="math display">\[
+L=\frac {1} {n}\sum ^{n}_{i=1} {H(y^{(i)},\hat{y}^{(i)})}
+\]</span></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
+              <a href="/tags/%E7%AC%AC3%E8%8A%82/" rel="tag"># 第3节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/03/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-3/" rel="prev" title="《动手学深度学习》3.3 线性回归的简洁实现">
+                  <i class="fa fa-angle-left"></i> 《动手学深度学习》3.3 线性回归的简洁实现
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
