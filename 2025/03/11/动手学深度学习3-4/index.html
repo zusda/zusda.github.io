@@ -48,7 +48,7 @@
 <meta property="og:image" content="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311105203493.png">
 <meta property="og:image" content="http://example.com/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311145719398.png">
 <meta property="article:published_time" content="2025-03-11T02:11:31.000Z">
-<meta property="article:modified_time" content="2025-03-11T07:01:11.632Z">
+<meta property="article:modified_time" content="2025-03-11T07:24:11.933Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ai">
 <meta property="article:tag" content="动手学习深度学习">
@@ -248,7 +248,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-03-11 10:11:31 / 修改时间：15:01:11" itemprop="dateCreated datePublished" datetime="2025-03-11T10:11:31+08:00">2025-03-11</time>
+      <time title="创建时间：2025-03-11 10:11:31 / 修改时间：15:24:11" itemprop="dateCreated datePublished" datetime="2025-03-11T10:11:31+08:00">2025-03-11</time>
     </span>
 
   
@@ -270,15 +270,19 @@
 <p><strong>softmax模型是用来解决分类问题的一种方法</strong>。</p>
 <p>我们将图像中的4像素分别记为<span class="math inline">\(x_1,x_2,x_3,x_4\)</span>。</p>
 <p>假设训练数据集中图像的真实标签为狗、猫或鸡（假设可以用4像素表示出这3种动物），这些标签分别对应离散值<span class="math inline">\(y_1,y_2,y_3\)</span>。</p>
-<p>举个例子，第i个图像样本<span class="math inline">\(x^{(i)}=[x_1,x_2,x_3,x_4]\)</span>，在经过了相应大小的的w和b进行计算后，该第i图像样本对应的输出为<span class="math inline">\(y^{(i)}=[y_1,y_2,y_3]\)</span>，其中<span class="math inline">\(y_1,y_2,y_3\)</span>结果对应狗、猫、鸡3个结果。</p>
-<p>以该图像是狗为例，在样本的label中<span class="math inline">\(\hat{y}^{(i)}=[1,0,0]\)</span>，而我们计算结果可能是<span class="math inline">\(y^{(i)}=[0.8,0.1,0.07]\)</span></p>
+<p>举个例子，第i个图像样本<span class="math inline">\(x^{(i)}=[x_1,x_2,x_3,x_4]\)</span>，在经过了相应大小的的w和b进行计算后，该第i图像样本对应的输出为<span class="math inline">\(\hat{y}^{(i)}=[y_1,y_2,y_3]\)</span>，其中<span class="math inline">\(y_1,y_2,y_3\)</span>结果对应狗、猫、鸡3个结果。</p>
+<p>以该图像是狗为例，在样本的label中<span class="math inline">\(y^{(i)}=[1,0,0]\)</span>，而我们计算结果可能是<span class="math inline">\(\hat{y}^{(i)}=[0.8,0.1,0.07]\)</span></p>
 <h2 id="softmax回归模型">2.softmax回归模型</h2>
 <p>softmax回归跟线性回归一样将输入特征与权重做线性叠加。</p>
 <p>与线性回归的一个主要不同在于，softmax回归的输出值个数等于标签里的类别数。
 <span class="math display">\[
-o_1=x_1w_{11}+x_2w_{21}+x_3w_{31}+x_4w_{41}+b_1\\
-o_2=x_1w_{12}+x_2w_{22}+x_3w_{32}+x_4w_{42}+b_2\\
+\begin{aligned}
+o_1=x_1w_{11}+x_2w_{21}+x_3w_{31}+x_4w_{41}+b_1
+\\
+o_2=x_1w_{12}+x_2w_{22}+x_3w_{32}+x_4w_{42}+b_2
+\\
 o_3=x_1w_{13}+x_2w_{23}+x_3w_{33}+x_4w_{43}+b_3
+\end{aligned}
 \]</span>
 <img src="/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/image-20250311102451667.png" alt="image-20250311102451667" style="zoom: 67%;"></p>
 <p>softmax回归同线性回归一样，也是一个单层神经网络。</p>
@@ -293,9 +297,11 @@ operator）通过下式将输出值变换成值为正且和为1的概率分布�
 <p>其中exp 代表的是指数函数，即 e 的幂次运算，数学上表示为：<span class="math inline">\(exp(x)=e^x\)</span></p>
 <p>指数函数 <span class="math inline">\(exp(x) = e^x\)</span>
 会放大较大的数值，而较小的数值则被压缩得更接近 0。例如： <span class="math display">\[
-exp(3)=20.09,\quad exp(1)=2.72,\quad exp(-1)=0.37\\
+\begin{aligned}
+exp(o_1=3)=20.09,\quad exp(o_2=1)=2.72,\quad exp(o_3=-1)=0.37\\
 \\
 y_1=\frac {20.09} {20.09+2.72+0.37}=0.86,\quad y_1=0.12 \quad y_3=0.02
+\end{aligned}
 \]</span> 可以看到 较大的值 <span class="math inline">\(o_1\)</span>
 产生的概率明显更高。</p>
 <p>这种特性可以让模型在做决策时更明确，避免输出值之间的差距太小，导致不确定性过高。</p>
@@ -328,8 +334,10 @@ y_1=\frac {20.09} {20.09+2.72+0.37}=0.86,\quad y_1=0.12 \quad y_3=0.02
 </figure>
 <h2 id="小批量样本分类的矢量计算表达式">4.小批量样本分类的矢量计算表达式</h2>
 <p><span class="math display">\[
-\mathbf{O=XW+b} \\
-\mathbf{\hat{Y}}=softmax(\mathbf{O})
+\begin{align}
+\mathbf{O} = \mathbf{XW+b} \\
+\mathbf{\hat{Y}} = softmax(\mathbf{O})
+\end{align}
 \]</span></p>
 <p>其中<span class="math inline">\(\mathbf{X}\)</span>是多个<span class="math inline">\(x^{(i)}\)</span>排列而成。</p>
 <h2 id="交叉熵损失函数">5.交叉熵损失函数</h2>
