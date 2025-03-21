@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动手学深度学习3.5 图像分类数据集">
+<meta property="og:url" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/image-20250320161343134.png">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/image-20250320161442928.png">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/image-20250320161619168.png">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/image-20250320161718280.png">
+<meta property="article:published_time" content="2025-03-20T07:58:29.000Z">
+<meta property="article:modified_time" content="2025-03-20T08:30:59.710Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="动手学习深度学习">
+<meta property="article:tag" content="第3节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/image-20250320161343134.png">
+
+
+<link rel="canonical" href="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/","path":"2025/03/20/动手学深度学习3-5/","title":"动手学深度学习3.5 图像分类数据集"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>动手学深度学习3.5 图像分类数据集 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">2.</span> <span class="nav-text">1. 获取数据集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E5%B0%8F%E6%89%B9%E9%87%8F"><span class="nav-number">3.</span> <span class="nav-text">2.读取小批量</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="动手学深度学习3.5 图像分类数据集 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动手学深度学习3.5 图像分类数据集
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-03-20 15:58:29 / 修改时间：16:30:59" itemprop="dateCreated datePublished" datetime="2025-03-20T15:58:29+08:00">2025-03-20</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<p>图像分类数据集中最常用的是手写数字识别数据集MNIST[1]。但大部分模型在MNIST上的分类精度都超过了95%。为了更直观地观察算法之间的差异，我们将使用一个图像内容更加复杂的数据集<strong>Fashion-MNIST[2]</strong>（这个数据集也比较小，只有几十M，没有GPU的电脑也能吃得消）。本节我们将使用torchvision包，它是服务于PyTorch深度学习框架的，主要用来构建计算机视觉模型。</p>
+<p>torchvision主要由以下几部分构成：</p>
+<ol type="1">
+<li><strong>torchvision.datasets</strong> :
+一些加载数据的函数及常用的<strong>数据集接口</strong>；</li>
+<li>torchvision.models :
+包含常用的模型结构（含预训练模型），例如AlexNet、VGG、ResNet等；</li>
+<li>torchvision.transforms : 常用的图片变换，例如裁剪、旋转等；</li>
+<li>torchvision.utils : 其他的一些有用的方法。</li>
+</ol>
+<h2 id="获取数据集">1. 获取数据集</h2>
+<p>使用以下两行指定我们数据集所在目录。download=True，如果数据集不存在则自动从网上下载</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mnist_train = torchvision.datasets.FashionMNIST(root=<span class="string">&#x27;~/Datasets/FashionMNIST&#x27;</span>, train=<span class="literal">True</span>, download=<span class="literal">True</span>, transform=transforms.ToTensor())</span><br><span class="line"></span><br><span class="line">mnist_test = torchvision.datasets.FashionMNIST(root=<span class="string">&#x27;~/Datasets/FashionMNIST&#x27;</span>, train=<span class="literal">False</span>, download=<span class="literal">True</span>, transform=transforms.ToTensor())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">type</span>(mnist_train))</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">len</span>(mnist_train), <span class="built_in">len</span>(mnist_test))</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/image-20250320161343134.png"></p>
+<p>我们可以通过下标来访问任意一个样本:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">feature, label = mnist_train[<span class="number">0</span>]</span><br><span class="line"><span class="built_in">print</span>(feature.shape, label)  <span class="comment"># Channel x Height x Width</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/image-20250320161442928.png"></p>
+<p>需要注意的是，feature的尺寸是 (C x H x W) 的，而不是 (H x W x
+C)。<strong>第一维是通道数</strong>，因为数据集中是灰度图像，所以通道数为1。后面两维分别是图像的高和宽。</p>
+<p>Fashion-MNIST中一共包括了10个类别，分别为t-shirt（T恤）、trouser（裤子）、pullover（套衫）、dress（连衣裙）、coat（外套）、sandal（凉鞋）、shirt（衬衫）、sneaker（运动鞋）、bag（包）和ankle
+boot（短靴）。以下函数可以将数值标签转成相应的文本标签。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">get_fashion_mnist_labels</span>(<span class="params">labels</span>):</span><br><span class="line">    text_labels = [<span class="string">&#x27;t-shirt&#x27;</span>, <span class="string">&#x27;trouser&#x27;</span>, <span class="string">&#x27;pullover&#x27;</span>, <span class="string">&#x27;dress&#x27;</span>, <span class="string">&#x27;coat&#x27;</span>,</span><br><span class="line">                   <span class="string">&#x27;sandal&#x27;</span>, <span class="string">&#x27;shirt&#x27;</span>, <span class="string">&#x27;sneaker&#x27;</span>, <span class="string">&#x27;bag&#x27;</span>, <span class="string">&#x27;ankle boot&#x27;</span>]</span><br><span class="line">    <span class="keyword">return</span> [text_labels[<span class="built_in">int</span>(i)] <span class="keyword">for</span> i <span class="keyword">in</span> labels]</span><br></pre></td></tr></table></figure>
+<p>下面定义一个可以在一行里画出多张图像和对应标签的函数。</p>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/image-20250320161619168.png"></p>
+<p>现在，我们看一下训练数据集中前10个样本的图像内容和文本标签。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">X, y = [], []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">    X.append(mnist_train[i][<span class="number">0</span>])</span><br><span class="line">    y.append(mnist_train[i][<span class="number">1</span>])</span><br><span class="line">show_fashion_mnist(X, get_fashion_mnist_labels(y))</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/image-20250320161718280.png"></p>
+<h2 id="读取小批量">2.读取小批量</h2>
+<p>我们将在训练数据集上训练模型，并将训练好的模型在测试数据集上评价模型的表现。<strong>mnist_train是torch.utils.data.Dataset的子类</strong>，所以我们可以将其传入torch.utils.data.DataLoader来创建一个读取小批量数据样本的DataLoader实例。</p>
+<p>在实践中，数据读取经常是训练的性能瓶颈，特别当模型较简单或者计算硬件性能较高时。PyTorch的<strong>DataLoader</strong>中一个很方便的功能是<strong>允许使用多进程来加速数据读取</strong>。这里我们通过参数num_workers来设置4个进程读取数据。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">batch_size = <span class="number">256</span></span><br><span class="line"><span class="keyword">if</span> sys.platform.startswith(<span class="string">&#x27;win&#x27;</span>):</span><br><span class="line">    num_workers = <span class="number">0</span>  <span class="comment"># 0表示不用额外的进程来加速读取数据</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    num_workers = <span class="number">4</span></span><br><span class="line">train_iter = torch.utils.data.DataLoader(mnist_train, batch_size=batch_size, shuffle=<span class="literal">True</span>, num_workers=num_workers)</span><br><span class="line">test_iter = torch.utils.data.DataLoader(mnist_test, batch_size=batch_size, shuffle=<span class="literal">False</span>, num_workers=num_workers)</span><br></pre></td></tr></table></figure>
+<p>根据GPT回答，Windows
+多进程不太适用我们当前场景，所以最好还是在linux中运行。但学习阶段两者都行。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
+              <a href="/tags/%E7%AC%AC3%E8%8A%82/" rel="tag"># 第3节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/03/11/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-4/" rel="prev" title="《动手学深度学习》3.4 softmax回归">
+                  <i class="fa fa-angle-left"></i> 《动手学深度学习》3.4 softmax回归
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/" rel="next" title="动手学深度学习3.6 softmax回归的简洁实现">
+                  动手学深度学习3.6 softmax回归的简洁实现 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

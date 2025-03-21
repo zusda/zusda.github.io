@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动手学深度学习3.6 softmax回归的简洁实现">
+<meta property="og:url" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321101731654.png">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321101833127.png">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321102022467.png">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321102656346.png">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321103442718.png">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321103501252.png">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321104651859.png">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321105006574.png">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321153544770.png">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321160716398.png">
+<meta property="og:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321160732356.png">
+<meta property="article:published_time" content="2025-03-20T08:33:06.000Z">
+<meta property="article:modified_time" content="2025-03-21T08:08:01.205Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="动手学习深度学习">
+<meta property="article:tag" content="第3节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321101731654.png">
+
+
+<link rel="canonical" href="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/","path":"2025/03/20/动手学深度学习3-6/","title":"动手学深度学习3.6 softmax回归的简洁实现"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>动手学深度学习3.6 softmax回归的简洁实现 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E5%92%8C%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE"><span class="nav-number">2.</span> <span class="nav-text">1. 获取和读取数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%A8%A1%E5%9E%8B%E5%8F%82%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">2. 初始化模型参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0softmax%E8%BF%90%E7%AE%97"><span class="nav-number">4.</span> <span class="nav-text">3.实现softmax运算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%A8%A1%E5%9E%8B"><span class="nav-number">5.</span> <span class="nav-text">4.定义模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="nav-number">6.</span> <span class="nav-text">5.定义损失函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#gather%E5%87%BD%E6%95%B0"><span class="nav-number">6.1.</span> <span class="nav-text">5.1 gather函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0-1"><span class="nav-number">6.2.</span> <span class="nav-text">5.2 定义损失函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E5%88%86%E7%B1%BB%E5%87%86%E7%A1%AE%E7%8E%87"><span class="nav-number">7.</span> <span class="nav-text">6.计算分类准确率</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="nav-number">8.</span> <span class="nav-text">7. 训练模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E6%B5%8B"><span class="nav-number">8.1.</span> <span class="nav-text">8. 预测</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="动手学深度学习3.6 softmax回归的简洁实现 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动手学深度学习3.6 softmax回归的简洁实现
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-03-20 16:33:06" itemprop="dateCreated datePublished" datetime="2025-03-20T16:33:06+08:00">2025-03-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-21 16:08:01" itemprop="dateModified" datetime="2025-03-21T16:08:01+08:00">2025-03-21</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<h2 id="获取和读取数据">1. 获取和读取数据</h2>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mnist_train = torchvision.datasets.FashionMNIST(root=<span class="string">&#x27;~/Datasets/FashionMNIST&#x27;</span>, train=<span class="literal">True</span>, download=<span class="literal">True</span>, transform=transforms.ToTensor())</span><br><span class="line">mnist_test = torchvision.datasets.FashionMNIST(root=<span class="string">&#x27;~/Datasets/FashionMNIST&#x27;</span>, train=<span class="literal">False</span>, download=<span class="literal">True</span>, transform=transforms.ToTensor())</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">batch_size = <span class="number">256</span></span><br><span class="line"><span class="keyword">if</span> sys.platform.startswith(<span class="string">&#x27;win&#x27;</span>):</span><br><span class="line">    num_workers = <span class="number">0</span>  <span class="comment"># 0表示不用额外的进程来加速读取数据</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    num_workers = <span class="number">4</span></span><br><span class="line">train_iter = torch.utils.data.DataLoader(mnist_train, batch_size=batch_size, shuffle=<span class="literal">True</span>, num_workers=num_workers)</span><br><span class="line">test_iter = torch.utils.data.DataLoader(mnist_test, batch_size=batch_size, shuffle=<span class="literal">False</span>, num_workers=num_workers)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="初始化模型参数">2. 初始化模型参数</h2>
+<p>跟线性回归中的例子一样，我们将使用向量表示每个样本。</p>
+<p>已知<strong>每个样本</strong>输入是高和宽均为28像素的图像。模型的<strong>输入向量的长度是
+28×28=784</strong>：该向量的每个元素对应图像中每个像素。</p>
+<p>由于图像有10个类别，单层神经网络输出层的输出个数为10，因此softmax回归的权重和偏差参数分别为784×10和1×10的矩阵。</p>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321101731654.png"></p>
+<h2 id="实现softmax运算">3.实现softmax运算</h2>
+<p>实现代码如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">softmax</span>(<span class="params">X</span>):</span><br><span class="line">    X_exp = X.exp()</span><br><span class="line">    partition = X_exp.<span class="built_in">sum</span>(dim=<span class="number">1</span>, keepdim=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">return</span> X_exp / partition  <span class="comment"># 这里应用了广播机制</span></span><br></pre></td></tr></table></figure>
+<p>首先来看<code>X_exp.sum(dim=1, keepdim=True)</code></p>
+<p>我们可以只对其中同一列（dim=0）或同一行（dim=1）的元素求和，并在结果中保留行和列这两个维度（keepdim=True）。</p>
+<p>举例如下，对X分别进行行和列上的求和并保留维度</p>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321101833127.png" style="zoom:67%;"></p>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321102022467.png" style="zoom: 50%;"></p>
+<p><strong>dim=0</strong>
+指的是<strong>在行的方向上修改</strong>，即<strong>行数以外的不变，</strong></p>
+<p><strong>dim=1</strong>
+指的是在<strong>列的方向上修改</strong>，即<strong>列数以外的不变</strong>，在二维的情况下列数以外不变则是保持行数，将每行元素相加</p>
+<p>复习一下softmax的公式</p>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321102656346.png"></p>
+<p>那么我们这里X_exp.sum(dim=1,
+keepdim=True)的作用则是将每行样本的输出<span class="math inline">\(exp(o_i)\)</span>进行相加，即上图中的分母部分。</p>
+<p>接下来是</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> X_exp / partition  <span class="comment"># 这里应用了广播机制</span></span><br></pre></td></tr></table></figure>
+<p>经过前面的计算我们得到partition是 n x 1
+的向量，这里n是行数，而X_exp则和输入的X一样，是n x m</p>
+<p>利用广播机制（应该是自动转换的），partition是 n x 1会重复m次，变成n x
+m的矩阵</p>
+<p>举例如下</p>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321103442718.png" style="zoom: 50%;"></p>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321103501252.png" style="zoom:50%;"></p>
+<p>那么X_exp中每个元素都能与对应partition进行除法，然后生成新的矩阵。</p>
+<p>这也意味着我们之前softmax公式的分子</p>
+<h2 id="定义模型">4.定义模型</h2>
+<p>有了softmax运算，我们可以定义上节描述的softmax回归模型了。这里通过view函数将每张原始图像改成长度为num_inputs的向量。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">net</span>(<span class="params">X</span>):</span><br><span class="line">    <span class="keyword">return</span> softmax(torch.mm(X.view((-<span class="number">1</span>, num_inputs)), W) + b)</span><br></pre></td></tr></table></figure>
+<h2 id="定义损失函数">5.定义损失函数</h2>
+<p>我们介绍了softmax回归使用的交叉熵损失函数。为了得到标签的预测概率，我们可以使用gather函数。</p>
+<h3 id="gather函数">5.1 gather函数</h3>
+<p>首先以一个例子介绍gather函数，在下面的例子中，变量y_hat是2个样本在3个类别的预测概率，变量y是这2个样本的标签类别。</p>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321104651859.png" alt="image-20250321104651859" style="zoom: 67%;"></p>
+<p>dim=1 指的是要在列方向上进行操作。</p>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321105006574.png" style="zoom:50%;"></p>
+<p>gather(1, y.view(-1, 1)) 操作的作用是从 y_hat
+中根据每个样本的真实标签 y 选择对应的预测值。</p>
+<p>这里y_hat.gather(1, y.view(-1, 1))的输出矩阵和 y.view(-1, 1)
+形状一致，也是n x
+1。或者反过来说，我们填入gather的第二个参数行数一定要和y_hat一样，然后列数为1，这样才能从y_hat的每行中挑一个组成新的矩阵。</p>
+<p>在转换后的，如果每行再添加行号就很明显了。</p>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321153544770.png" style="zoom:50%;"></p>
+<p>相当于 <span class="math inline">\(y\_hat[0][0]、y\_hat[1][2]\)</span>。</p>
+<p>通过使用gather函数，我们得到了2个样本的标签的预测概率。与3.4节（softmax回归）数学表述中标签类别离散值从1开始逐一递增不同，在代码中，标签类别的离散值是从0开始逐一递增的。</p>
+<h3 id="定义损失函数-1">5.2 定义损失函数</h3>
+<p>我们知道交叉熵误差公式如下 <span class="math display">\[
+H(y^{(i)},\hat{y}^{(i)}) = -\sum ^{q}_{j=1}
+{y^{(i)}_jlog\hat{y}^{(i)}_j}
+\]</span>
+因为除了目标类y为1，其他的都为0。因此我们进获取目标类y的值来进行计算(下图在下标的<span class="math inline">\(y^{(i)}\)</span>起始就是上图的j，不知道是不是课本打印公式打错了，指的是第i个样本的label
+j才为1) <span class="math display">\[
+H(y^{(i)},\hat{y}^{(i)}) = -log\hat{y}^{(i)}_j
+\]</span>
+同样，在神经网络计算的结果中，我们也不去管其他任何结果，只用gather函数去获取y_hat中目标类i的值。因此我们就需要用gather函数去获取目标第i类的值。</p>
+<p>下面实现了3.4节（softmax回归）中介绍的交叉熵损失函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">cross_entropy</span>(<span class="params">y_hat, y</span>):</span><br><span class="line">    <span class="keyword">return</span> - torch.log(y_hat.gather(<span class="number">1</span>, y.view(-<span class="number">1</span>, <span class="number">1</span>)))</span><br></pre></td></tr></table></figure>
+<h2 id="计算分类准确率">6.计算分类准确率</h2>
+<p>下面定义准确率accuracy函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">accuracy</span>(<span class="params">y_hat, y</span>):</span><br><span class="line">    <span class="keyword">return</span> (y_hat.argmax(dim=<span class="number">1</span>) == y).<span class="built_in">float</span>().mean().item()</span><br></pre></td></tr></table></figure>
+<p><code>y_hat.argmax(dim=1)</code>返回矩阵y_hat每行中最大元素的索引。</p>
+<p><code>(y_hat.argmax(dim=1) == y)</code>是一个类型为ByteTensor的Tensor。</p>
+<p>也就是说样本预测正确即为1，预测错误即为0，所有结果相加并除以样本数（上面的mean函数作用），当成是准确率。</p>
+<p>类似地，我们可以计算评价模型net在数据集data_iter上的准确率。y.shape[0]
+返回的是该数组的行数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">evaluate_accuracy</span>(<span class="params">data_iter, net</span>):</span><br><span class="line">    acc_sum, n = <span class="number">0.0</span>, <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> X, y <span class="keyword">in</span> data_iter:</span><br><span class="line">        acc_sum += (net(X).argmax(dim=<span class="number">1</span>) == y).<span class="built_in">float</span>().<span class="built_in">sum</span>().item()</span><br><span class="line">        n += y.shape[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">return</span> acc_sum / n</span><br></pre></td></tr></table></figure>
+<p>和之前不同，我们无法一次将所有样本进行计算，每次只能获取部分的data，因此我们每次累计正确数acc_sum与样本数n，最后进行acc_sum
+/ n获取平均数（就相当于之前的mean函数）</p>
+<h2 id="训练模型">7. 训练模型</h2>
+<p>代码如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">train_ch3</span>(<span class="params">net, train_iter, test_iter, loss, num_epochs, batch_size,</span></span><br><span class="line"><span class="params">              params=<span class="literal">None</span>, lr=<span class="literal">None</span>, optimizer=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs):</span><br><span class="line">        train_l_sum, train_acc_sum, n = <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> X, y <span class="keyword">in</span> train_iter:</span><br><span class="line">            y_hat = net(X)</span><br><span class="line">            l = loss(y_hat, y).<span class="built_in">sum</span>()</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 梯度清零</span></span><br><span class="line">            <span class="keyword">if</span> optimizer <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                optimizer.zero_grad()</span><br><span class="line">            <span class="keyword">elif</span> params <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> params[<span class="number">0</span>].grad <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                <span class="keyword">for</span> param <span class="keyword">in</span> params:</span><br><span class="line">                    param.grad.data.zero_()</span><br><span class="line"></span><br><span class="line">            l.backward()</span><br><span class="line">            <span class="keyword">if</span> optimizer <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">                d2l.sgd(params, lr, batch_size)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                optimizer.step()  <span class="comment"># “softmax回归的简洁实现”一节将用到</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            train_l_sum += l.item()</span><br><span class="line">            train_acc_sum += (y_hat.argmax(dim=<span class="number">1</span>) == y).<span class="built_in">sum</span>().item()</span><br><span class="line">            n += y.shape[<span class="number">0</span>]</span><br><span class="line">        test_acc = evaluate_accuracy(test_iter, net)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;epoch %d, loss %.4f, train acc %.3f, test acc %.3f&#x27;</span></span><br><span class="line">              % (epoch + <span class="number">1</span>, train_l_sum / n, train_acc_sum / n, test_acc))</span><br><span class="line">        </span><br><span class="line">train_ch3(net, train_iter, test_iter, cross_entropy, num_epochs, batch_size, [W, b], lr)</span><br></pre></td></tr></table></figure>
+<p>我们能注意到每批样本的loss计算：<code>l = loss(y_hat, y).sum()</code></p>
+<ul>
+<li>使用 sum() 时，损失值的绝对大小随着 batch size
+增大而增大，因此梯度也增大，影响训练稳定性。</li>
+<li>使用 mean() 时，损失值不会因为 batch size
+变化而变化，使得训练更稳定，适用于可变 batch size。</li>
+</ul>
+<p>因此</p>
+<ul>
+<li>如果 batch size 是固定的，.sum() 和 .mean()
+都可以使用。(不过mean生成的loss更小,因此更新更慢)</li>
+<li>如果 batch size 变化较大，推荐使用 .mean()，训练更稳定。</li>
+</ul>
+<p>除此外,这里因为optimizer是None，因此更新方式<code>d2l.sgd(params, lr, batch_size)</code>是直接减去偏导数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">sgd</span>(<span class="params">params, lr, batch_size</span>):</span><br><span class="line">    <span class="comment"># 为了和原书保持一致，这里除以了batch_size，但是应该是不用除的，因为一般用PyTorch计算loss时就默认已经</span></span><br><span class="line">    <span class="comment"># 沿batch维求了平均了。</span></span><br><span class="line">    <span class="keyword">for</span> param <span class="keyword">in</span> params:</span><br><span class="line">        param.data -= lr * param.grad / batch_size <span class="comment"># 注意这里更改param时用的param.data</span></span><br></pre></td></tr></table></figure>
+<h3 id="预测">8. 预测</h3>
+<p>训练完成后，现在就可以演示如何对图像进行分类了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">X, y = <span class="built_in">next</span>(<span class="built_in">iter</span>(test_iter))</span><br><span class="line">true_labels = d2l.get_fashion_mnist_labels(y.numpy())</span><br><span class="line">pred_labels = d2l.get_fashion_mnist_labels(net(X).argmax(dim=<span class="number">1</span>).numpy())</span><br><span class="line">titles = [true + <span class="string">&#x27;\n&#x27;</span> + pred <span class="keyword">for</span> true, pred <span class="keyword">in</span> <span class="built_in">zip</span>(true_labels, pred_labels)]</span><br><span class="line"></span><br><span class="line">d2l.show_fashion_mnist(X[<span class="number">0</span>:<span class="number">9</span>], titles[<span class="number">0</span>:<span class="number">9</span>])</span><br></pre></td></tr></table></figure>
+<p>记得把下图注释去掉</p>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321160716398.png" style="zoom:50%;"></p>
+<p>给定一系列图像（第三行图像输出），我们比较一下它们的真实标签（第一行文本输出）和模型预测结果（第二行文本输出）。</p>
+<p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321160732356.png"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
+              <a href="/tags/%E7%AC%AC3%E8%8A%82/" rel="tag"># 第3节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-5/" rel="prev" title="动手学深度学习3.5 图像分类数据集">
+                  <i class="fa fa-angle-left"></i> 动手学深度学习3.5 图像分类数据集
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
