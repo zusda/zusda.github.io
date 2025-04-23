@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动手学深度学习 3.14 正向传播、反向传播和计算图">
+<meta property="og:url" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423152925680.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423161947615.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153121947.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153201399.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153217504.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153236852.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153248338.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153310205.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153321633.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153418769.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153923998.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423160126237.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423160324130.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423160424730.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423160842073.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423160945944.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423161049506.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423161219587.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/1.png">
+<meta property="og:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423161559816.png">
+<meta property="article:published_time" content="2025-04-21T07:55:48.000Z">
+<meta property="article:modified_time" content="2025-04-23T09:04:03.407Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="动手学习深度学习">
+<meta property="article:tag" content="第3节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423152925680.png">
+
+
+<link rel="canonical" href="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/","path":"2025/04/21/动手学深度学习3-14/","title":"动手学深度学习 3.14 正向传播、反向传播和计算图"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>动手学深度学习 3.14 正向传播、反向传播和计算图 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section"><span class="nav-number">2.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A3%E5%90%91%E4%BC%A0%E6%92%AD"><span class="nav-number">3.</span> <span class="nav-text">1. 正向传播</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A3%E5%90%91%E4%BC%A0%E6%92%AD%E7%9A%84%E8%AE%A1%E7%AE%97%E5%9B%BE"><span class="nav-number">4.</span> <span class="nav-text">2. 正向传播的计算图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD"><span class="nav-number">5.</span> <span class="nav-text">3. 反向传播</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B"><span class="nav-number">6.</span> <span class="nav-text">4. 训练深度学习模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">小结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="动手学深度学习 3.14 正向传播、反向传播和计算图 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动手学深度学习 3.14 正向传播、反向传播和计算图
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-04-21 15:55:48" itemprop="dateCreated datePublished" datetime="2025-04-21T15:55:48+08:00">2025-04-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-04-23 17:04:03" itemprop="dateModified" datetime="2025-04-23T17:04:03+08:00">2025-04-23</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<h2 id="section"></h2>
+<p>前面几节里我们使用了小批量随机梯度下降的优化算法来训练模型。</p>
+<p>在实现中，我们只提供了模型的正向传播（forward
+propagation）的计算，即对输入计算模型输出，</p>
+<p>然后通过autograd模块来调用系统自动生成的backward函数计算梯度。</p>
+<p>本节我们将使用数学和计算图（computational
+graph）两个方式来描述正向传播和反向传播。</p>
+<h2 id="正向传播">1. 正向传播</h2>
+<p>正向传播是指对神经网络沿着从输入层到输出层的顺序，依次计算并存储模型的中间变量（包括输出）。</p>
+<p>假设输入是一个特征为 <span class="math inline">\(x\)</span>(d * 1)
+且不考虑偏差项，那么中间变量 <span class="math display">\[
+z = W^{(1)}x
+\]</span> 其中 <span class="math inline">\(W^{(1)}\)</span>(m * d)
+是隐藏层的权重参数。把中间变量 <span class="math inline">\(z\)</span> (m
+* 1)输入按元素运算的激活函数 <span class="math inline">\(ϕ\)</span>
+后，将得到向量长度为m的隐藏层变量 <span class="math display">\[
+h=ϕ(z)
+\]</span> 隐藏层变量h (m * 1) 也是一个中间变量。假设输出层参数只有权重
+<span class="math inline">\(W^{(2)}\)</span>(q * m)
+可以得到向量长度为q的输出层变量 <span class="math display">\[
+o=W^{(2)}h
+\]</span> <span class="math inline">\(o\)</span> 对 <span class="math inline">\(W^{(2)}\)</span> 的求导结果为 <span class="math inline">\(h\)</span> 的转置即 <span class="math inline">\(h^T\)</span> 并复制与 <span class="math inline">\(o\)</span> 相同n行。（即求导结果为n行的 <span class="math inline">\(h^T\)</span> ）</p>
+<blockquote>
+<p>假设 <span class="math inline">\(o_i\)</span> 为 o
+的第i行元素（o为列向量，即大小为n*1）, <span class="math inline">\(W_i\)</span>
+为W的第i行元素。每行元素有m列。变量h有m行 <span class="math display">\[
+o_i=W_ih=w_{i1}h_1+w_{i2}h_2+...+w_{im}h_m
+\]</span> 那么<span class="math inline">\(oi\)</span>对<span class="math inline">\(w_{i1}\)</span>的偏导为<span class="math inline">\(h_1\)</span>，对<span class="math inline">\(w_{i2}\)</span>的偏导为<span class="math inline">\(h_2\)</span> ，同理可得<span class="math inline">\(o_i\)</span>对<span class="math inline">\(W_i\)</span>的求导结果为横向量 {<span class="math inline">\(h_1,h_2,...,h_m\)</span>} 即<span class="math inline">\(h^T\)</span> 。</p>
+<p>一共n个<span class="math inline">\(o_i\)</span> ，因此一共n行 <span class="math inline">\(h^T\)</span></p>
+</blockquote>
+<p>假设损失函数为ℓ，且样本标签为y，可以计算出<strong>单个数据样本</strong>的损失项（其实这里的o是一个元素，并非列向量）
+<span class="math display">\[
+L=ℓ(o,y)
+\]</span> 根据L2范数正则化的定义，给定超参数λ，正则化项即</p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423152925680.png" alt style="zoom: 50%;"></p>
+<p>其中矩阵的Frobenius范数等价于将矩阵变平为向量后计算L2范数。最终，模型在给定的数据样本上带正则化的损失为
+<span class="math display">\[
+J = L + s
+\]</span> 也就是之前说的</p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423161947615.png"></p>
+<p>我们将J称为有关给定数据样本的目标函数，并在以下的讨论中简称目标函数。</p>
+<h2 id="正向传播的计算图">2. 正向传播的计算图</h2>
+<p>我们通常绘制计算图来可视化运算符和变量在计算中的依赖关系。图3.6绘制了本节中样例模型正向传播的计算图，其中左下角是输入，右上角是输出。</p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153121947.png" style="zoom:67%;"></p>
+<p>接下来我会按照之前正向传播顺序逐个框出来所做的操作</p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153201399.png" style="zoom:67%;"></p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153217504.png" style="zoom:67%;"></p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153236852.png" style="zoom:67%;"></p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153248338.png" style="zoom:67%;"></p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153310205.png" style="zoom:67%;"></p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153321633.png" style="zoom:67%;"></p>
+<h2 id="反向传播">3. 反向传播</h2>
+<p>反向传播指的是计算 神经网络参数梯度 的方法。</p>
+<p>总的来说，反向传播依据微积分中的链式法则，沿着从输出层到输入层的顺序，依次计算并存储目标函数有关神经网络各层的中间变量以及参数的梯度。</p>
+<p>对输入或输出X,Y,Z为任意形状张量的函数Y=f(X)和Z=g(Y)，通过链式法则，我们有</p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153418769.png" style="zoom: 50%;"></p>
+<p>其中prod运算符将根据两个输入的形状，在必要的操作（如转置和互换输入位置）后对两个输入做乘法。</p>
+<p>回顾一下本节中样例模型，它的参数是 <span class="math inline">\(W^{(1)}\)</span> 和 <span class="math inline">\(W^{(2)}\)</span> ，因此反向传播的目标是计算 <span class="math inline">\(\frac{∂J}{∂W^{(1)}}\)</span> 和<span class="math inline">\(\frac{∂J}{∂W^{(2)}}\)</span>。asd</p>
+<p>我们将应用链式法则依次计算各中间变量和参数的梯度，其计算次序与前向传播中相应中间变量的计算次序恰恰相反。首先，分别计算目标函数J=L+s有关损失项L和正则项s的梯度</p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153923998.png" style="zoom: 67%;"></p>
+<p>其次，依据链式法则计算目标函数有关输出层变量o的梯度</p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423160126237.png" alt style="zoom:50%;"></p>
+<p>其结果指的是loss函数对o的求导.</p>
+<p>接下来，计算正则项有关两个参数的梯度：</p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423160324130.png" style="zoom:50%;"></p>
+<p>现在，我们可以计算最靠近输出层的模型参数的梯度(之前说过o是单个样本的输出，因此导数是一个横向量)</p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423160424730.png" style="zoom:80%;"></p>
+<p>沿着输出层向隐藏层继续反向传播，隐藏层变量的梯度</p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423160842073.png" style="zoom:67%;"></p>
+<p>由于激活函数ϕ是按元素运算的，中间变量z的梯度的计算需要使用按元素乘法符⊙：</p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423160945944.png" style="zoom:67%;"></p>
+<p>最终，我们可以得到最靠近输入层的模型参数的梯度。依据链式法则，得到</p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423161049506.png" style="zoom:80%;"></p>
+<h2 id="训练深度学习模型">4. 训练深度学习模型</h2>
+<p>一方面，<strong>正向传播</strong>的计算可能<strong>依赖于模型参数的当前值</strong>。而这些模型参数是在反向传播的梯度计算后通过优化算法迭代的。</p>
+<p>例如，计算正则化项
+<img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423161219587.png" alt style="zoom: 50%;">
+依赖模型参数 <span class="math inline">\(W^{(1)}\)</span> 和 <span class="math inline">\(W^{(2)}\)</span>
+的当前值，，而这些当前值是优化算法最近一次根据反向传播算出梯度后迭代得到的。</p>
+<p>另一方面，<strong>反向传播</strong>的梯度计算可能<strong>依赖于各变量的当前值</strong>，而这些变量的当前值是通过正向传播计算得到的。</p>
+<p>举例来说，参数梯度
+<img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/1.png" style="zoom: 67%;">
+的计算需要依赖隐藏层变量的当前值h。这个当前值是通过从输入层到输出层的正向传播计算并存储得到的。</p>
+<p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423161559816.png" alt="h由x获得的路径" style="zoom:50%;"></p>
+<p>因此，在模型参数初始化完成后，我们交替地进行正向传播和反向传播，并根据反向传播计算的梯度迭代模型参数。</p>
+<p>既然我们<strong>在反向传播中使用了正向传播中计算得到的中间变量来避免重复计算</strong>，那么<strong>这个复用也导致正向传播结束后不能立即释放中间变量内存</strong>。这也是<strong>训练要比预测占用更多内存的一个重要原因</strong>。</p>
+<p>另外需要指出的是，这些<strong>中间变量的个数大体上与网络层数线性相关</strong>，<strong>每个变量的大小跟批量大小和输入个数也是线性相关的</strong>，它们是导致<strong>较深的神经网络使用较大批量训练时更容易超内存的主要原因</strong>。</p>
+<h2 id="小结">小结</h2>
+<p>这部分要点内容在于，理解正向传播与反向传播是什么</p>
+<p>正向传播就是通过网络求值。</p>
+<p>反向传播就是通过网络求导。</p>
+<p>正向传播相当于 y=wx, L=(y'-y)² （平方差）</p>
+<p>通过 初始化 或 反向传播 获取w的值，计算出y</p>
+<p>反向传播相当于 ∂L/∂y=-2y'+y , ∂y/∂w=x ⇒ ∂L/∂w=(-2y'+y)x ⇒
+w=w-∂L/∂w</p>
+<p>通过正向传播中的计算值y，获得w的偏导，更新w</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
+              <a href="/tags/%E7%AC%AC3%E8%8A%82/" rel="tag"># 第3节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/04/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-13/" rel="prev" title="动手学深度学习 3.13 丢弃法">
+                  <i class="fa fa-angle-left"></i> 动手学深度学习 3.13 丢弃法
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
