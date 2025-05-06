@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动手学深度学习 4.1 模型构造">
+<meta property="og:url" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506094427873.png">
+<meta property="og:image" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506094813631.png">
+<meta property="og:image" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506095711209.png">
+<meta property="og:image" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506100336968.png">
+<meta property="og:image" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506100449670.png">
+<meta property="og:image" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506101215693.png">
+<meta property="og:image" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506101345275.png">
+<meta property="og:image" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506100659351.png">
+<meta property="og:image" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506102349143.png">
+<meta property="og:image" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506102530863.png">
+<meta property="og:image" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506102702680.png">
+<meta property="og:image" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506102713988.png">
+<meta property="article:published_time" content="2025-04-30T07:33:01.000Z">
+<meta property="article:modified_time" content="2025-05-06T02:59:21.218Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="动手学习深度学习">
+<meta property="article:tag" content="第4节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506094427873.png">
+
+
+<link rel="canonical" href="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/","path":"2025/04/30/动手学深度学习4-1/","title":"动手学深度学习 4.1 模型构造"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>动手学深度学习 4.1 模型构造 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%A7%E6%89%BFmodule%E7%B1%BB%E6%9D%A5%E6%9E%84%E9%80%A0%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">1. 继承Module类来构造模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#module%E7%9A%84%E5%AD%90%E7%B1%BB"><span class="nav-number">3.</span> <span class="nav-text">2. Module的子类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sequential%E7%B1%BB"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 Sequential类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#modulelist%E7%B1%BB"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 ModuleList类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#moduledict%E7%B1%BB"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 ModuleDict类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E5%A4%8D%E6%9D%82%E7%9A%84%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">3 构造复杂的模型</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="动手学深度学习 4.1 模型构造 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动手学深度学习 4.1 模型构造
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-04-30 15:33:01" itemprop="dateCreated datePublished" datetime="2025-04-30T15:33:01+08:00">2025-04-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-05-06 10:59:21" itemprop="dateModified" datetime="2025-05-06T10:59:21+08:00">2025-05-06</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<p>本章节我们介绍另外一种基于Module类的模型构造方法：它让模型构造更加灵活。</p>
+<h2 id="继承module类来构造模型">1. 继承Module类来构造模型</h2>
+<p>Module类是nn模块里提供的一个模型构造类，是所有神经网络模块的基类，我们可以继承它来定义我们想要的模型。</p>
+<p>下面继承Module类构造本节开头提到的多层感知机。</p>
+<p>这里定义的MLP类重载了Module类的<strong>init函数</strong>和<strong>forward函数</strong>。它们分别用于<strong>创建模型参数</strong>和<strong>定义前向计算</strong>。前向计算也即正向传播。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MLP</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, **kwargs</span>):</span><br><span class="line">        <span class="comment"># 调用MLP父类Module的构造函数来进行必要的初始化。这样在构造实例时还可以指定其他函数参数，如“模型参数的访问、初始化和共享”一节将介绍的模型参数params</span></span><br><span class="line">        <span class="built_in">super</span>(MLP, <span class="variable language_">self</span>).__init__(**kwargs)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 声明带有模型参数的层，这里声明了两个全连接层</span></span><br><span class="line">        <span class="variable language_">self</span>.hidden = nn.Linear(<span class="number">784</span>, <span class="number">256</span>) <span class="comment"># 隐藏层</span></span><br><span class="line">        <span class="variable language_">self</span>.act = nn.ReLU()</span><br><span class="line">        <span class="variable language_">self</span>.output = nn.Linear(<span class="number">256</span>, <span class="number">10</span>)  <span class="comment"># 输出层</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 定义模型的前向计算，即如何根据输入x计算返回所需要的模型输出</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        a1 = <span class="variable language_">self</span>.hidden(x)</span><br><span class="line">        a2 = <span class="variable language_">self</span>.act(a1)</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.output(a2)</span><br></pre></td></tr></table></figure>
+<p>以上的MLP类中无须定义反向传播函数。系统将通过自动求梯度而自动生成反向传播所需的backward函数。</p>
+<p>我们可以实例化MLP类得到模型变量net。下面的代码初始化net并传入输入数据X做一次前向计算。其中，net(X)会调用MLP继承自Module类的__call__函数，这个函数将调用MLP类定义的forward函数来完成前向计算。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">X = torch.rand(<span class="number">2</span>, <span class="number">784</span>)</span><br><span class="line">net = MLP()</span><br><span class="line"><span class="built_in">print</span>(net)</span><br><span class="line">net(X)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506094427873.png" style="zoom:67%;"></p>
+<p>注意，这里并没有将Module类命名为Layer（层）或者Model（模型）之类的名字，这是因为该类是一个可供自由组建的部件。它的子类既可以是一个层（如PyTorch提供的Linear类），又可以是一个模型（如这里定义的MLP类），或者是模型的一个部分。我们下面通过两个例子来展示它的灵活性。</p>
+<h2 id="module的子类">2. Module的子类</h2>
+<p>Module类是一个通用的部件。事实上，PyTorch还实现了继承自Module的可以方便构建模型的类:
+如Sequential、ModuleList和ModuleDict等等。</p>
+<h3 id="sequential类">2.1 Sequential类</h3>
+<p>当模型的前向计算为<strong>简单串联各个层</strong>的计算时，Sequential类可以通过更加简单的方式定义模型。</p>
+<p>这正是Sequential类的目的：它可以接收一个子模块的有序字典（OrderedDict）或者一系列子模块作为参数来逐一添加Module的实例，而模型的前向计算就是将这些实例按添加的顺序逐一计算。</p>
+<p>手动实现Sequential类，这里叫做MySequential类</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> OrderedDict</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MySequential</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, *args</span>):</span><br><span class="line">        <span class="built_in">super</span>(MySequential, <span class="variable language_">self</span>).__init__()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(args) == <span class="number">1</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(args[<span class="number">0</span>], OrderedDict):</span><br><span class="line">            <span class="comment"># 如果传入的是一个OrderedDict</span></span><br><span class="line">            <span class="keyword">for</span> key, module <span class="keyword">in</span> args[<span class="number">0</span>].items():</span><br><span class="line">                <span class="variable language_">self</span>.add_module(key, module)</span><br><span class="line">                <span class="comment"># add_module方法会将module添加进self._modules(一个OrderedDict)</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># 传入的是一些Module</span></span><br><span class="line">            <span class="keyword">for</span> idx, module <span class="keyword">in</span> <span class="built_in">enumerate</span>(args):</span><br><span class="line">                <span class="variable language_">self</span>.add_module(<span class="built_in">str</span>(idx), module)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, <span class="built_in">input</span></span>):</span><br><span class="line">        <span class="comment"># self._modules返回一个 OrderedDict，保证会按照成员添加时的顺序遍历成员</span></span><br><span class="line">        <span class="keyword">for</span> module <span class="keyword">in</span> <span class="variable language_">self</span>._modules.values():</span><br><span class="line">            <span class="built_in">input</span> = module(<span class="built_in">input</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">input</span></span><br></pre></td></tr></table></figure>
+<p>我们用MySequential类来实现前面描述的MLP类，并使用随机初始化的模型做一次前向计算</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">X = torch.rand(<span class="number">2</span>, <span class="number">784</span>)</span><br><span class="line">net = MySequential(</span><br><span class="line">        nn.Linear(<span class="number">784</span>, <span class="number">256</span>),</span><br><span class="line">        nn.ReLU(),</span><br><span class="line">        nn.Linear(<span class="number">256</span>, <span class="number">10</span>),</span><br><span class="line">        )</span><br><span class="line"><span class="built_in">print</span>(net)</span><br><span class="line">net(X)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506094813631.png" style="zoom:67%;"></p>
+<p>可以观察到这里MySequential类的使用跟3.10节（多层感知机的简洁实现）中Sequential类的使用没什么区别。</p>
+<h3 id="modulelist类">2.2 ModuleList类</h3>
+<p>ModuleList<strong>接收一个子模块的列表</strong>作为输入，然后也可以<strong>类似List</strong>那样进行append和extend操作:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">net = nn.ModuleList([</span><br><span class="line">        nn.Linear(<span class="number">784</span>, <span class="number">256</span>),</span><br><span class="line">        nn.ReLU()</span><br><span class="line">    ])</span><br><span class="line">net.append(nn.Linear(<span class="number">256</span>, <span class="number">10</span>)) <span class="comment"># # 类似List的append操作</span></span><br><span class="line"><span class="built_in">print</span>(net[-<span class="number">1</span>])  <span class="comment"># 类似List的索引访问</span></span><br><span class="line"><span class="built_in">print</span>(net)</span><br><span class="line"><span class="comment"># net(torch.zeros(1, 784)) # 会报NotImplementedError</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506095711209.png" style="zoom:67%;"></p>
+<p>既然Sequential和ModuleList都可以进行列表化构造网络，那二者区别是什么呢。</p>
+<p>ModuleList仅仅是一个储存各种模块的列表，这些模块之间没有联系也没有顺序（所以不用保证相邻层的输入输出维度匹配），而且没有实现forward功能需要自己实现，所以上面执行net(torch.zeros(1,
+784))会报NotImplementedError；</p>
+<p>而<strong>Sequential内的模块</strong>需要按照顺序排列，要保证相邻层的输入输出大小相匹配，<strong>内部forward功能已经实现</strong>。</p>
+<p>ModuleList的出现只是让网络定义前向传播时更加灵活，见下面官网的例子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyModule</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">super</span>(MyModule, <span class="variable language_">self</span>).__init__()</span><br><span class="line">        <span class="variable language_">self</span>.linears = nn.ModuleList([</span><br><span class="line">            nn.Linear(<span class="number">10</span>, <span class="number">10</span>) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>)</span><br><span class="line">        ])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        <span class="comment"># ModuleList can act as an iterable, or be indexed using ints</span></span><br><span class="line">        <span class="keyword">for</span> i, l <span class="keyword">in</span> <span class="built_in">enumerate</span>(<span class="variable language_">self</span>.linears):</span><br><span class="line">            x = <span class="variable language_">self</span>.linears[i // <span class="number">2</span>](x) + l(x)</span><br><span class="line">        <span class="keyword">return</span> x</span><br></pre></td></tr></table></figure>
+<p>另外，ModuleList不同于一般的Python的list，加入到ModuleList里面的所有模块的参数会被自动添加到整个网络中，下面看一个例子对比一下。</p>
+<p><img src="/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506100336968.png" style="zoom:67%;"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">net1 = Module_ModuleList()</span><br><span class="line">net2 = Module_List()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;net1:&quot;</span>)</span><br><span class="line"><span class="keyword">for</span> p <span class="keyword">in</span> net1.parameters():</span><br><span class="line">    <span class="built_in">print</span>(p.size())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;net2:&quot;</span>)</span><br><span class="line"><span class="keyword">for</span> p <span class="keyword">in</span> net2.parameters():</span><br><span class="line">    <span class="built_in">print</span>(p)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506100449670.png" style="zoom: 67%;"></p>
+<p>普通list和nn.ModuleList的区别可以参考GPT的回复</p>
+<p><img src="/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506101215693.png" style="zoom:50%;">
+。</p>
+<p><img src="/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506101345275.png" style="zoom:50%;"></p>
+<h3 id="moduledict类">2.3 ModuleDict类</h3>
+<p>ModuleDict接收一个子模块的字典作为输入,
+然后也可以类似字典那样进行添加访问操作:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">net = nn.ModuleDict(&#123;</span><br><span class="line">    <span class="string">&#x27;linear&#x27;</span>: nn.Linear(<span class="number">784</span>, <span class="number">256</span>),</span><br><span class="line">    <span class="string">&#x27;act&#x27;</span>: nn.ReLU(),</span><br><span class="line">&#125;)</span><br><span class="line">net[<span class="string">&#x27;output&#x27;</span>] = nn.Linear(<span class="number">256</span>, <span class="number">10</span>) <span class="comment"># 添加</span></span><br><span class="line"><span class="built_in">print</span>(net[<span class="string">&#x27;linear&#x27;</span>]) <span class="comment"># 访问</span></span><br><span class="line"><span class="built_in">print</span>(net.output)</span><br><span class="line"><span class="built_in">print</span>(net)</span><br><span class="line"><span class="comment"># net(torch.zeros(1, 784)) # 会报NotImplementedError</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506100659351.png" style="zoom:67%;"></p>
+<p>和ModuleList一样，ModuleDict实例仅仅是存放了一些模块的字典，并没有定义forward函数需要自己定义。同样，ModuleDict也与Python的Dict有所不同，ModuleDict里的所有模块的参数会被自动添加到整个网络中。</p>
+<h2 id="构造复杂的模型">3 构造复杂的模型</h2>
+<p>虽然上面介绍的这些类可以使模型构造更加简单，且不需要定义forward函数，但直接继承Module类可以极大地拓展模型构造的灵活性。</p>
+<p>下面我们构造一个稍微复杂点的网络FancyMLP。在这个网络中，我们通过get_constant函数创建训练中不被迭代的参数，即常数参数。在前向计算中，除了使用创建的常数参数外，我们还使用Tensor的函数和Python的控制流，并多次调用相同的层。</p>
+<p><img src="/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506102349143.png"></p>
+<p>其中，</p>
+<ol type="1">
+<li>x.norm() 计算张量 x 的 范数（norm），默认计算 L2
+范数（即欧几里得范数），相当于：</li>
+</ol>
+<p><img src="/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506102530863.png" style="zoom:50%;"></p>
+<p>也可以指定不同的范数类型，例如 x.norm(p=1) 计算 L1 范数。</p>
+<ol start="2" type="1">
+<li>item() 方法用于将 单个元素的张量 转换为 Python 标量（float 或
+int）。由于 x.norm() 计算的是一个标量（0 维张量），item()
+作用是取出这个数值，变成普通的 Python 浮点数，方便用于 if 语句等 Python
+逻辑判断。</li>
+</ol>
+<p>因为FancyMLP和Sequential类都是Module类的子类，所以我们可以嵌套调用它们。</p>
+<p><img src="/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506102702680.png"></p>
+<p><img src="/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A04-1/image-20250506102713988.png" style="zoom:67%;"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
+              <a href="/tags/%E7%AC%AC4%E8%8A%82/" rel="tag"># 第4节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/04/30/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-15/" rel="prev" title="动手学深度学习 3.15 数值稳定性和模型初始化">
+                  <i class="fa fa-angle-left"></i> 动手学深度学习 3.15 数值稳定性和模型初始化
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
