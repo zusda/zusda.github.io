@@ -2226,10 +2226,4 @@ int）。由于 x.norm() 计算的是一个标量（0 维张量），item()
         <tag>第4节</tag>
       </tags>
   </entry>
-  <entry>
-    <title>test23</title>
-    <url>/2025/05/26/test23/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script>
-]]></content>
-  </entry>
 </search>
