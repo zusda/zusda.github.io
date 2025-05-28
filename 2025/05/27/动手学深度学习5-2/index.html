@@ -34,36 +34,39 @@
 
     <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="动手学深度学习 3.8 多层感知机">
-<meta property="og:url" content="http://example.com/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/index.html">
+<meta property="og:title" content="动手学深度学习 5.2 填充和步幅">
+<meta property="og:url" content="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250327101017490.png">
-<meta property="og:image" content="http://example.com/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250328101000294.png">
-<meta property="og:image" content="http://example.com/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250328101048509.png">
-<meta property="og:image" content="http://example.com/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250328101933951.png">
-<meta property="og:image" content="http://example.com/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250328102109339.png">
-<meta property="og:image" content="http://example.com/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250328103336028.png">
-<meta property="og:image" content="http://example.com/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250328103430953.png">
-<meta property="article:published_time" content="2025-03-27T02:06:52.000Z">
-<meta property="article:modified_time" content="2025-03-28T02:37:48.756Z">
+<meta property="og:image" content="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250527180720465.png">
+<meta property="og:image" content="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528104734786.png">
+<meta property="og:image" content="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528104814360.png">
+<meta property="og:image" content="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528105241598.png">
+<meta property="og:image" content="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528105501575.png">
+<meta property="og:image" content="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528105555220.png">
+<meta property="og:image" content="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528121446020.png">
+<meta property="og:image" content="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528121507764.png">
+<meta property="og:image" content="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528121608852.png">
+<meta property="og:image" content="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528121620898.png">
+<meta property="article:published_time" content="2025-05-27T09:57:14.000Z">
+<meta property="article:modified_time" content="2025-05-28T04:16:30.088Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ai">
 <meta property="article:tag" content="动手学习深度学习">
-<meta property="article:tag" content="第3节">
+<meta property="article:tag" content="第5节">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250327101017490.png">
+<meta name="twitter:image" content="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250527180720465.png">
 
 
-<link rel="canonical" href="http://example.com/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/">
+<link rel="canonical" href="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/","path":"2025/03/27/动手学深度学习3-8/","title":"动手学深度学习 3.8 多层感知机"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/","path":"2025/05/27/动手学深度学习5-2/","title":"动手学深度学习 5.2 填充和步幅"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>动手学深度学习 3.8 多层感知机 | Hexo</title>
+<title>动手学深度学习 5.2 填充和步幅 | Hexo</title>
   
 
 
@@ -166,7 +169,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9A%90%E8%97%8F%E5%B1%82"><span class="nav-number">2.</span> <span class="nav-text">1.隐藏层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">2. 激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#relu%E5%87%BD%E6%95%B0"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 ReLU函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sigmoid%E5%87%BD%E6%95%B0"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 sigmoid函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tanh%E5%87%BD%E6%95%B0"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 tanh函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA"><span class="nav-number">4.</span> <span class="nav-text">3 多层感知机</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A1%AB%E5%85%85"><span class="nav-number">2.</span> <span class="nav-text">1. 填充</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A5%E5%B9%85"><span class="nav-number">3.</span> <span class="nav-text">2. 步幅</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -217,7 +220,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -230,12 +233,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="动手学深度学习 3.8 多层感知机 | Hexo">
+      <meta itemprop="name" content="动手学深度学习 5.2 填充和步幅 | Hexo">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          动手学深度学习 3.8 多层感知机
+          动手学深度学习 5.2 填充和步幅
         </h1>
 
         <div class="post-meta-container">
@@ -246,14 +249,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2025-03-27 10:06:52" itemprop="dateCreated datePublished" datetime="2025-03-27T10:06:52+08:00">2025-03-27</time>
+      <time title="创建时间：2025-05-27 17:57:14" itemprop="dateCreated datePublished" datetime="2025-05-27T17:57:14+08:00">2025-05-27</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-03-28 10:37:48" itemprop="dateModified" datetime="2025-03-28T10:37:48+08:00">2025-03-28</time>
+      <time title="修改时间：2025-05-28 12:16:30" itemprop="dateModified" datetime="2025-05-28T12:16:30+08:00">2025-05-28</time>
     </span>
 
   
@@ -271,72 +274,64 @@
 <p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
 <p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
 <p>（由于有时候公式太多，可能会直接贴图片）</p>
-<h2 id="隐藏层">1.隐藏层</h2>
-<p><img src="/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250327101017490.png" style="zoom:50%;"></p>
-<p>多层感知机中，输入和输出个数分别为4和3，中间的隐藏层中包含了5个隐藏单元（hidden
-unit）。由于输入层不涉及计算，图3.3中的多层感知机的层数为2。</p>
-<p>给定一个小批量样本<span class="math inline">\(X(n *
-d)\)</span>，其批量大小为 <span class="math inline">\(n\)</span>，输入个数为 <span class="math inline">\(d\)</span>。</p>
-<p>其中隐藏单元个数为 <span class="math inline">\(h\)</span>
-。那么<strong>隐藏层的输出</strong>（也称为隐藏层变量或隐藏变量）为<span class="math inline">\(H(n *
-h)\)</span>。因为隐藏层和输出层均是全连接层，因此
-隐藏层的<strong>权重参数</strong>和<strong>偏差参数</strong>分别为<span class="math inline">\(W_h(d * h)\)</span>和<span class="math inline">\(b_h(1 *
-h)\)</span>。其中d为前一层输出的列数，而这里的前一层输出则直接是输入样本X。且每个隐藏层节点的输出需要一个偏差b，h个隐藏层节点则需要h个偏差b。</p>
-<p>输出层同理，输出层的输出为$ O(n * q) $ 其中 <span class="math inline">\(q\)</span> 为输出单元个数
-。输出层的权重和偏差参数分别为 <span class="math inline">\(W_o(h *
-q)\)</span> 和 <span class="math inline">\(b_o(1*q)\)</span> <span class="math display">\[
-\begin{aligned}
-H=XW_h*b_h \\
-O=HW_o*b_o
-\end{aligned}
-\]</span>
-将隐藏层的输出直接作为输出层的输入。如果将以上两个式子联立起来，可以得到
+<p>在上一节的例子里，我们使用高和宽为<code>3</code>的输入与高和宽为<code>2</code>的卷积核得到高和宽为<code>2</code>的输出。</p>
+<p>一般来说，假设输入形状是 <span class="math inline">\(n_h*n_w\)</span>
+，卷积核窗口形状是 <span class="math inline">\(k_h*k_w\)</span>
+，那么输出形状将会是<br>
 <span class="math display">\[
-O=(XW_h+b_h)W_o+b_o=XW_hW_o+b_hW_o+b_o
+(n_h-k_h+1)*(n_w-k_w+1)
 \]</span>
-从联立后的式子可以看出，虽然神经网络引入了隐藏层，却依然等价于一个单层神经网络。其中输出层权重参数为<span class="math inline">\(W_hW_o\)</span>，偏差为<span class="math inline">\(b_hW_o+b_o\)</span>
-。不难发现，即便再添加更多的隐藏层，以上设计依然只能与仅含输出层的单层神经网络等价。</p>
-<h2 id="激活函数">2. 激活函数</h2>
-<h3 id="relu函数">2.1 ReLU函数</h3>
-<p>上述问题的根源在于全连接层只是对数据做仿射变换（affine
-transformation），而多个仿射变换的叠加仍然是一个仿射变换。解决问题的一个方法是<strong>引入非线性变换</strong>，例如对隐藏变量使用按元素运算的非线性函数进行变换，然后再作为下一个全连接层的输入。</p>
-<p>这个非线性函数被称为<strong>激活函数（activation
-function）</strong>。下面我们介绍几个常用的激活函数。 <span class="math display">\[
-ReLU(x)=max(x,0)
-\]</span> 可以看出，ReLU函数只保留正数元素，并将负数元素清零。</p>
-<p><img src="/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250328101000294.png" style="zoom:67%;"></p>
-<p>下图是ReLU的导数图。显然，当输入为负数时，ReLU函数的导数为0；当输入为正数时，ReLU函数的导数为1。尽管输入为0时ReLU函数不可导，但是我们可以取此处的导数为0。</p>
-<p><img src="/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250328101048509.png" style="zoom:67%;"></p>
-<h3 id="sigmoid函数">2.2 sigmoid函数</h3>
-<p><span class="math display">\[
-sigmoid(x)=\frac{1}{1+exp(-x)}
-\]</span></p>
-<p>sigmoid函数在<strong>早期的神经网络中较为普遍</strong>，但它<strong>目前逐渐被更简单的ReLU函数取代</strong>。在后面“循环神经网络”一章中我们会介绍如何利用它值域在0到1之间这一特性来控制信息在神经网络中的流动。</p>
-<p>下图是sigmoid函数图</p>
-<p><img src="/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250328101933951.png" style="zoom:67%;"></p>
-<p>依据链式法则，sigmoid函数的导数 <span class="math display">\[
-sigmoid&#39;(x)=sigmoid(x)(1-sigmoid(x))
-\]</span>
-下面绘制了sigmoid函数的导数。当输入为0时，sigmoid函数的导数达到最大值0.25；当输入越偏离0时，sigmoid函数的导数越接近0。</p>
-<p><img src="/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250328102109339.png" alt="sigmoid导数图" style="zoom:67%;"></p>
-<h3 id="tanh函数">2.3 tanh函数</h3>
-<p><span class="math display">\[
-tanh(x)=\frac{1-exp(-2x)}{1+exp(-2x)}
-\]</span></p>
-<p><img src="/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250328103336028.png" style="zoom:67%;"></p>
-<p>依据链式法则，tanh函数的导数 <span class="math display">\[
-tanh&#39;(x)=1=tanh^2(x)
-\]</span>
-下面绘制了tanh函数的导数。当输入为0时，tanh函数的导数达到最大值1；当输入越偏离0时，tanh函数的导数越接近0。</p>
-<p><img src="/2025/03/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-8/image-20250328103430953.png" style="zoom:67%;"></p>
-<h2 id="多层感知机">3 多层感知机</h2>
-<p>多层感知机就是<strong>含有至少一个隐藏层</strong>的<strong>由全连接层组成</strong>的神经网络，且<strong>每个隐藏层的输出通过激活函数进行变换</strong>。
+所以卷积层的输出形状由输入形状和卷积核窗口形状决定。本节我们将介绍卷积层的两个超参数，即填充和步幅。它们可以对给定形状的输入和卷积核改变输出形状。</p>
+<h2 id="填充">1. 填充</h2>
+<p>填充（padding）是指在输入高和宽的两侧填充元素（通常是0元素）</p>
+<p>图5.2里我们在原输入高和宽的两侧分别添加了值为<code>0</code>的元素，使得输入高和宽从<code>3</code>变成了<code>5</code>，并导致输出高和宽由<code>2</code>增加到<code>4</code>。</p>
+<p><img src="/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250527180720465.png" style="zoom:67%;"></p>
+<p>一般来说，如果在高的两侧一共填充 <span class="math inline">\(p_h\)</span> 行，在宽的两侧一共填充 <span class="math inline">\(p_w\)</span> 列，那么输出形状将会是 <span class="math display">\[
+(n_h-k_h+p_h+1)*(n_w-k_w+p_w+1)
+\]</span> 也就是说，输出的高和宽会分别增加 <span class="math inline">\(p_h\)</span> 和 <span class="math inline">\(p_w\)</span> 。</p>
+<p>在很多情况下，我们会设置 <span class="math inline">\(p_h =
+k_h-1\)</span> 和 <span class="math inline">\(p_w = k_w-1\)</span>
+来使输入和输出具有相同的高和宽。这样会方便在构造网络时推测每个层的输出形状。</p>
+<p>假设 <span class="math inline">\(k_h\)</span> 是奇数，（那么 <span class="math inline">\(k_h-1\)</span>
+就是偶数），我们会在高的<strong>两侧</strong>分别填充 <span class="math inline">\(\frac{p_h}{2}\)</span> 行 。</p>
+<p>假设 <span class="math inline">\(k_h\)</span> 是偶数，（那么 <span class="math inline">\(k_h-1\)</span>
+就是奇数），我们会在高或底的<strong>某一侧</strong>填充 <span class="math inline">\(\frac{p_h}{2}\)</span> 行 。</p>
+<p>对于宽 <span class="math inline">\(k_w\)</span> 同理。</p>
+<p>卷积神经网络经常使用奇数高宽的卷积核，如<code>1、3、5</code>和<code>7</code>，所以两端上的填充个数相等。</p>
+<p>下面的例子里我们创建一个高和宽为<code>3</code>的二维卷积层，然后设输入高和宽两侧的填充数分别为<code>1</code>。给定一个高和宽为<code>8</code>的输入，我们发现输出的高和宽也是<code>8</code>。</p>
+<p><img src="/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528104734786.png" style="zoom: 60%;"></p>
+<p><img src="/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528104814360.png" style="zoom:80%;"></p>
+<p>当卷积核的高和宽不同时，我们也可以通过设置高和宽上不同的填充数使输出和输入具有相同的高和宽。</p>
+<p>在行的部分添加4行，即两侧分别添加2行，列的部分同理两侧添加1列（注意这里卷积核是<code>5x3</code>）</p>
+<p><img src="/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528105241598.png" style="zoom:80%;"></p>
+<p><img src="/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528105501575.png" style="zoom: 80%;"></p>
+<h2 id="步幅">2. 步幅</h2>
+<p>我们将每次滑动的行数和列数称为步幅（stride）。目前我们看到的例子里，在高和宽两个方向上步幅均为1。我们也可以使用更大步幅。</p>
+<p><img src="/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528105555220.png" style="zoom: 80%;"></p>
+<p>一般来说，当高上步幅为 <span class="math inline">\(s_h\)</span>
+，宽上步幅为 <span class="math inline">\(s_w\)</span>
+时，输出形状为（注意这里不是中括号，而是向下取整符号） <span class="math display">\[
+\lfloor (n_h-k_h+p_h+s_h)/s_h\rfloor  * \lfloor
+(n_w-k_w+p_w+s_w)/s_w\rfloor
+\]</span> 如果我们设置 <span class="math inline">\(p_h = k_h-1\)</span>
+和 <span class="math inline">\(p_w = k_w-1\)</span> ，么输出形状将简化为
 <span class="math display">\[
-\begin{aligned}
-H=ϕ(XW_h*b_h) \\
-O=HW_o*b_o
-\end{aligned}
-\]</span> <span class="math inline">\(ϕ\)</span>表示激活函数。H是隐藏层的计算，O是最后的输出层的计算，因此O不用激活函数处理</p>
+\lfloor (n_h+s_h-1)/s_h\rfloor  * \lfloor (n_w+s_w-1)/s_w\rfloor
+\]</span>
+更进一步，如果输入的高和宽能分别被高和宽上的步幅整除，那么输出形状将是
+<span class="math display">\[
+\lfloor n_h/s_h\rfloor  * \lfloor n_w/s_w\rfloor
+\]</span></p>
+<blockquote>
+<p><span class="math inline">\(\lfloor (s_h-1)/s_h\rfloor\)</span>
+为<code>0</code></p>
+</blockquote>
+<p>下面我们令高和宽上的步幅均为<code>2</code>，从而使输入的高和宽减半。</p>
+<p><img src="/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528121446020.png" style="zoom: 80%;"></p>
+<p><img src="/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528121507764.png" style="zoom:80%;"></p>
+<p>同理可以分别设置高和宽上的步幅</p>
+<p><img src="/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528121608852.png" style="zoom:80%;"></p>
+<p><img src="/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/image-20250528121620898.png" style="zoom:80%;"></p>
 
     </div>
 
@@ -348,21 +343,18 @@ O=HW_o*b_o
           <div class="post-tags">
               <a href="/tags/ai/" rel="tag"># ai</a>
               <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
-              <a href="/tags/%E7%AC%AC3%E8%8A%82/" rel="tag"># 第3节</a>
+              <a href="/tags/%E7%AC%AC5%E8%8A%82/" rel="tag"># 第5节</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2025/03/26/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-7/" rel="prev" title="动手学深度学习 3.7 softmax回归的简洁实现">
-                  <i class="fa fa-angle-left"></i> 动手学深度学习 3.7 softmax回归的简洁实现
+                <a href="/2025/05/26/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-1/" rel="prev" title="动手学深度学习 5.1 二维卷积层">
+                  <i class="fa fa-angle-left"></i> 动手学深度学习 5.1 二维卷积层
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2025/04/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-9/" rel="next" title="动手学深度学习 3.9 多层感知机的从零开始实现">
-                  动手学深度学习 3.9 多层感知机的从零开始实现 <i class="fa fa-angle-right"></i>
-                </a>
             </div>
           </div>
     </footer>
