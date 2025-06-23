@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动手学深度学习 5.3 多输入通道和多输出通道">
+<meta property="og:url" content="http://example.com/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616105416956.png">
+<meta property="og:image" content="http://example.com/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616105524525.png">
+<meta property="og:image" content="http://example.com/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616165717244.png">
+<meta property="og:image" content="http://example.com/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616165737744.png">
+<meta property="og:image" content="http://example.com/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616170111474.png">
+<meta property="og:image" content="http://example.com/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616172833910.png">
+<meta property="og:image" content="http://example.com/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616173656293.png">
+<meta property="article:published_time" content="2025-06-16T02:43:08.000Z">
+<meta property="article:modified_time" content="2025-06-16T09:39:32.153Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="动手学习深度学习">
+<meta property="article:tag" content="第5节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616105416956.png">
+
+
+<link rel="canonical" href="http://example.com/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/","path":"2025/06/16/动手学深度学习5-3/","title":"动手学深度学习 5.3 多输入通道和多输出通道"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>动手学深度学习 5.3 多输入通道和多输出通道 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E8%BE%93%E5%85%A5%E9%80%9A%E9%81%93"><span class="nav-number">2.</span> <span class="nav-text">1 多输入通道</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E8%BE%93%E5%87%BA%E9%80%9A%E9%81%93"><span class="nav-number">3.</span> <span class="nav-text">2 多输出通道</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%B7%E7%A7%AF%E5%B1%82"><span class="nav-number">4.</span> <span class="nav-text">3. 1×1卷积层</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="动手学深度学习 5.3 多输入通道和多输出通道 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动手学深度学习 5.3 多输入通道和多输出通道
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-06-16 10:43:08 / 修改时间：17:39:32" itemprop="dateCreated datePublished" datetime="2025-06-16T10:43:08+08:00">2025-06-16</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<p>前面两节里我们用到的输入和输出都是二维数组，但真实数据的维度经常更高。</p>
+<p>例如，彩色图像在高和宽2个维度外还有RGB（红、绿、蓝）3个颜色通道。假设彩色图像的高和宽分别是<code>h</code>和<code>w</code>（像素），那么它可以表示为一个<code>3×h×w</code>的多维数组。我们将大小为3的这一维称为通道（channel）维。</p>
+<h2 id="多输入通道">1 多输入通道</h2>
+<p>当输入数据含多个通道时，我们需要构造一个输入通道数与输入数据的通道数相同的卷积核，从而能够与含多通道的输入数据做互相关运算。</p>
+<p><img src="/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616105416956.png" style="zoom:80%;"></p>
+<p>接下来我们实现含多个输入通道的互相关运算。我们只需要对每个通道做互相关运算，然后通过<code>add_n</code>函数来进行累加。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">corr2d_multi_in</span>(<span class="params">X, K</span>):</span><br><span class="line">    <span class="comment"># 沿着X和K的第0维（通道维）分别计算再相加</span></span><br><span class="line">    res = d2l.corr2d(X[<span class="number">0</span>, :, :], K[<span class="number">0</span>, :, :])</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, X.shape[<span class="number">0</span>]):</span><br><span class="line">        res += d2l.corr2d(X[i, :, :], K[i, :, :])</span><br><span class="line">    <span class="keyword">return</span> res</span><br></pre></td></tr></table></figure>
+<p>这里<code>corr2d</code>互相关计算函数的步幅为1。</p>
+<p>我们可以构造图5.4中的输入数组X、核数组K来验证互相关运算的输出。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">X = torch.tensor(</span><br><span class="line">    [</span><br><span class="line">        [</span><br><span class="line">            [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>],</span><br><span class="line">            [<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>],</span><br><span class="line">            [<span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]</span><br><span class="line">        ],</span><br><span class="line">        [</span><br><span class="line">            [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">            [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>],</span><br><span class="line">            [<span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]</span><br><span class="line">        ]</span><br><span class="line">    ])</span><br><span class="line">K = torch.tensor(</span><br><span class="line">    [</span><br><span class="line">        [</span><br><span class="line">            [<span class="number">0</span>, <span class="number">1</span>],</span><br><span class="line">            [<span class="number">2</span>, <span class="number">3</span>]</span><br><span class="line">        ],</span><br><span class="line">        [</span><br><span class="line">            [<span class="number">1</span>, <span class="number">2</span>],</span><br><span class="line">            [<span class="number">3</span>, <span class="number">4</span>]</span><br><span class="line">        ]</span><br><span class="line">    ])</span><br><span class="line">res = corr2d_multi_in(X, K)</span><br><span class="line"><span class="built_in">print</span>(res)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616105524525.png" style="zoom:67%;"></p>
+<h2 id="多输出通道">2 多输出通道</h2>
+<p>我们之前使用<strong>一组核<code>K</code>仅获得一个输出</strong>，多输出的意思则是<strong>多组核</strong>获取多个输出</p>
+<p>下面我们实现一个互相关运算函数来计算多个通道的输出。</p>
+<p>下面的K中有多个一组核的k，多组核计算后的多个结果通过stack堆在在一个tensor中。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">corr2d_multi_in_out</span>(<span class="params">X, K</span>):</span><br><span class="line">    <span class="comment"># 对K的第0维遍历，每次同输入X做互相关计算。所有结果使用stack函数合并在一起</span></span><br><span class="line">    <span class="keyword">return</span> torch.stack([corr2d_multi_in(X, k) <span class="keyword">for</span> k <span class="keyword">in</span> K])</span><br></pre></td></tr></table></figure>
+<p>stack使用举例</p>
+<p><img src="/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616165717244.png" style="zoom:67%;"></p>
+<p><img src="/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616165737744.png" style="zoom:67%;"></p>
+<p>我们将核数组<code>K</code>同<code>K+1</code>（<code>K</code>中每个元素加一）和<code>K+2</code>连结在一起来构造一个输出通道数为<code>3</code>的卷积核</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">K = torch.stack([K, K + <span class="number">1</span>, K + <span class="number">2</span>])</span><br><span class="line"><span class="built_in">print</span>(K.shape) <span class="comment"># torch.Size([3, 2, 2, 2])</span></span><br></pre></td></tr></table></figure>
+<p>下面我们对输入数组<code>X</code>与核数组<code>K</code>做互相关运算。此时的输出含有<code>3</code>个通道。其中第一个通道的结果与之前输入数组<code>X</code>与多输入通道、单输出通道核的计算结果一致。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">res = corr2d_multi_in_out(X, K)</span><br><span class="line"><span class="built_in">print</span>(res)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616170111474.png" style="zoom:67%;"></p>
+<h2 id="卷积层">3. 1×1卷积层</h2>
+<p>最后我们讨论卷积窗口形状为<code>1×1</code>（<span class="math inline">\(k_h=k_w=1\)</span>）的多通道卷积层。我们通常称之为<code>1×1</code>卷积层，并将其中的卷积运算称为<code>1×1</code>卷积。
+实际上，<code>1×1</code> 卷积的主要计算发生在通道维上。</p>
+<p>假设我们将通道维当作特征维，将高和宽维度上的元素当成数据样本，那么1×1卷积层的作用与全连接层等价。</p>
+<p>输出中的每个元素来自输入中在高和宽上相同位置的元素在不同通道之间的按权重累加。</p>
+<p><img src="/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616172833910.png" style="zoom: 50%;"></p>
+<p>下面我们使用全连接层中的矩阵乘法来实现<code>1×1</code>卷积。这里需要在矩阵乘法运算前后对数据形状做一些调整。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">corr2d_multi_in_out_1x1</span>(<span class="params">X, K</span>):</span><br><span class="line">    c_i, h, w = X.shape</span><br><span class="line">    c_o = K.shape[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">    X = X.view(c_i, h * w)</span><br><span class="line">    K = K.view(c_o, c_i)</span><br><span class="line"></span><br><span class="line">    Y = torch.mm(K, X)  <span class="comment"># 全连接层的矩阵乘法</span></span><br><span class="line">    <span class="keyword">return</span> Y.view(c_o, h, w)</span><br></pre></td></tr></table></figure>
+<p>注意我们这里的矩阵乘法是 <span class="math inline">\(K*X\)</span>
+,然后我们就清楚
+<code>X = X.view(c_i, h * w); K = K.view(c_o, c_i)</code>
+变换的意义。</p>
+<p>最终我们将计算结果恢复成 (通道，高，宽) 的格式</p>
+<p>做1×1
+卷积时，以上函数与之前实现的互相关运算函数corr2d_multi_in_out等价。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">X = torch.rand(<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>)</span><br><span class="line">K = torch.rand(<span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">Y1 = corr2d_multi_in_out_1x1(X, K)</span><br><span class="line">Y2 = corr2d_multi_in_out(X, K)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>((Y1 - Y2).norm().item() &lt; <span class="number">1e-6</span>)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/image-20250616173656293.png" style="zoom: 67%;"></p>
+<p>之后的模型里我们将会看到1×1卷积层被当作保持高和宽维度形状不变的全连接层使用。于是，我们可以通过调整网络层之间的通道数来控制模型复杂度。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
+              <a href="/tags/%E7%AC%AC5%E8%8A%82/" rel="tag"># 第5节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/05/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-2/" rel="prev" title="动手学深度学习 5.2 填充和步幅">
+                  <i class="fa fa-angle-left"></i> 动手学深度学习 5.2 填充和步幅
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
