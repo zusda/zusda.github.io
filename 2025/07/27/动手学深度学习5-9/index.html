@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动手学深度学习 5.9 含并行连结的网络（GoogLeNet）">
+<meta property="og:url" content="http://example.com/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/image-20250727042750944.png">
+<meta property="og:image" content="http://example.com/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/image-20250727043435616.png">
+<meta property="og:image" content="http://example.com/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/image-20250727063930884.png">
+<meta property="og:image" content="http://example.com/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/image-20250727064323133.png">
+<meta property="article:published_time" content="2025-07-26T20:23:00.000Z">
+<meta property="article:modified_time" content="2025-07-26T22:50:36.952Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="动手学习深度学习">
+<meta property="article:tag" content="第5节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/image-20250727042750944.png">
+
+
+<link rel="canonical" href="http://example.com/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/","path":"2025/07/27/动手学深度学习5-9/","title":"动手学深度学习 5.9 含并行连结的网络（GoogLeNet）"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>动手学深度学习 5.9 含并行连结的网络（GoogLeNet） | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#inception-%E5%9D%97"><span class="nav-number">2.</span> <span class="nav-text">1. Inception 块</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#googlenet%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">2. GoogLeNet模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E5%92%8C%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">3. 获取数据和训练模型</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="动手学深度学习 5.9 含并行连结的网络（GoogLeNet） | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动手学深度学习 5.9 含并行连结的网络（GoogLeNet）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-07-27 04:23:00 / 修改时间：06:50:36" itemprop="dateCreated datePublished" datetime="2025-07-27T04:23:00+08:00">2025-07-27</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<h2 id="inception-块">1. Inception 块</h2>
+<p>GoogLeNet中的基础卷积块叫作Inception块，得名于同名电影《盗梦空间》（Inception）。与上一节介绍的NiN块相比，这个基础块在结构上更加复杂，如图5.8所示。</p>
+<p><img src="/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/image-20250727042750944.png" style="zoom:80%;"></p>
+<p>由图5.8可以看出，Inception块里有<strong>4条并行的线路</strong>。</p>
+<p>前3条线路使用窗口大小分别是<code>1×1</code>、<code>3×3</code>和<code>5×5</code>的卷积层来抽取不同空间尺寸下的信息，其中中间2个线路会对输入先做1×1卷积来减少输入通道数，以降低模型复杂度。
+第四条线路则使用<code>3×3</code>最大池化层，后接<code>1×1</code>卷积层来改变通道数。</p>
+<p>4条线路都使用了合适的填充来使输入与输出的高和宽一致。最后我们将每条线路的输出在通道维上连结，并输入接下来的层中去。</p>
+<p>Inception块中可以自定义的<strong>超参数</strong>是每个层的<strong>输出通道数</strong>，我们以此来控制模型复杂度。</p>
+<p><img src="/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/image-20250727043435616.png" style="zoom: 67%;"></p>
+<h2 id="googlenet模型">2. GoogLeNet模型</h2>
+<p>GoogLeNet跟VGG一样，在<code>主体卷积部分</code>
+中使用<code>5</code>个模块（block），每个模块之间使用<code>步幅为2</code>的<code>3×3</code>最大池化层来减小输出高宽。</p>
+<p><strong>第一模块</strong>使用一个<code>64通道</code>的<code>7×7</code>卷积层。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">b1 = nn.Sequential(nn.Conv2d(<span class="number">1</span>, <span class="number">64</span>, kernel_size=<span class="number">7</span>, stride=<span class="number">2</span>, padding=<span class="number">3</span>),</span><br><span class="line">                   nn.ReLU(),</span><br><span class="line">                   nn.MaxPool2d(kernel_size=<span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+<p><strong>第二模块</strong>使用2个卷积层：首先是<code>64通道</code>的<code>1×1</code>卷积层，然后是将通道增大3倍的`3×3卷积层。它对应Inception块中的第二条线路</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">b2 = nn.Sequential(nn.Conv2d(<span class="number">64</span>, <span class="number">64</span>, kernel_size=<span class="number">1</span>),</span><br><span class="line">                   nn.Conv2d(<span class="number">64</span>, <span class="number">192</span>, kernel_size=<span class="number">3</span>, padding=<span class="number">1</span>),</span><br><span class="line">                   nn.MaxPool2d(kernel_size=<span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+<p><strong>第三模块</strong>串联2个完整的Inception块。</p>
+<p>第一个Inception块的输出通道数为
+<code>64+128+32+32=256</code>，其中4条线路的输出通道数比例为<code>64:128:32:32=2:4:1:1</code>。其中第二、第三条线路先分别将输入通道数减小至
+<code>96/192=1/2</code> 和 <code>16/192=1/12</code>
+后，再接上第二层卷积层。</p>
+<p>第二个Inception块输出通道数增至<code>128+192+96+64=480</code>，每条线路的输出通道数之比为<code>128:192:96:64=4:6:3:2</code>。其中第二、第三条线路先分别将输入通道数减小至<code>128/256=1/2</code>和<code>32/256=1/8</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">b3 = nn.Sequential(Inception(<span class="number">192</span>, <span class="number">64</span>, (<span class="number">96</span>, <span class="number">128</span>), (<span class="number">16</span>, <span class="number">32</span>), <span class="number">32</span>),</span><br><span class="line">                   Inception(<span class="number">256</span>, <span class="number">128</span>, (<span class="number">128</span>, <span class="number">192</span>), (<span class="number">32</span>, <span class="number">96</span>), <span class="number">64</span>),</span><br><span class="line">                   nn.MaxPool2d(kernel_size=<span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+<p><strong>第四模块</strong>更加复杂。它串联了5个Inception块，其输出通道数分别是<code>192+208+48+64=512</code>、<code>160+224+64+64=512</code>、<code>128+256+64+64=512</code>、<code>112+288+64+64=528</code>和<code>256+320+128+128=832</code>。</p>
+<p>这些线路的通道数分配和第三模块中的类似，首先含<code>3×3</code>卷积层的第二条线路输出最多通道，其次是仅含1×1卷积层的第一条线路，之后是含5×5卷积层的第三条线路和含3×3最大池化层的第四条线路。其中第二、第三条线路都会先按比例减小通道数。这些比例在各个Inception块中都略有不同。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">b4 = nn.Sequential(Inception(<span class="number">480</span>, <span class="number">192</span>, (<span class="number">96</span>, <span class="number">208</span>), (<span class="number">16</span>, <span class="number">48</span>), <span class="number">64</span>),</span><br><span class="line">                   Inception(<span class="number">512</span>, <span class="number">160</span>, (<span class="number">112</span>, <span class="number">224</span>), (<span class="number">24</span>, <span class="number">64</span>), <span class="number">64</span>),</span><br><span class="line">                   Inception(<span class="number">512</span>, <span class="number">128</span>, (<span class="number">128</span>, <span class="number">256</span>), (<span class="number">24</span>, <span class="number">64</span>), <span class="number">64</span>),</span><br><span class="line">                   Inception(<span class="number">512</span>, <span class="number">112</span>, (<span class="number">144</span>, <span class="number">288</span>), (<span class="number">32</span>, <span class="number">64</span>), <span class="number">64</span>),</span><br><span class="line">                   Inception(<span class="number">528</span>, <span class="number">256</span>, (<span class="number">160</span>, <span class="number">320</span>), (<span class="number">32</span>, <span class="number">128</span>), <span class="number">128</span>),</span><br><span class="line">                   nn.MaxPool2d(kernel_size=<span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+<p><strong>第五模块</strong>有输出通道数为<code>256+320+128+128=832</code>和<code>384+384+128+128=1024</code>的两个Inception块。其中每条线路的通道数的分配思路和第三、第四模块中的一致，只是在具体数值上有所不同。</p>
+<p>需要注意的是，第五模块的后面紧跟输出层，该模块同NiN一样使用全局平均池化层来将每个通道的高和宽变成1。最后我们将输出变成二维数组后接上一个输出个数为标签类别数的全连接层。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">b5 = nn.Sequential(Inception(<span class="number">832</span>, <span class="number">256</span>, (<span class="number">160</span>, <span class="number">320</span>), (<span class="number">32</span>, <span class="number">128</span>), <span class="number">128</span>),</span><br><span class="line">                   Inception(<span class="number">832</span>, <span class="number">384</span>, (<span class="number">192</span>, <span class="number">384</span>), (<span class="number">48</span>, <span class="number">128</span>), <span class="number">128</span>),</span><br><span class="line">                   d2l.GlobalAvgPool2d())</span><br><span class="line"></span><br><span class="line">net = nn.Sequential(b1, b2, b3, b4, b5,</span><br><span class="line">                    d2l.FlattenLayer(), nn.Linear(<span class="number">1024</span>, <span class="number">10</span>))</span><br></pre></td></tr></table></figure>
+<p>GoogLeNet模型的计算复杂，而且不如VGG那样便于修改通道数。本节里我们将输入的高和宽从224降到96来简化计算。下面演示各个模块之间的输出的形状变化。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">net = nn.Sequential(b1, b2, b3, b4, b5, d2l.FlattenLayer(), nn.Linear(<span class="number">1024</span>, <span class="number">10</span>))</span><br><span class="line">X = torch.rand(<span class="number">1</span>, <span class="number">1</span>, <span class="number">96</span>, <span class="number">96</span>)</span><br><span class="line"><span class="keyword">for</span> blk <span class="keyword">in</span> net.children():</span><br><span class="line">    X = blk(X)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;output shape: &#x27;</span>, X.shape)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/image-20250727063930884.png" style="zoom:67%;"></p>
+<h2 id="获取数据和训练模型">3. 获取数据和训练模型</h2>
+<p>我们使用高和宽均为96像素的图像来训练GoogLeNet模型。训练使用的图像依然来自Fashion-MNIST数据集。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">batch_size = <span class="number">128</span></span><br><span class="line"><span class="comment"># 如出现“out of memory”的报错信息，可减小batch_size或resize</span></span><br><span class="line">train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size, resize=<span class="number">96</span>)</span><br><span class="line"></span><br><span class="line">lr, num_epochs = <span class="number">0.001</span>, <span class="number">5</span></span><br><span class="line">optimizer = torch.optim.Adam(net.parameters(), lr=lr)</span><br><span class="line">d2l.train_ch5(net, train_iter, test_iter, batch_size, optimizer, device, num_epochs)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/image-20250727064323133.png" style="zoom:67%;"></p>
+<p>(可以看出，相比于之前的网络，其准确率也接近0.9，但是其速度平均只需要30s)</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
+              <a href="/tags/%E7%AC%AC5%E8%8A%82/" rel="tag"># 第5节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/07/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-8/" rel="prev" title="动手学深度学习 5.8 网络中的网络（NiN）">
+                  <i class="fa fa-angle-left"></i> 动手学深度学习 5.8 网络中的网络（NiN）
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
