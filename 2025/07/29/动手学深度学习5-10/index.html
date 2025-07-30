@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动手学深度学习 5.10 批量归一化">
+<meta property="og:url" content="http://example.com/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/image-20250729160526941.png">
+<meta property="og:image" content="http://example.com/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/image-20250729212201317.png">
+<meta property="og:image" content="http://example.com/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/image-20250729213116201.png">
+<meta property="og:image" content="http://example.com/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/image-20250729213332131.png">
+<meta property="og:image" content="http://example.com/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/image-20250729214250581.png">
+<meta property="og:image" content="http://example.com/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/image-20250730113605708.png">
+<meta property="article:published_time" content="2025-07-29T01:10:19.000Z">
+<meta property="article:modified_time" content="2025-07-30T03:36:30.463Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="动手学习深度学习">
+<meta property="article:tag" content="第5节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/image-20250729160526941.png">
+
+
+<link rel="canonical" href="http://example.com/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/","path":"2025/07/29/动手学深度学习5-10/","title":"动手学深度学习 5.10 批量归一化"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>动手学深度学习 5.10 批量归一化 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96%E5%B1%82"><span class="nav-number">2.</span> <span class="nav-text">1. 批量归一化层</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E5%85%A8%E8%BF%9E%E6%8E%A5%E5%B1%82%E5%81%9A%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 对全连接层做批量归一化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E5%8D%B7%E7%A7%AF%E5%B1%82%E5%81%9A%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 对卷积层做批量归一化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E6%B5%8B%E6%97%B6%E7%9A%84%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 预测时的批量归一化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">2. 从零开始实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96%E5%B1%82%E7%9A%84lenet"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 使用批量归一化层的LeNet</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E6%B4%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">3. 简洁实现</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="动手学深度学习 5.10 批量归一化 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动手学深度学习 5.10 批量归一化
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-07-29 09:10:19" itemprop="dateCreated datePublished" datetime="2025-07-29T09:10:19+08:00">2025-07-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-07-30 11:36:30" itemprop="dateModified" datetime="2025-07-30T11:36:30+08:00">2025-07-30</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<p>本节我们介绍批量归一化（batch
+normalization）层，它能让较深的神经网络的训练变得更加容易。</p>
+<p>在3.16节（实战Kaggle比赛：预测房价）里，我们对输入数据做了标准化处理：处理后的任意一个特征在数据集中所有样本上的<code>均值为0</code>、<code>标准差为1</code>。标准化处理输入数据使各个特征的分布相近：这往往更容易训练出有效的模型。</p>
+<p>通常来说，数据标准化预处理对于浅层模型就足够有效了。随着模型训练的进行，当每层中参数更新时，靠近输出层的输出较难出现剧烈变化。但<strong>对深层神经网络来说，即使输入数据已做标准化，训练中模型参数的更新依然很容易造成靠近输出层输出的剧烈变化</strong>。这种计算数值的不稳定性通常令我们难以训练出有效的深度模型。</p>
+<p>批量归一化的提出正是为了应对深度模型训练的挑战。在模型训练时，批量归一化利用小批量上的均值和标准差，不断调整神经网络中间输出，从而使整个神经网络在各层的中间输出的数值更稳定。</p>
+<h2 id="批量归一化层">1. 批量归一化层</h2>
+<p>对<code>全连接层</code>和<code>卷积层</code>做批量归一化的方法稍有不同。下面我们将分别介绍这两种情况下的批量归一化。</p>
+<h3 id="对全连接层做批量归一化">1.1 对全连接层做批量归一化</h3>
+<p>我们先考虑如何对全连接层做批量归一化。</p>
+<p>通常，我们将批量归一化层置于全连接层中的仿射变换和激活函数之间。（人话来说就是放在激活函数层前，或者是计算网络层后（如卷积层或者全连接层后））</p>
+<p>设全连接层的输入为u，权重参数和偏差参数分别为W和b，激活函数为ϕ。设批量归一化的运算符为BN。那么，使用批量归一化的全连接层的输出为
+<span class="math display">\[
+ϕ(BN(x))
+\]</span> 其中批量归一化输入x由仿射变换 <span class="math display">\[
+x=Wu+b
+\]</span>
+得到。考虑一个由m个样本组成的小批量，仿射变换的输出为一个新的小批量<span class="math inline">\(B={x^{(1)},…,x^{(m)}}\)</span>。它们正是批量归一化层的输入。对于小批量B中任意样本<span class="math inline">\(x^{(i)}\)</span>，批量归一化层的输出同样是d维向量
+<span class="math display">\[
+y^{(i)}=BN(x^{(i)})
+\]</span> 以下是BN具体的计算内容。</p>
+<p>首先，对小批量B求<code>均值</code>和<code>方差</code>： <span class="math display">\[
+\begin{align}
+μ_B = \frac{1}{m} \sum ^{m}_{i=1} {x^{(i)}}\\
+σ_B^2 = \frac{1}{m} \sum ^{m}_{i=1} {(x^{(i)}-μ_B)}^2
+\end{align}
+\]</span>
+其中的平方计算是按元素求平方。接下来，使用按元素开方和按元素除法对<span class="math inline">\(x^{(i)}\)</span>标准化： <span class="math display">\[
+\hat{x}^{(i)} ←\frac{x^{(i)}-μ_B}{\sqrt {σ_B^2+ϵ}}
+\]</span> 这里ϵ&gt;0是一个很小的常数，保证分母大于0。</p>
+<p>在上面标准化的基础上，批量归一化层引入了两个可以学习的模型参数，<code>拉伸（scale）参数 γ</code>
+和<code>偏移（shift）参数 β</code> 。</p>
+<p>这<strong>两个参数</strong>和<span class="math inline">\(x^{(i)}\)</span>形状相同，皆为<strong>d维向量</strong>。它们与<span class="math inline">\(x^{(i)}\)</span>分别做按元素乘法（符号⊙）和加法计算：</p>
+<p><span class="math display">\[
+y^{(i)} = γ⊙\hat{x}^{(i)}+β
+\]</span> 至此，我们得到了<span class="math inline">\(x^{(i)}\)</span>的批量归一化的输出<span class="math inline">\(y^{(i)}\)</span> 。
+值得注意的是，可学习的拉伸和偏移参数保留了不对<span class="math inline">\(x^{(i)}\)</span>做批量归一化的可能。此时只需学出 $
+γ = $ 和 $β = μ_B $ 。</p>
+<p>即将该两参数带入公式 <span class="math inline">\(\hat{x}^{(i)}
+←\frac{x^{(i)}-μ_B}{\sqrt {σ_B^2+ϵ}}\)</span>
+中刚好消除归一化计算添加的两个内容</p>
+<h3 id="对卷积层做批量归一化">1.2 对卷积层做批量归一化</h3>
+<p>对卷积层来说，批量归一化发生在卷积计算之后、应用激活函数之前。</p>
+<p>如果卷积计算输出<strong>多个通道</strong>，我们需要对这些通道的输出<strong>分别做批量归一化</strong>，且每个通道都<strong>拥有独立的拉伸和偏移参数</strong>，并均为<strong>标量</strong>。</p>
+<p>设小批量中有m个样本。在<strong>单个通道上</strong>，假设卷积计算输出的高和宽分别为p和q。我们需要对该通道中<code>m×p×q</code>个元素同时做批量归一化。对这些元素做标准化计算时，我们使用相同的均值和方差，即<strong>该通道中<code>m×p×q</code>个元素的均值和方差</strong>。</p>
+<h3 id="预测时的批量归一化">1.3 预测时的批量归一化</h3>
+<p>使用批量归一化训练时，我们<strong>可以将批量大小设得大一点</strong>，从而使批量内样本的均值和方差的计算都较为准确。</p>
+<p>将训练好的模型用于预测时，我们希望模型对于任意输入都有确定的输出。因此，单个样本的输出不应取决于批量归一化所需要的随机小批量中的均值和方差。一种常用的方法是通过移动平均估算整个训练数据集的样本均值和方差，并在预测时使用它们得到确定的输出。</p>
+<blockquote>
+<p>🔧 举个例子：</p>
+<p>假设我们训练图像分类模型时使用 BatchNorm：</p>
+<p>训练时：</p>
+<p>​ 输入一个 batch（比如32张图片），BatchNorm 会用这 32
+张图的均值和方差做归一化。</p>
+<p>​ 同时，它会更新一个 “移动平均” 的均值和方差（全局估计）。</p>
+<p>预测时：</p>
+<p>​ 输入一张图。不能用这一张图的均值和方差归一化（不准且不稳定）。</p>
+<p>​ 要使用训练过程中积累下来的“全局均值和方差”。</p>
+</blockquote>
+<blockquote>
+<p>回到实际中，归一化层 BatchNorm 中有两类“内容”</p>
+<ol type="1">
+<li>可学习的缩放系数 γ（gamma）和偏移量 β（beta）</li>
+<li>非学习型的“均值和方差”</li>
+</ol>
+<p>训练时： 每个 mini-batch 动态计算 μ 和 σ（所以叫 Batch
+Normalization）。</p>
+<p>预测时： 没有
+mini-batch（或batch太小不准），所以不能再用它们，只能用训练阶段保存下来的“全局均值和方差”。</p>
+</blockquote>
+<p>可见，和丢弃层一样，批量归一化层在训练模式和预测模式下的计算结果也是不一样的。</p>
+<h2 id="从零开始实现">2. 从零开始实现</h2>
+<p>下面我们自己实现批量归一化层。</p>
+<p><img src="/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/image-20250729160526941.png"></p>
+<p>代码整体易懂，就只说下两个框的意思。</p>
+<p>第一个比较好懂：<code>assert len(X.shape) in (2, 4)</code> 指的是
+判断X是否是2维或者4维。如果不是这两种情况则中断程序。</p>
+<p>第二个比较复杂点。</p>
+<blockquote>
+<p>首先举个例子</p>
+<p>假设X为 (3,4)大小的二维矩阵，执行X.mean(dim=0)，则意味着
+X仅修改第0维的数据，即大小修改为
+(1,N)，这里的N指的是原本维度所在的数字的大小，在这例子中是4，则变成(1,4)，由于并没有添加
+keepdim=True
+选项，所以除了N以外的其他维度会被消除，其结果大小变成(4)，如果加了
+keepdim=True，则大小会保持为(1,4)。</p>
+</blockquote>
+<p>回到代码中
+<code>X.mean(dim=0, keepdim=True).mean(dim=2, keepdim=True).mean(dim=3, keepdim=True)</code>
+X原本大小为 <code>(N,C,W,H)</code>,以上结果相当于
+<code>mean = X.mean(dim=(0, 2, 3), keepdim=True)</code> X大小变成
+<code>(1,C,1,1)</code>
+，即，X中所有样本上某一通道上所有值加起来进行求平均，</p>
+<p>接下来，我们自定义一个BatchNorm层。它保存参与求梯度和迭代的拉伸参数gamma和偏移参数beta，同时也维护移动平均得到的均值和方差，以便能够在模型预测时被使用。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">BatchNorm</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, num_features, num_dims</span>):</span><br><span class="line">        <span class="built_in">super</span>(BatchNorm, <span class="variable language_">self</span>).__init__()</span><br><span class="line">        <span class="keyword">if</span> num_dims == <span class="number">2</span>:</span><br><span class="line">            shape = (<span class="number">1</span>, num_features)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            shape = (<span class="number">1</span>, num_features, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 参与求梯度和迭代的拉伸和偏移参数，分别初始化成0和1</span></span><br><span class="line">        <span class="variable language_">self</span>.gamma = nn.Parameter(torch.ones(shape))</span><br><span class="line">        <span class="variable language_">self</span>.beta = nn.Parameter(torch.zeros(shape))</span><br><span class="line">        <span class="comment"># 不参与求梯度和迭代的变量，全在内存上初始化成0</span></span><br><span class="line">        <span class="variable language_">self</span>.moving_mean = torch.zeros(shape)</span><br><span class="line">        <span class="variable language_">self</span>.moving_var = torch.zeros(shape)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, X</span>):</span><br><span class="line">        <span class="comment"># 如果X不在内存上，将moving_mean和moving_var复制到X所在显存上</span></span><br><span class="line">        <span class="keyword">if</span> <span class="variable language_">self</span>.moving_mean.device != X.device:</span><br><span class="line">            <span class="variable language_">self</span>.moving_mean = <span class="variable language_">self</span>.moving_mean.to(X.device)</span><br><span class="line">            <span class="variable language_">self</span>.moving_var = <span class="variable language_">self</span>.moving_var.to(X.device)</span><br><span class="line">        <span class="comment"># 保存更新过的moving_mean和moving_var, Module实例的traning属性默认为true, 调用.eval()后设成false</span></span><br><span class="line">        Y, <span class="variable language_">self</span>.moving_mean, <span class="variable language_">self</span>.moving_var = batch_norm(<span class="variable language_">self</span>.training,</span><br><span class="line">            X, <span class="variable language_">self</span>.gamma, <span class="variable language_">self</span>.beta, <span class="variable language_">self</span>.moving_mean,</span><br><span class="line">            <span class="variable language_">self</span>.moving_var, eps=<span class="number">1e-5</span>, momentum=<span class="number">0.9</span>)</span><br><span class="line">        <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
+<h3 id="使用批量归一化层的lenet">2.1 使用批量归一化层的LeNet</h3>
+<p>下面我们修改5.5节（卷积神经网络（LeNet））介绍的LeNet模型，从而应用批量归一化层。我们在所有的卷积层或全连接层之后、激活层之前加入批量归一化层。</p>
+<p><img src="/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/image-20250729212201317.png"></p>
+<p>下面我们训练修改后的模型。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">batch_size = <span class="number">256</span></span><br><span class="line">train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size=batch_size)</span><br><span class="line"></span><br><span class="line">lr, num_epochs = <span class="number">0.001</span>, <span class="number">5</span></span><br><span class="line">optimizer = torch.optim.Adam(net.parameters(), lr=lr)</span><br><span class="line">d2l.train_ch5(net, train_iter, test_iter, batch_size, optimizer, device, num_epochs)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/image-20250729213116201.png" style="zoom:67%;"></p>
+<p>最后我们查看第一个批量归一化层学习到的拉伸参数gamma和偏移参数beta。</p>
+<p>我们知道卷积层的拉伸跟偏移参数数量只和通道数有关（二维就只和fetures数量有关）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(net[<span class="number">1</span>].gamma.view((-<span class="number">1</span>,)))</span><br><span class="line"><span class="built_in">print</span>(net[<span class="number">1</span>].beta.view((-<span class="number">1</span>,)))</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/image-20250729213332131.png" style="zoom: 67%;"></p>
+<h2 id="简洁实现">3. 简洁实现</h2>
+<p>与我们刚刚自己定义的BatchNorm类相比，Pytorch中nn模块定义的<code>BatchNorm1d</code>和<code>BatchNorm2d</code>类使用起来更加简单，二者分别用于全连接层和卷积层，都需要指定输入的num_features参数值。下面我们用PyTorch实现使用批量归一化的LeNet。</p>
+<p><img src="/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/image-20250729214250581.png"></p>
+<p>使用同样的超参数进行训练。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">batch_size = <span class="number">256</span></span><br><span class="line">train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size=batch_size)</span><br><span class="line"></span><br><span class="line">lr, num_epochs = <span class="number">0.001</span>, <span class="number">5</span></span><br><span class="line">optimizer = torch.optim.Adam(net.parameters(), lr=lr)</span><br><span class="line">d2l.train_ch5(net, train_iter, test_iter, batch_size, optimizer, device, num_epochs)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/07/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-10/image-20250730113605708.png" style="zoom:80%;"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
+              <a href="/tags/%E7%AC%AC5%E8%8A%82/" rel="tag"># 第5节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/07/27/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-9/" rel="prev" title="动手学深度学习 5.9 含并行连结的网络（GoogLeNet）">
+                  <i class="fa fa-angle-left"></i> 动手学深度学习 5.9 含并行连结的网络（GoogLeNet）
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
