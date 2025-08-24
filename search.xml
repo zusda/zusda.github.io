@@ -2342,9 +2342,9 @@ layer）</strong>。前者定义了输入和输出是如何连结的，后者则
 <p>稠密块由多个conv_block组成，每块使用相同的输出通道数。但在前向计算时，我们将每块的输入和输出在通道维上连结。</p>
 <p><img src="/2025/08/24/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-12/image-20250824184750979.png"></p>
 <p>简单理解模型组成</p>
-<p>第一层 net( input , ouput1)</p>
-<p>第二层 net( input + output1 , output2 )</p>
-<p>第三层 net( input + 2*output2 , output3 )</p>
+<p>第一层 net( input , ouput)</p>
+<p>第二层 net( input + output , 2*output )</p>
+<p>第三层 net( input + 2*output , 3*output )</p>
 <p>每层的作为输入的上一层输出都会叠加一次output。前向计算同理。</p>
 <p>在下面的例子中，我们定义一个有<code>2</code>个<code>输出通道数为10</code>的卷积块。使用<code>通道数为3的输入</code>时，我们会得到通道数为<code>3+2×10 = 23</code>的输出。卷积块的通道数控制了输出通道数相对于输入通道数的增长，因此也被称为增长率（growth
 rate）。</p>
