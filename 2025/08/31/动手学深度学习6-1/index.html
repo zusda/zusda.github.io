@@ -34,41 +34,30 @@
 
     <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="动手学深度学习 5.4 池化层">
-<meta property="og:url" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/index.html">
+<meta property="og:title" content="动手学深度学习 6.1 语言模型">
+<meta property="og:url" content="http://example.com/2025/08/31/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-1/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623112632220.png">
-<meta property="og:image" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623112705786.png">
-<meta property="og:image" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623120442560.png">
-<meta property="og:image" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623120649121.png">
-<meta property="og:image" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623121525470.png">
-<meta property="og:image" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623121701427.png">
-<meta property="og:image" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623160446133.png">
-<meta property="og:image" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623122738687.png">
-<meta property="og:image" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623122956880.png">
-<meta property="og:image" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623155026386.png">
-<meta property="og:image" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623155458878.png">
-<meta property="og:image" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623160101049.png">
-<meta property="article:published_time" content="2025-06-23T03:24:51.000Z">
-<meta property="article:modified_time" content="2025-06-23T08:06:27.743Z">
+<meta property="og:image" content="http://example.com/2025/08/31/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-1/z.png">
+<meta property="article:published_time" content="2025-08-31T09:10:29.000Z">
+<meta property="article:modified_time" content="2025-09-01T14:08:25.469Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ai">
 <meta property="article:tag" content="动手学习深度学习">
-<meta property="article:tag" content="第5节">
+<meta property="article:tag" content="第6节">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623112632220.png">
+<meta name="twitter:image" content="http://example.com/2025/08/31/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-1/z.png">
 
 
-<link rel="canonical" href="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/">
+<link rel="canonical" href="http://example.com/2025/08/31/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-1/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/","path":"2025/06/23/动手学深度学习5-4/","title":"动手学深度学习 5.4 池化层"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/08/31/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-1/","path":"2025/08/31/动手学深度学习6-1/","title":"动手学深度学习 6.1 语言模型"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>动手学深度学习 5.4 池化层 | Hexo</title>
+<title>动手学深度学习 6.1 语言模型 | Hexo</title>
   
 
 
@@ -171,7 +160,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E7%BB%B4%E6%9C%80%E5%A4%A7%E6%B1%A0%E5%8C%96%E5%B1%82%E5%92%8C%E5%B9%B3%E5%9D%87%E6%B1%A0%E5%8C%96%E5%B1%82"><span class="nav-number">2.</span> <span class="nav-text">1. 二维最大池化层和平均池化层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A1%AB%E5%85%85%E5%92%8C%E6%AD%A5%E5%B9%85"><span class="nav-number">3.</span> <span class="nav-text">2. 填充和步幅</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E9%80%9A%E9%81%93"><span class="nav-number">4.</span> <span class="nav-text">3. 多通道</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E7%9A%84%E8%AE%A1%E7%AE%97"><span class="nav-number">2.</span> <span class="nav-text">1. 语言模型的计算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#n%E5%85%83%E8%AF%AD%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">2. n元语法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BE%E4%BE%8B%E8%AF%B4%E6%98%8E%E4%B8%AA%E4%BA%BA%E6%80%9D%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">3. 举例说明（个人思考）</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -222,7 +211,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/08/31/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -235,12 +224,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="动手学深度学习 5.4 池化层 | Hexo">
+      <meta itemprop="name" content="动手学深度学习 6.1 语言模型 | Hexo">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          动手学深度学习 5.4 池化层
+          动手学深度学习 6.1 语言模型
         </h1>
 
         <div class="post-meta-container">
@@ -250,9 +239,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2025-06-23 11:24:51 / 修改时间：16:06:27" itemprop="dateCreated datePublished" datetime="2025-06-23T11:24:51+08:00">2025-06-23</time>
+      <time title="创建时间：2025-08-31 17:10:29" itemprop="dateCreated datePublished" datetime="2025-08-31T17:10:29+08:00">2025-08-31</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-09-01 22:08:25" itemprop="dateModified" datetime="2025-09-01T22:08:25+08:00">2025-09-01</time>
     </span>
 
   
@@ -270,46 +265,89 @@
 <p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
 <p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
 <p>（由于有时候公式太多，可能会直接贴图片）</p>
-<p>池化（Pooling）就是在降低特征图尺寸的同时，保留重要的特征（比如纹理、边缘、轮廓、最大响应）并提升模型的鲁棒性（不敏感于位置、旋转、缩放等）</p>
-<p><img src="/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623112632220.png" style="zoom: 50%;"></p>
-<p><img src="/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623112705786.png" style="zoom:50%;"></p>
-<p><img src="/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623120442560.png" style="zoom:50%;"></p>
-<p>池化层只能容忍
-小幅度的平移，对大幅度的偏移是无能为力的。所以并不用在意这个东西，<strong>池化层主要就是减少后续需要处理的参数，防止参数爆炸，从而加快训练，其他都是额外的</strong>。</p>
-<h2 id="二维最大池化层和平均池化层">1. 二维最大池化层和平均池化层</h2>
-<p>同卷积层一样，池化层每次对输入数据的一个固定形状窗口（又称池化窗口）中的元素计算输出。</p>
-<p>不同于卷积层里计算输入和核的互相关性，池化层直接计算池化窗口内元素的最大值或者平均值。</p>
-<p><img src="/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623120649121.png" style="zoom: 50%;"></p>
-<p>二维平均池化的工作原理与二维最大池化类似，但将最大运算符替换成平均运算符。</p>
-<p>下面把池化层的前向计算实现在pool2d函数里。它跟5.1节（二维卷积层）里corr2d函数非常类似，唯一的区别在计算输出Y上。</p>
-<p><img src="/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623121525470.png" style="zoom: 67%;"></p>
-<p>我们可以构造图5.6中的输入数组X来验证二维最大池化层的输出。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">X = torch.tensor([[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>], [<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>], [<span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]])</span><br><span class="line">res = pool2d(X, (<span class="number">2</span>, <span class="number">2</span>))</span><br><span class="line"><span class="built_in">print</span>(res)</span><br></pre></td></tr></table></figure>
-<p><img src="/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623121701427.png" style="zoom: 67%;"></p>
-<h2 id="填充和步幅">2. 填充和步幅</h2>
-<p>卷积层一样，池化层也可以在输入的高和宽两侧的填充并调整窗口的移动步幅来改变输出形状。池化层填充和步幅与卷积层填充和步幅的工作机制一样。</p>
-<p>我们将通过nn模块里的二维最大池化层MaxPool2d来演示池化层填充和步幅的工作机制。我们先构造一个形状为<code>(1, 1, 4, 4)</code>的输入数据，前两个维度分别是<strong>批量（batch）</strong>和<strong>通道（chanel）</strong>（池化函数的输入格式）。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">X = torch.arange(<span class="number">16</span>, dtype=torch.<span class="built_in">float</span>).view((<span class="number">1</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">4</span>))</span><br><span class="line"><span class="built_in">print</span>(X)</span><br></pre></td></tr></table></figure>
-<p><img src="/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623160446133.png" style="zoom:67%;"></p>
-<p>默认情况下，MaxPool2d实例里步幅和池化窗口形状相同。下面使用形状为<code>(3, 3)</code>的池化窗口，默认获得形状为<code>(3, 3)</code>的步幅。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pool2d = nn.MaxPool2d(<span class="number">3</span>)</span><br><span class="line">res = pool2d(X)</span><br><span class="line"><span class="built_in">print</span>(res)</span><br></pre></td></tr></table></figure>
-<p><img src="/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623122738687.png" style="zoom:67%;"></p>
-<p>我们可以手动指定步幅和填充。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pool2d = nn.MaxPool2d(<span class="number">3</span>, padding=<span class="number">1</span>, stride=<span class="number">2</span>)</span><br><span class="line">res = pool2d(X)</span><br><span class="line"><span class="built_in">print</span>(res)</span><br></pre></td></tr></table></figure>
-<p><img src="/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623122956880.png" style="zoom:67%;"></p>
-<p>当然，我们也可以指定非正方形的池化窗口，并分别指定高和宽上的填充和步幅。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pool2d = nn.MaxPool2d((<span class="number">2</span>, <span class="number">4</span>), padding=(<span class="number">1</span>, <span class="number">2</span>), stride=(<span class="number">2</span>, <span class="number">3</span>))</span><br><span class="line">pool2d(X)</span><br><span class="line">res = pool2d(X)</span><br><span class="line"><span class="built_in">print</span>(res)</span><br></pre></td></tr></table></figure>
-<p><code>padding=(1, 2)</code> 指的是上下添加1行，左右添加2列</p>
-<p><img src="/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623155026386.png" style="zoom:67%;"></p>
-<h2 id="多通道">3. 多通道</h2>
-<p>在处理多通道输入数据时，池化层<strong>对每个输入通道分别池化</strong>，而<strong>不是像卷积层那样将各通道的输入按通道相加</strong>。</p>
-<p>下面将数组X和X+1在通道维上连结来构造通道数为2的输入。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">X = torch.cat((X, X + <span class="number">1</span>), dim=<span class="number">1</span>)</span><br><span class="line"><span class="built_in">print</span>(X.shape)</span><br><span class="line"><span class="built_in">print</span>(X)</span><br></pre></td></tr></table></figure>
-<p><img src="/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623155458878.png" style="zoom: 67%;"></p>
-<p>运行下面的池化代码后，我们发现输出通道数仍然是2。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pool2d = nn.MaxPool2d(<span class="number">3</span>, padding=<span class="number">1</span>, stride=<span class="number">2</span>)</span><br><span class="line">r = pool2d(X)</span><br><span class="line"><span class="built_in">print</span>(r)</span><br></pre></td></tr></table></figure>
-<p><img src="/2025/06/23/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-4/image-20250623160101049.png" style="zoom:67%;"></p>
-<p><strong>池化层的输出通道数跟输入通道数相同</strong>。</p>
+<hr>
+<p>语言模型（language
+model）是自然语言处理的重要技术。自然语言处理中最常见的数据是<strong>文本数据</strong>。</p>
+<p>我们可以把一段自然语言文本看作一段离散的时间序列。</p>
+<p>假设一段<strong>长度为T</strong>的<strong>文本中的词</strong>依次为<span class="math inline">\(w_1,w_2,…,w_T\)</span>，那么在离散的时间序列中，<span class="math inline">\(w_t\)</span>（1≤t≤T）可看作在时间步（time
+step）t的输出或标签。 <span class="math display">\[
+P(w_1,w_2,…,w_T)
+\]</span></p>
+<h2 id="语言模型的计算">1. 语言模型的计算</h2>
+<p>既然语言模型很有用，那该如何计算它呢？假设序列 <span class="math inline">\(w_1,w_2,…,w_T\)</span>
+中的每个词是依次生成的，我们有 <span class="math display">\[
+P(w_1,w_2,…,w_T) = ∏_{t=1}^{T}{P(w_t|w_1,w_2,…,w_{t-1})}
+\]</span> 例如，一段含有4个词的文本序列的概率，将以上公式展开 <span class="math display">\[
+P(w_1,w_2,…,w_T) = P(w_1)P(w_2|w_1)P(w_3|w_1,w_2)P(w_4|w_1,w_2,w_3)
+\]</span>
+为了计算语言模型，我们需要计算词的概率，以及一个词在给定前几个词的情况下的条件概率，即语言模型参数。</p>
+<h2 id="n元语法">2. n元语法</h2>
+<p>当序列长度增加时，计算和存储多个词共同出现的概率的复杂度会呈指数级增加。n元语法通过马尔可夫假设（虽然并不一定成立）简化了语言模型的计算。</p>
+<p>这里的<strong>马尔可夫假设</strong>是指<strong>一个词的出现只与前面n个词相关</strong>，即<code>n阶马尔可夫链（Markov chain of order n）</code>。</p>
+<p>如果n=1，那么有 <span class="math inline">\(P(w_3∣w_1,w_2) =
+P(w_3∣w_2)\)</span> 。如果基于n−1阶马尔可夫链，我们可以将语言模型改写为
+<span class="math display">\[
+P(w_1,w_2,…,w_T) ≈ ∏_{t=1}^{T}{P(w_t|w_{t-(n-1)},…,w_{t-1})}
+\]</span>
+以上也叫<code>n元语法（n-grams）</code>。它是基于n−1阶马尔可夫链的概率语言模型。当n分别为1、2和3时，我们将其分别称作一元语法（unigram）、二元语法（bigram）和三元语法（trigram）。</p>
+<p>例如，长度为4的序列 <span class="math inline">\(w_1,w_2,w_3,w_4\)</span>
+在一元语法、二元语法和三元语法中的概率分别为 <span class="math display">\[
+\begin{align}
+P(w_1,w_2,w_3,w_4) &amp;= P(w_1)P(w_2)P(w_3)P(w_4) \\
+P(w_1,w_2,w_3,w_4) &amp;= P(w_1)P(w_2|w_1)P(w_3|w_2)P(w_4|w_3) \\
+P(w_1,w_2,w_3,w_4) &amp;= P(w_1)P(w_2|w_1)P(w_3|w_1,w_2)P(w_4|w_2,w_3)
+\end{align}
+\]</span>
+当n较小时，n元语法往往并不准确。例如，在一元语法中，由三个词组成的句子“你走先”和“你先走”的概率是一样的。然而，当n较大时，n元语法需要计算并存储大量的词频和多词相邻频率。</p>
+<h2 id="举例说明个人思考">3. 举例说明（个人思考）</h2>
+<p>假设存在一段对话。（A为输入，可以认为是人类问话。B为输出，可以认为是电脑回答。）</p>
+<blockquote>
+<p>A: 你好吗</p>
+<p>B: 我很好</p>
+</blockquote>
+<p>此时存在字符串"你好吗\end"</p>
+<p>我们现在要计算字符串 <strong>"你好吗\end"</strong> 出现的概率
+<code>P("你好吗\end我很好\end")</code></p>
+<p>首先输入是 <code>你好吗\end</code> 因此
+<code>P("你好吗\end")=1</code></p>
+<p>那么原来的式子变形为（latex中斜杠和双引号） <span class="math display">\[
+\begin{align*}
+&amp;P(你好吗\backslash end我很好\backslash end) \\
+&amp;=   P(我很好\backslash end | 你好吗\backslash end
+)*P(你好吗\backslash end)   \\
+&amp;= P(我很好\backslash end | 你好吗\backslash end  )
+\end{align*}
+\]</span> 接下来我们分析网络输出<code>"我很好\end"</code>的概率。 <span class="math display">\[
+\begin{align*}
+&amp;P(我很好\backslash end | 你好吗\backslash end  ) \\
+&amp;= P(我 | 你好吗\backslash end )\\
+&amp;*P(很 | 你好吗\backslash end我 )\\
+&amp;*P(好 | 你好吗\backslash end我很 )\\
+&amp;*P(\backslash end | 你好吗\backslash end我很好 )\\
+\end{align*}
+\]</span> 首先在 <code>"你好吗"</code> 的条件下得到 <code>"我"</code>
+的概率 <code>P("我" | "你好吗\end" )=0.9</code>
+（这里的概率数值都是随便写的）。当然也可能出现其他词，比如
+<code>"你"</code> ，但在训练好的模型中其概率很低，大概为
+<code>P("你" | "你好吗\end" )=0.01</code></p>
+<p>接着继续在 <code>"你好吗\end我"</code> 的条件下得到 <code>"很"</code>
+的概率为 <code>P("很" | "你好吗\end我" )=0.6</code></p>
+<p>同理继续
+<code>P("好" | "你好吗\end我很" ) = 0.8</code>，<code>P("好" | "你好吗\end我很" )=0.7</code>
+，<code>P("\end" | "你好吗\end我很好" )=0.9</code></p>
+<p>那么我们就算出了网络模型在输入 <code>"你好吗\end"</code> 下输出
+<code>"我很好\end"</code> 的概率为 <span class="math display">\[
+P(我很好\backslash end|你好吗\backslash end)
+=0.9*0.6*0.8*0.7*0.9=0.27216
+\]</span></p>
+<hr>
+<p>拓展到n元语法。举例n=2， 此时我们认为
+<code>P("我" | "吗\end") ≈ P("我" | "你好吗\end")</code>
+，即下一个词的概率，仅和前n个词有关，不足的时候可以用空格代替。</p>
+<p>当然我们也看到从<code>"吗\end"</code> 得到 <code>"我"</code>
+是一件匪夷所思的事情，因此n如果太小的话是会出问题的。直接上来理解，n越大说明获取的信息越多，因此输出能表现的更加理性。</p>
+<p>最后贴上claude一段回答。</p>
+<p><img src="/2025/08/31/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-1/z.png"></p>
 
     </div>
 
@@ -321,21 +359,18 @@
           <div class="post-tags">
               <a href="/tags/ai/" rel="tag"># ai</a>
               <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
-              <a href="/tags/%E7%AC%AC5%E8%8A%82/" rel="tag"># 第5节</a>
+              <a href="/tags/%E7%AC%AC6%E8%8A%82/" rel="tag"># 第6节</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2025/06/16/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-3/" rel="prev" title="动手学深度学习 5.3 多输入通道和多输出通道">
-                  <i class="fa fa-angle-left"></i> 动手学深度学习 5.3 多输入通道和多输出通道
+                <a href="/2025/08/24/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-12/" rel="prev" title="动手学深度学习 5.12 稠密连接网络（DenseNet）">
+                  <i class="fa fa-angle-left"></i> 动手学深度学习 5.12 稠密连接网络（DenseNet）
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2025/06/28/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A05-5/" rel="next" title="动手学深度学习 5.5 卷积神经网络（LeNet）">
-                  动手学深度学习 5.5 卷积神经网络（LeNet） <i class="fa fa-angle-right"></i>
-                </a>
             </div>
           </div>
     </footer>
