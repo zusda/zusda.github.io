@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动手学深度学习 6.3 语言模型数据集（周杰伦专辑歌词）">
+<meta property="og:url" content="http://example.com/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/image-20250910183735372.png">
+<meta property="og:image" content="http://example.com/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/image-20250910184236562.png">
+<meta property="og:image" content="http://example.com/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/image-20250910191239703.png">
+<meta property="og:image" content="http://example.com/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/image-20250910191601728.png">
+<meta property="og:image" content="http://example.com/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/image-20250910195336820.png">
+<meta property="article:published_time" content="2025-09-10T10:23:13.000Z">
+<meta property="article:modified_time" content="2025-09-10T11:56:20.193Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="动手学习深度学习">
+<meta property="article:tag" content="第6节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/image-20250910183735372.png">
+
+
+<link rel="canonical" href="http://example.com/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/","path":"2025/09/10/动手学深度学习6-3/","title":"动手学深度学习 6.3 语言模型数据集（周杰伦专辑歌词）"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>动手学深度学习 6.3 语言模型数据集（周杰伦专辑歌词） | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">2.</span> <span class="nav-text">1. 读取数据集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E5%AD%97%E7%AC%A6%E7%B4%A2%E5%BC%95"><span class="nav-number">3.</span> <span class="nav-text">2. 建立字符索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%B6%E5%BA%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E9%87%87%E6%A0%B7"><span class="nav-number">4.</span> <span class="nav-text">3. 时序数据的采样</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E9%87%87%E6%A0%B7"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 随机采样</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E9%82%BB%E9%87%87%E6%A0%B7"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 相邻采样</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">40</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="动手学深度学习 6.3 语言模型数据集（周杰伦专辑歌词） | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动手学深度学习 6.3 语言模型数据集（周杰伦专辑歌词）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-09-10 18:23:13 / 修改时间：19:56:20" itemprop="dateCreated datePublished" datetime="2025-09-10T18:23:13+08:00">2025-09-10</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<hr>
+<p>本节将介绍如何预处理一个语言模型数据集，并将其转换成字符级循环神经网络所需要的输入格式。</p>
+<p>为此，我们收集了周杰伦从第一张专辑《Jay》到第十张专辑《跨时代》中的歌词，并在后面几节里应用循环神经网络来训练一个语言模型。当模型训练好后，我们就可以用这个模型来创作歌词。</p>
+<h2 id="读取数据集">1. 读取数据集</h2>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">import</span> zipfile</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> zipfile.ZipFile(<span class="string">&#x27;jaychou_lyrics.txt.zip&#x27;</span>) <span class="keyword">as</span> zin:</span><br><span class="line">    <span class="keyword">with</span> zin.<span class="built_in">open</span>(<span class="string">&#x27;jaychou_lyrics.txt&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        corpus_chars = f.read().decode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(corpus_chars[:<span class="number">40</span>])</span><br></pre></td></tr></table></figure>
+<p>这个数据集有6万多个字符。为了打印方便，我们把换行符替换成空格，然后仅使用前1万个字符来训练模型。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">corpus_chars = corpus_chars.replace(<span class="string">&#x27;\n&#x27;</span>, <span class="string">&#x27; &#x27;</span>).replace(<span class="string">&#x27;\r&#x27;</span>, <span class="string">&#x27; &#x27;</span>)</span><br><span class="line">corpus_chars = corpus_chars[<span class="number">0</span>:<span class="number">10000</span>]</span><br></pre></td></tr></table></figure>
+<h2 id="建立字符索引">2. 建立字符索引</h2>
+<p>我们将每个字符映射成一个从0开始的连续整数，又称索引，来方便之后的数据处理。为了得到索引，我们将数据集里所有不同字符取出来，然后将其逐一映射到索引来构造词典。接着，打印vocab_size，即词典中不同字符的个数，又称词典大小。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">idx_to_char = <span class="built_in">list</span>(<span class="built_in">set</span>(corpus_chars))</span><br><span class="line"></span><br><span class="line"><span class="comment"># &#123;&#x27;char&#x27;: index&#125;</span></span><br><span class="line">char_to_idx = <span class="built_in">dict</span>([(char, i) <span class="keyword">for</span> i, char <span class="keyword">in</span> <span class="built_in">enumerate</span>(idx_to_char)]) </span><br><span class="line"></span><br><span class="line">vocab_size = <span class="built_in">len</span>(char_to_idx)</span><br><span class="line"><span class="built_in">print</span>(vocab_size) <span class="comment"># 1027</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/image-20250910183735372.png" style="zoom:67%;"></p>
+<p>之后，将训练数据集中每个字符转化为索引，并打印前20个字符及其对应的索引。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># corpus_indices是文本中每个字都转换成数字来表示的list</span></span><br><span class="line">corpus_indices = [char_to_idx[char] <span class="keyword">for</span> char <span class="keyword">in</span> corpus_chars]</span><br><span class="line">sample = corpus_indices[:<span class="number">20</span>]</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;chars:&#x27;</span>, <span class="string">&#x27;&#x27;</span>.join([idx_to_char[idx] <span class="keyword">for</span> idx <span class="keyword">in</span> sample]))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;indices:&#x27;</span>, sample)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/image-20250910184236562.png"></p>
+<h2 id="时序数据的采样">3. 时序数据的采样</h2>
+<p>在训练中我们需要每次随机读取小批量样本和标签。与之前章节的实验数据不同的是，时序数据的一个样本通常包含连续的字符。</p>
+<p>假设时间步数为5，样本序列为5个字符，即“想”“要”“有”“直”“升”。</p>
+<p>我们有两种方式对时序数据进行采样，分别是 <strong>随机采样</strong> 和
+<strong>相邻采样</strong> 。</p>
+<h3 id="随机采样">3.1 随机采样</h3>
+<p>下面的代码每次从数据里随机采样一个小批量。其中批量大小
+<code>batch_size</code>
+指每个小批量的<code>样本数</code>，<code>num_steps</code>
+为每个样本所包含的<code>时间步数</code>。</p>
+<p>在随机采样中，每个样本是<strong>原始序列上任意截取的一段序列</strong>。相邻的两个随机小批量在原始序列上的位置不一定相毗邻（也就是后续代码中的X中<strong>每个batch中的文本段内容都不是相连的，是随机的</strong>）。因此，我们无法用一个小批量最终时间步的隐藏状态来初始化下一个小批量的隐藏状态。</p>
+<p>在训练模型时，每次随机采样前都需要重新初始化隐藏状态。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># 本函数已保存在d2lzh_pytorch包中方便以后使用</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data_iter_random</span>(<span class="params">corpus_indices, batch_size, num_steps, device=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="comment"># 减1是因为 输出的索引Y 是 相应输入的索引X 加1，所以得总长度-1才是X分布范围（后面Y部分代码:Y = [_data(j * num_steps + 1)）</span></span><br><span class="line">    num_examples = (<span class="built_in">len</span>(corpus_indices) - <span class="number">1</span>) // num_steps   <span class="comment"># corpus_indices 按照num_steps来分成n段</span></span><br><span class="line">    epoch_size = num_examples // batch_size     <span class="comment"># n段 分到训练的每个batch_size后，一共有epoch_size个 batch_size训练集</span></span><br><span class="line">    example_indices = <span class="built_in">list</span>(<span class="built_in">range</span>(num_examples)) <span class="comment"># 为每个段分配索引,形成索引列表</span></span><br><span class="line">    random.shuffle(example_indices) <span class="comment"># 打乱索引</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 返回从pos开始的长为num_steps的序列</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_data</span>(<span class="params">pos</span>):</span><br><span class="line">        <span class="keyword">return</span> corpus_indices[pos: pos + num_steps]   <span class="comment"># 返回给出 索引 的对应段内容</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> device <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(epoch_size):</span><br><span class="line">        <span class="comment"># 每次读取batch_size个随机样本</span></span><br><span class="line">        i = i * batch_size</span><br><span class="line">        batch_indices = example_indices[i: i + batch_size]  <span class="comment"># 索引列表中取出 从i开始的batch_size大小的索引，即batch_size个样本开始索引</span></span><br><span class="line">        X = [_data(j * num_steps) <span class="keyword">for</span> j <span class="keyword">in</span> batch_indices] <span class="comment"># 生成按照n个batch_size个样本开始索引(每个为j)，每次请求corpus_indices[j,j+num_steps] 中的片段。</span></span><br><span class="line">        Y = [_data(j * num_steps + <span class="number">1</span>) <span class="keyword">for</span> j <span class="keyword">in</span> batch_indices] <span class="comment">#</span></span><br><span class="line">        <span class="keyword">yield</span> torch.tensor(X, dtype=torch.float32, device=device), torch.tensor(Y, dtype=torch.float32, device=device)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这里简单说明Y。</p>
+<p>语言模型训练的目标是根据输入序列预测下一个词（即“语言建模”）。</p>
+<p>假设 corpus_indices = [0, 1, 2, 3, 4, 5, 6]，num_steps = 3。</p>
+<p>那么对于 j = 1（也就是第 1 段，从0算起）：</p>
+<p>• start = j * num_steps = 3</p>
+<p>• X = _data(3) = corpus_indices[3:6] = [3, 4, 5]</p>
+<p>• Y = _data(4) = corpus_indices[4:7] = [4, 5, 6]</p>
+<p><img src="/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/image-20250910191239703.png" style="zoom:67%;"></p>
+<p>因此代码中一开始需要减1。</p>
+</blockquote>
+<p>让我们输入一个从0到29的连续整数的人工序列。</p>
+<p>设批量大小和时间步数分别为2和6。打印随机采样每次读取的小批量样本的输入X和标签Y。可见，相邻的两个随机小批量在原始序列上的位置不一定相毗邻。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">my_seq = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="number">30</span>))</span><br><span class="line"><span class="keyword">for</span> X, Y <span class="keyword">in</span> data_iter_random(my_seq, batch_size=<span class="number">2</span>, num_steps=<span class="number">6</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;X: &#x27;</span>, X, <span class="string">&#x27;\nY:&#x27;</span>, Y, <span class="string">&#x27;\n&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>下图中可以看到每轮的X/Y中存在2(batch_size)个数据</p>
+<p><img src="/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/image-20250910191601728.png" style="zoom: 67%;"></p>
+<h3 id="相邻采样">3.2 相邻采样</h3>
+<p>除对原始序列做随机采样之外，我们还可以令相邻的两个随机小批量在原始序列上的位置相毗邻。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">data_iter_consecutive</span>(<span class="params">corpus_indices, batch_size, num_steps, device=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="keyword">if</span> device <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    corpus_indices = torch.tensor(corpus_indices, dtype=torch.float32, device=device)</span><br><span class="line">    data_len = <span class="built_in">len</span>(corpus_indices)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 先按照batch_size分段，batch_len即为每个batch中的字符串长度</span></span><br><span class="line">    batch_len = data_len // batch_size</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将 总字符串corpus_indices 变形成(batch_size,batch_len)的矩阵</span></span><br><span class="line">    indices = corpus_indices[<span class="number">0</span>: batch_size*batch_len].view(batch_size, batch_len)</span><br><span class="line">	</span><br><span class="line">    <span class="comment"># batch_len-1后除以num_steps，求出每个batch中的字符串长度能分出多少个XY的配套数据。</span></span><br><span class="line">    <span class="comment"># 即每个batch中，存在epoch_size个XY数据。</span></span><br><span class="line">    epoch_size = (batch_len - <span class="number">1</span>) // num_steps</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(epoch_size):</span><br><span class="line">        i = i * num_steps</span><br><span class="line">        X = indices[:, i: i + num_steps]		<span class="comment"># batch_sieze个样本中的第i个num_step的数据</span></span><br><span class="line">        Y = indices[:, i + <span class="number">1</span>: i + num_steps + <span class="number">1</span>]</span><br><span class="line">        <span class="keyword">yield</span> X, Y</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/image-20250910195336820.png" style="zoom:67%;"></p>
+<p>总之我们知道不论随机还是相邻函数，其结果都是每次输出内含batch_size个字符串的X/Y矩阵（batch_size,num_steps）。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
+              <a href="/tags/%E7%AC%AC6%E8%8A%82/" rel="tag"># 第6节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/09/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-2/" rel="prev" title="动手学深度学习 6.2 循环神经网络">
+                  <i class="fa fa-angle-left"></i> 动手学深度学习 6.2 循环神经网络
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
