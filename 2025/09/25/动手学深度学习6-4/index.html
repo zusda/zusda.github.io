@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动手学深度学习 6.4 循环神经网络的从零开始实现">
+<meta property="og:url" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007094107677.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007095253257.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007101923278.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/1.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/2.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007185105234.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007190644840.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007193041947.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007193658722.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007195248717.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007195551600.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251008001726423.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/1-1759853918034-3.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251008002201034.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251008011920909.png">
+<meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251008012151529.png">
+<meta property="article:published_time" content="2025-09-25T11:53:41.000Z">
+<meta property="article:modified_time" content="2025-10-07T17:26:34.832Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="动手学习深度学习">
+<meta property="article:tag" content="第6节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007094107677.png">
+
+
+<link rel="canonical" href="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/","path":"2025/09/25/动手学深度学习6-4/","title":"动手学深度学习 6.4 循环神经网络的从零开始实现"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>动手学深度学习 6.4 循环神经网络的从零开始实现 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#one-hot%E5%90%91%E9%87%8F"><span class="nav-number">2.</span> <span class="nav-text">1.one-hot向量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%A8%A1%E5%9E%8B%E5%8F%82%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">2.初始化模型参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">3.定义模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0"><span class="nav-number">5.</span> <span class="nav-text">4.定义预测函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A3%81%E5%89%AA%E6%A2%AF%E5%BA%A6"><span class="nav-number">6.</span> <span class="nav-text">5.裁剪梯度</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%B0%E6%83%91%E5%BA%A6"><span class="nav-number">7.</span> <span class="nav-text">6.困惑度</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E5%87%BD%E6%95%B0"><span class="nav-number">8.</span> <span class="nav-text">7.定义模型训练函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B%E5%B9%B6%E5%88%9B%E4%BD%9C%E6%AD%8C%E8%AF%8D"><span class="nav-number">9.</span> <span class="nav-text">8.训练模型并创作歌词</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="动手学深度学习 6.4 循环神经网络的从零开始实现 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动手学深度学习 6.4 循环神经网络的从零开始实现
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-09-25 19:53:41" itemprop="dateCreated datePublished" datetime="2025-09-25T19:53:41+08:00">2025-09-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-10-08 01:26:34" itemprop="dateModified" datetime="2025-10-08T01:26:34+08:00">2025-10-08</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<hr>
+<p>在本节中，我们将从零开始实现一个基于字符级循环神经网络的语言模型，并在周杰伦专辑歌词数据集上训练一个模型来进行歌词创作。</p>
+<p>首先，我们读取周杰伦专辑歌词数据集：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">load_data_jay_lyrics</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;加载周杰伦歌词数据集</span></span><br><span class="line"><span class="string">    idx_to_char     : 每个不重复字符组成的 list[char]</span></span><br><span class="line"><span class="string">    char_to_idx     : 每个不重复字符对应索引组成的 dict[char]=index</span></span><br><span class="line"><span class="string">    vocab_size      : 不重复字符的数量大小</span></span><br><span class="line"><span class="string">    corpus_indices  : 原本字符文本每个字符转换成index后的新list</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">with</span> zipfile.ZipFile(<span class="string">&#x27;./jaychou_lyrics.txt.zip&#x27;</span>) <span class="keyword">as</span> zin:</span><br><span class="line">        <span class="keyword">with</span> zin.<span class="built_in">open</span>(<span class="string">&#x27;jaychou_lyrics.txt&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            corpus_chars = f.read().decode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    corpus_chars = corpus_chars.replace(<span class="string">&#x27;\n&#x27;</span>, <span class="string">&#x27; &#x27;</span>).replace(<span class="string">&#x27;\r&#x27;</span>, <span class="string">&#x27; &#x27;</span>)</span><br><span class="line">    corpus_chars = corpus_chars[<span class="number">0</span>:<span class="number">10000</span>]</span><br><span class="line"></span><br><span class="line">    idx_to_char = <span class="built_in">list</span>(<span class="built_in">set</span>(corpus_chars))</span><br><span class="line">    char_to_idx = <span class="built_in">dict</span>([(char, i) <span class="keyword">for</span> i, char <span class="keyword">in</span> <span class="built_in">enumerate</span>(idx_to_char)])</span><br><span class="line">    vocab_size = <span class="built_in">len</span>(char_to_idx)</span><br><span class="line">    corpus_indices = [char_to_idx[char] <span class="keyword">for</span> char <span class="keyword">in</span> corpus_chars]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> corpus_indices, char_to_idx, idx_to_char, vocab_size</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> d2lzh_pytorch <span class="keyword">as</span> d2l</span><br><span class="line">(corpus_indices, char_to_idx, idx_to_char, vocab_size) = d2l.load_data_jay_lyrics()</span><br></pre></td></tr></table></figure>
+<h2 id="one-hot向量">1.one-hot向量</h2>
+<p>为了<strong>将词表示成向量</strong>输入到神经网络，一个简单的办法是使用one-hot向量。</p>
+<p>假设词典中不同字符的数量为N（即词典大小vocab_size），每个字符已经同一个从0到N−1的连续整数值索引一一对应。</p>
+<p>如果一个字符的索引是整数i,
+那么我们创建<strong>一个值全为0且长为N的向量</strong>，并将<strong>其位置为i的元素设成1</strong>。该向量就是对原字符的one-hot向量。下面分别展示了索引为0和2的one-hot向量，向量长度等于词典大小。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">one_hot</span>(<span class="params">x, n_class, dtype=torch.float32</span>):</span><br><span class="line">    <span class="comment"># X shape: (batch), output shape: (batch, n_class)</span></span><br><span class="line">    x = x.long()</span><br><span class="line">    res = torch.zeros(x.shape[<span class="number">0</span>], n_class, dtype=dtype, device=x.device)</span><br><span class="line">    res.scatter_(dim=<span class="number">1</span>, index=x.view(-<span class="number">1</span>, <span class="number">1</span>), value=<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"></span><br><span class="line">x = torch.tensor([<span class="number">0</span>, <span class="number">2</span>])</span><br><span class="line">res = one_hot(x, vocab_size)</span><br><span class="line"><span class="built_in">print</span>(res)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007094107677.png" style="zoom:80%;"></p>
+<blockquote>
+<p>scatter_ 常用于将类别标签向量转换成 one-hot 编码 的情景中</p>
+<p>scatter_ 是 原地操作，把值 1 按照 x 提供的位置写入 res 的第 1
+维（列）上</p>
+<p>x.view(-1, 1) 也是 one-hot 编码中index的常用操作</p>
+<p>举例如下</p>
+<p>x = tensor([2, 0, 1])</p>
+<p>x.view(-1, 1) == tensor([[2], [0], [1]])</p>
+<p>这样就获取了每行的中需要修改的列索引号</p>
+</blockquote>
+<p>我们每次采样的小批量的形状是 (批量大小, 时间步数)。
+下面的函数将这样的小批量变换成数个可以输入进网络的形状为(批量大小,
+词典大小)的矩阵，矩阵个数等于时间步数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">to_onehot</span>(<span class="params">X, n_class</span>):</span><br><span class="line">    <span class="comment"># X shape: (batch, seq_len), output: seq_len elements of (batch, n_class)</span></span><br><span class="line">    <span class="keyword">return</span> [one_hot(X[:, i], n_class) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(X.shape[<span class="number">1</span>])]</span><br><span class="line"></span><br><span class="line">X = torch.arange(<span class="number">10</span>).view(<span class="number">2</span>, <span class="number">5</span>)</span><br><span class="line">inputs = to_onehot(X, vocab_size)</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">len</span>(inputs), inputs[<span class="number">0</span>].shape)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007095253257.png" style="zoom:67%;"></p>
+<p>相当于 原本的 <strong>(批量大小, 时间步数)</strong> 转换成了
+<strong>(时间步数, 批量大小, 词典大小)</strong></p>
+<blockquote>
+<p>代码很简单。按照时间步 for i in range(X.shape[1]) 提取第i步所在的
+X[:, i] 元素，提取的内容形状类似于之前我们说的tensor([[2], [0],
+[1]])，然后将该元素放到one_hot(X[:, i], n_class) 获取所需的 (批量大小,
+词典大小) 形状的one_hot数组。</p>
+<p>之所以按照 时间步数 进行迭代，也是为了直接获取形状类似 tensor([[2],
+[0], [1]]) 的数组，否则按照批量大小来的话，还得首先进行x.view(-1, 1)
+的转换操作。</p>
+</blockquote>
+<h2 id="初始化模型参数">2.初始化模型参数</h2>
+<p>接下来，我们初始化模型参数。隐藏单元个数
+num_hiddens是一个超参数。</p>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007101923278.png"></p>
+<p>也就是这几个东西</p>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/1.png" style="zoom: 67%;"></p>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/2.png" style="zoom:67%;"></p>
+<blockquote>
+<p>_one函数就是一个输入形状，生成对应形状的高斯初始化的tensor的函数。</p>
+</blockquote>
+<h2 id="定义模型">3.定义模型</h2>
+<p>我们根据循环神经网络的计算表达式实现该模型。首先定义init_rnn_state函数来返回初始化的隐藏状态。</p>
+<p>它返回由一个形状为(批量大小,
+隐藏单元个数)的值为0的NDArray组成的元组。使用元组是为了更便于处理隐藏状态含有多个NDArray的情况。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">init_rnn_state</span>(<span class="params">batch_size, num_hiddens, device</span>):</span><br><span class="line">    <span class="keyword">return</span> (torch.zeros((batch_size, num_hiddens), device=device), )</span><br></pre></td></tr></table></figure>
+<p>下面的rnn函数定义了在一个时间步里如何计算隐藏状态和输出。这里的激活函数使用了tanh函数。3.8节（多层感知机）中介绍过，当元素在实数域上均匀分布时，tanh函数值的均值为0。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">rnn</span>(<span class="params">inputs, state, params</span>):</span><br><span class="line">    <span class="comment"># inputs和outputs皆为 num_steps个 形状为(batch_size, vocab_size)的矩阵</span></span><br><span class="line">    <span class="comment"># 即inputs形状为(时间步数, 批量大小, 词典大小)</span></span><br><span class="line">    W_xh, W_hh, b_h, W_hq, b_q = params</span><br><span class="line">    H, = state</span><br><span class="line">    outputs = []</span><br><span class="line">    <span class="keyword">for</span> X <span class="keyword">in</span> inputs:</span><br><span class="line">        H = torch.tanh(torch.matmul(X, W_xh) + torch.matmul(H, W_hh) + b_h)</span><br><span class="line">        Y = torch.matmul(H, W_hq) + b_q</span><br><span class="line">        outputs.append(Y)</span><br><span class="line">    <span class="keyword">return</span> outputs, (H,)</span><br></pre></td></tr></table></figure>
+<p>做个简单的测试来观察输出结果的个数（时间步数），以及第一个时间步的输出层输出的形状和隐藏状态的形状。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">X = torch.arange(<span class="number">10</span>).view(<span class="number">2</span>, <span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">state = init_rnn_state(X.shape[<span class="number">0</span>], num_hiddens, device)</span><br><span class="line">inputs = to_onehot(X.to(device), vocab_size)</span><br><span class="line">params = get_params()</span><br><span class="line">W_xh, W_hh, b_h, W_hq, b_q = params</span><br><span class="line"></span><br><span class="line">outputs, state_new = rnn(inputs, state, params)</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">len</span>(outputs), outputs[<span class="number">0</span>].shape, state_new[<span class="number">0</span>].shape)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007185105234.png" style="zoom:67%;"></p>
+<blockquote>
+<p>结果中</p>
+<p>5 是num_steps。</p>
+<p>torch.Size([2, 1027]) 是 (batch_size, vocab_size)</p>
+<p>torch.Size([2, 256]) 是 (batch_size, num_hiddens)</p>
+</blockquote>
+<h2 id="定义预测函数">4.定义预测函数</h2>
+<p>以下函数基于前缀prefix（含有数个字符的字符串）来预测接下来的num_chars个字符。这个函数稍显复杂，其中我们将循环神经单元rnn设置成了函数参数，这样在后面小节介绍其他循环神经网络时能重复使用这个函数。</p>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007190644840.png"></p>
+<blockquote>
+<p>简单说，就是先将prefix个字符，依序逐个放到rnn()中计算。在计算完最后的prefix字符后，产生的Y（通过int(Y[0].argmax(dim=1).item())
+获得字符的idx值）作为下个计算的输入X。如此重复获得num_chars个Y。</p>
+</blockquote>
+<p>我们先测试一下predict_rnn函数。我们将根据前缀“分开”创作长度为10个字符（不考虑前缀长度）的一段歌词。因为模型参数为随机值，所以预测结果也是随机的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">result = predict_rnn(<span class="string">&#x27;分开&#x27;</span>, <span class="number">10</span>, rnn, params, init_rnn_state, num_hiddens, vocab_size,</span><br><span class="line">            device, idx_to_char, char_to_idx)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(result)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007193041947.png" style="zoom:67%;"></p>
+<blockquote>
+<p>由于还没训练，因此输出的字是随机的。同时因为是通过idx_to_char转换成字，因此也仅能输出我们原本数据集中已有的字。</p>
+</blockquote>
+<h2 id="裁剪梯度">5.裁剪梯度</h2>
+<p>循环神经网络中较容易出现梯度衰减或梯度爆炸。我们会在6.6节（通过时间反向传播）中解释原因。为了应对梯度爆炸，我们可以裁剪梯度（clip
+gradient）。假设我们把所有模型参数的梯度拼接成一个向量
+g，并设裁剪的阈值是θ。裁剪后<strong>梯度的L2范数不超过θ</strong>。</p>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007193658722.png" style="zoom:67%;"></p>
+<blockquote>
+<p>公式中我们能看出，最大 <span class="math inline">\(min(\frac{\theta}{||g||},1)*g\)</span> 最大为g，即
+当<span class="math inline">\(||g||&lt;\theta\)</span> 时，结果为g，
+当<span class="math inline">\(||g||&gt;\theta\)</span> 时，结果为<span class="math inline">\(\frac{\theta}{||g||}*g\)</span>
+，此时缩放后的g的L2范数值为θ，可参考如下公式</p>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007195248717.png" style="zoom:67%;"></p>
+<p>“<strong>梯度爆炸（gradient explosion）</strong>” 与
+“<strong>范数（norm）</strong>” 是密切相关的 ——
+实际上，<strong>梯度爆炸就是梯度向量的范数过大</strong> 的一种现象。</p>
+<p>梯度向量的 <strong>L2
+范数</strong>，反映了“梯度的整体大小”。当我们训练深层网络（尤其是
+RNN、LSTM、Transformer
+等序列模型）时，反向传播的梯度在多层传递过程中会被反复相乘（由链式法则）。如果这些雅可比矩阵的特征值（或权重）稍大于
+1，乘积就会迅速变大，导致梯度的范数变得非常大，这就是“梯度爆炸”。</p>
+</blockquote>
+<p>因为我们添加了限制，$ g的L2范数&lt;=θ $
+，一旦g的L2范数超过θ就会<strong>被等比例缩小</strong>，从而使得<strong>参数更新幅度被限制</strong>，但并<strong>不改变更新的方向</strong>。</p>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251007195551600.png" style="zoom:67%;"></p>
+<h2 id="困惑度">6.困惑度</h2>
+<blockquote>
+<p>应该就是我们的损失</p>
+</blockquote>
+<p>我们通常使用困惑度（perplexity）来评价语言模型的好坏。回忆一下3.4节（softmax回归）中交叉熵损失函数的定义。</p>
+<p>困惑度是对交叉熵损失函数做指数运算后得到的值。特别地，</p>
+<p>• 最佳情况下，模型总是把标签类别的概率预测为1，此时困惑度为1；</p>
+<p>•
+最坏情况下，模型总是把标签类别的概率预测为0，此时困惑度为正无穷；</p>
+<p>•
+基线情况下，模型总是预测所有类别的概率都相同，此时困惑度为类别个数。</p>
+<p>显然，任何一个有效模型的<strong>困惑度必须小于类别个数</strong>。在本例中，<strong>困惑度必须小于词典大小vocab_size</strong>。</p>
+<h2 id="定义模型训练函数">7.定义模型训练函数</h2>
+<p>跟之前章节的模型训练函数相比，这里的模型训练函数有以下几点不同：</p>
+<ol type="1">
+<li>使用困惑度评价模型。</li>
+<li>在迭代模型参数前裁剪梯度。</li>
+<li>对时序数据采用不同采样方法将导致隐藏状态初始化的不同。相关讨论可参考6.3节（语言模型数据集（周杰伦专辑歌词））。</li>
+</ol>
+<p>另外，考虑到后面将介绍的其他循环神经网络，为了更通用，这里的函数实现更长一些。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">train_and_predict_rnn</span>(<span class="params">rnn, get_params, init_rnn_state, num_hiddens,</span></span><br><span class="line"><span class="params">                          vocab_size, device, corpus_indices, idx_to_char,</span></span><br><span class="line"><span class="params">                          char_to_idx, is_random_iter, num_epochs, num_steps,</span></span><br><span class="line"><span class="params">                          lr, clipping_theta, batch_size, pred_period,</span></span><br><span class="line"><span class="params">                          pred_len, prefixes</span>):</span><br><span class="line">    <span class="keyword">if</span> is_random_iter:</span><br><span class="line">        data_iter_fn = d2l.data_iter_random</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        data_iter_fn = d2l.data_iter_consecutive</span><br><span class="line">    params = get_params()</span><br><span class="line">    loss = nn.CrossEntropyLoss()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs):</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> is_random_iter:  <span class="comment"># 如使用相邻采样，在epoch开始时初始化隐藏状态</span></span><br><span class="line">            state = init_rnn_state(batch_size, num_hiddens, device)</span><br><span class="line">        l_sum, n, start = <span class="number">0.0</span>, <span class="number">0</span>, time.time()</span><br><span class="line"></span><br><span class="line">        data_iter = data_iter_fn(corpus_indices, batch_size, num_steps, device)</span><br><span class="line">        <span class="keyword">for</span> X, Y <span class="keyword">in</span> data_iter:</span><br><span class="line">            <span class="comment"># X，Y都是 (batch_size,steps)</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> is_random_iter:  <span class="comment"># 如使用随机采样，在每个小批量更新前初始化隐藏状态</span></span><br><span class="line">                state = init_rnn_state(batch_size, num_hiddens, device)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># 否则需要使用detach函数从计算图分离隐藏状态, 这是为了</span></span><br><span class="line">            <span class="comment"># 使模型参数的梯度计算只依赖一次迭代读取的小批量序列(防止梯度计算开销太大)</span></span><br><span class="line">                <span class="keyword">for</span> s <span class="keyword">in</span> state:</span><br><span class="line">                    s.detach_()</span><br><span class="line"></span><br><span class="line">            <span class="comment"># input (steps,batch_size,voc_size)</span></span><br><span class="line">            inputs = to_onehot(X, vocab_size)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># outputs有num_steps个形状为(batch_size, vocab_size)的矩阵</span></span><br><span class="line">            (outputs, state) = rnn(inputs, state, params)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># outputs (steps,batch_size,voc_size)</span></span><br><span class="line">            <span class="comment"># 拼接之后形状为(num_steps * batch_size, vocab_size)</span></span><br><span class="line">            outputs = torch.cat(outputs, dim=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># Y的形状是(batch_size, num_steps)，转置后再变成长度为</span></span><br><span class="line">            <span class="comment"># batch * num_steps 的向量，这样跟输出的行一一对应</span></span><br><span class="line">            y = torch.transpose(Y, <span class="number">0</span>, <span class="number">1</span>).contiguous().view(-<span class="number">1</span>)</span><br><span class="line">            <span class="comment"># 使用交叉熵损失计算平均分类误差</span></span><br><span class="line">            l = loss(outputs, y.long())</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 梯度清0</span></span><br><span class="line">            <span class="keyword">if</span> params[<span class="number">0</span>].grad <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                <span class="keyword">for</span> param <span class="keyword">in</span> params:</span><br><span class="line">                    param.grad.data.zero_()</span><br><span class="line">            l.backward()</span><br><span class="line">            grad_clipping(params, clipping_theta, device)  <span class="comment"># 裁剪梯度</span></span><br><span class="line">            d2l.sgd(params, lr, <span class="number">1</span>)  <span class="comment"># 因为误差已经取过均值，梯度不用再做平均</span></span><br><span class="line">            l_sum += l.item() * y.shape[<span class="number">0</span>]</span><br><span class="line">            n += y.shape[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (epoch + <span class="number">1</span>) % pred_period == <span class="number">0</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;epoch %d, perplexity %f, time %.2f sec&#x27;</span> % (</span><br><span class="line">                epoch + <span class="number">1</span>, math.exp(l_sum / n), time.time() - start))</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> prefix <span class="keyword">in</span> prefixes:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&#x27; -&#x27;</span>, predict_rnn(prefix, pred_len, rnn, params, init_rnn_state,</span><br><span class="line">                    num_hiddens, vocab_size, device, idx_to_char, char_to_idx))</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>首先说明上面的这部分代码</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> X, Y <span class="keyword">in</span> data_iter:</span><br><span class="line">    <span class="comment"># X，Y都是 (batch_size,steps)</span></span><br><span class="line">    <span class="keyword">if</span> is_random_iter:  <span class="comment"># 如使用随机采样，在每个小批量更新前初始化隐藏状态</span></span><br><span class="line">        state = init_rnn_state(batch_size, num_hiddens, device)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">    <span class="comment"># 否则需要使用detach函数从计算图分离隐藏状态, 这是为了</span></span><br><span class="line">    <span class="comment"># 使模型参数的梯度计算只依赖一次迭代读取的小批量序列(防止梯度计算开销太大)</span></span><br><span class="line">        <span class="keyword">for</span> s <span class="keyword">in</span> state:</span><br><span class="line">            s.detach_()</span><br></pre></td></tr></table></figure>
+<p>在随机取样的时候，每个batch中的X都是无关的。比如</p>
+<blockquote>
+<p>序列：ABCDEFGH... 第一次取：BCD 第二次取：GHA</p>
+</blockquote>
+<p>因此我们每次batch都对隐藏状态state进行初始化</p>
+<p>而在相邻取样的时候，每个batch中的x都是相关的，比如：</p>
+<blockquote>
+<p>序列：ABCDEFGH... 第一个 batch：ABC 第二个 batch：DEF</p>
+</blockquote>
+<p>因此每个batch之间的state为了继承上一次计算后的结果，就没有进行初始化。只进行计算图的剥离。即s.detach_()。</p>
+<p>如果不进行该操作的话，当前的s在计算图中还会指向上一次batch中的计算，比如：</p>
+<p>rnn(ABC,s) -&gt; rnn(DEF,s)</p>
+<p>那么在反向传播的时候，s的梯度计算会延续到上一次batch中，从而对我们当前batch造成干扰，因此我们需要使用s.detach_()，将每次batch变成单独的计算图，如</p>
+<p>rnn(ABC,s) | rnn(DEF,s)</p>
+</blockquote>
+<p>接下来是上面的另一部分损失计算的代码</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">(outputs, state) = rnn(inputs, state, params)</span><br><span class="line"><span class="comment"># outputs (num_steps,batch_size,voc_size)</span></span><br><span class="line"><span class="comment"># 拼接之后形状为(num_steps * batch_size, vocab_size)</span></span><br><span class="line">outputs = torch.cat(outputs, dim=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Y的形状是(batch_size, num_steps)，转置后再变成长度为</span></span><br><span class="line"><span class="comment"># batch * num_steps 的向量，这样跟输出的行一一对应</span></span><br><span class="line">y = torch.transpose(Y, <span class="number">0</span>, <span class="number">1</span>).contiguous().view(-<span class="number">1</span>)</span><br><span class="line"><span class="comment"># 使用交叉熵损失计算平均分类误差</span></span><br><span class="line">l = loss(outputs, y.long())</span><br></pre></td></tr></table></figure>
+<p>首先我们要回忆下交叉熵损失nn.CrossEntropyLoss()的计算</p>
+<p>原公式
+<img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251008001726423.png" style="zoom:50%;"></p>
+<p>但是在y中，由于除了目标位数（类别）为1外，其余都为0。因此简化为</p>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/1-1759853918034-3.png" style="zoom:50%;"></p>
+<p>因此，我们的一组y_hat与y的loss结果，需要y_hat提供的tensor，以及y提供位数（类别）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">loss = nn.CrossEntropyLoss()</span><br><span class="line">loss(y_hat,y) </span><br></pre></td></tr></table></figure>
+<p>其中，<strong>y_hat</strong>需要<strong>二维矩阵tensor</strong>，而<strong>y</strong>则是<strong>一维的数字列表</strong>，表明yhat中所对应实际的所在位数（类别）</p>
+<p>其形状类似如下</p>
+<figure>
+<img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251008002201034.png" alt="image-20251008002201034">
+<figcaption aria-hidden="true">image-20251008002201034</figcaption>
+</figure>
+<p>回到代码中，<code>outputs = torch.cat(outputs, dim=0)</code>
+将outputs从3维形状 (num_steps,batch_size,voc_size) 变成了2维的
+(num_steps*batch_size,voc_size)</p>
+<p><code>y = torch.transpose(Y, 0, 1).contiguous().view(-1)</code>
+中，<code>torch.transpose(Y, 0, 1).contiguous()</code>
+将原本的y从形状(batch_size, num_steps) 转置成了 (num_steps,
+batch_size)，使之与前面的outputs对齐。 然后通过<code>view(-1)</code>
+变成一维向量。</p>
+<p>现在我们满足了 <strong>y_hat</strong>
+需要的<strong>二维矩阵tensor</strong>，和<strong>y</strong>要求的<strong>一维的数字列表</strong>，以及y_hat与y之间的结果对齐。</p>
+<p>那么我们就能计算交叉熵损失了</p>
+<p>l = loss(outputs, y.long())</p>
+</blockquote>
+<h2 id="训练模型并创作歌词">8.训练模型并创作歌词</h2>
+<p>现在我们可以训练模型了。首先，设置模型超参数。我们将根据前缀“分开”和“不分开”分别创作长度为50个字符（不考虑前缀长度）的一段歌词。我们每过50个迭代周期便根据当前训练的模型创作一段歌词。</p>
+<p>下面采用随机采样训练模型并创作歌词。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">num_epochs, num_steps, batch_size, lr, clipping_theta = <span class="number">250</span>, <span class="number">35</span>, <span class="number">32</span>, <span class="number">1e2</span>, <span class="number">1e-2</span></span><br><span class="line">pred_period, pred_len, prefixes = <span class="number">50</span>, <span class="number">50</span>, [<span class="string">&#x27;分开&#x27;</span>, <span class="string">&#x27;不分开&#x27;</span>]</span><br><span class="line"></span><br><span class="line">train_and_predict_rnn(rnn, get_params, init_rnn_state, num_hiddens,</span><br><span class="line">                      vocab_size, device, corpus_indices, idx_to_char,</span><br><span class="line">                      char_to_idx, <span class="literal">True</span>, num_epochs, num_steps, lr,</span><br><span class="line">                      clipping_theta, batch_size, pred_period, pred_len,</span><br><span class="line">                      prefixes)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251008011920909.png"></p>
+<p>接下来采用相邻采样训练模型并创作歌词。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">num_epochs, num_steps, batch_size, lr, clipping_theta = <span class="number">250</span>, <span class="number">35</span>, <span class="number">32</span>, <span class="number">1e2</span>, <span class="number">1e-2</span></span><br><span class="line">pred_period, pred_len, prefixes = <span class="number">50</span>, <span class="number">50</span>, [<span class="string">&#x27;分开&#x27;</span>, <span class="string">&#x27;不分开&#x27;</span>]</span><br><span class="line"></span><br><span class="line">train_and_predict_rnn(rnn, get_params, init_rnn_state, num_hiddens,</span><br><span class="line">                      vocab_size, device, corpus_indices, idx_to_char,</span><br><span class="line">                      char_to_idx, <span class="literal">False</span>, num_epochs, num_steps, lr,</span><br><span class="line">                      clipping_theta, batch_size, pred_period, pred_len,</span><br><span class="line">                      prefixes)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251008012151529.png"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
+              <a href="/tags/%E7%AC%AC6%E8%8A%82/" rel="tag"># 第6节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/09/10/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-3/" rel="prev" title="动手学深度学习 6.3 语言模型数据集（周杰伦专辑歌词）">
+                  <i class="fa fa-angle-left"></i> 动手学深度学习 6.3 语言模型数据集（周杰伦专辑歌词）
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
