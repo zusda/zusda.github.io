@@ -56,7 +56,7 @@
 <meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251008011920909.png">
 <meta property="og:image" content="http://example.com/2025/09/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-4/image-20251008012151529.png">
 <meta property="article:published_time" content="2025-09-25T11:53:41.000Z">
-<meta property="article:modified_time" content="2025-10-07T17:26:34.832Z">
+<meta property="article:modified_time" content="2025-10-07T17:35:20.936Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ai">
 <meta property="article:tag" content="动手学习深度学习">
@@ -188,7 +188,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-count">42</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -262,7 +262,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-10-08 01:26:34" itemprop="dateModified" datetime="2025-10-08T01:26:34+08:00">2025-10-08</time>
+      <time title="修改时间：2025-10-08 01:35:20" itemprop="dateModified" datetime="2025-10-08T01:35:20+08:00">2025-10-08</time>
     </span>
 
   
@@ -405,12 +405,16 @@ RNN、LSTM、Transformer
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> X, Y <span class="keyword">in</span> data_iter:</span><br><span class="line">    <span class="comment"># X，Y都是 (batch_size,steps)</span></span><br><span class="line">    <span class="keyword">if</span> is_random_iter:  <span class="comment"># 如使用随机采样，在每个小批量更新前初始化隐藏状态</span></span><br><span class="line">        state = init_rnn_state(batch_size, num_hiddens, device)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">    <span class="comment"># 否则需要使用detach函数从计算图分离隐藏状态, 这是为了</span></span><br><span class="line">    <span class="comment"># 使模型参数的梯度计算只依赖一次迭代读取的小批量序列(防止梯度计算开销太大)</span></span><br><span class="line">        <span class="keyword">for</span> s <span class="keyword">in</span> state:</span><br><span class="line">            s.detach_()</span><br></pre></td></tr></table></figure>
 <p>在随机取样的时候，每个batch中的X都是无关的。比如</p>
 <blockquote>
-<p>序列：ABCDEFGH... 第一次取：BCD 第二次取：GHA</p>
+<p>序列：ABCDEFGH...</p>
+<p>第一次取：BCD</p>
+<p>第二次取：GHA</p>
 </blockquote>
 <p>因此我们每次batch都对隐藏状态state进行初始化</p>
 <p>而在相邻取样的时候，每个batch中的x都是相关的，比如：</p>
 <blockquote>
-<p>序列：ABCDEFGH... 第一个 batch：ABC 第二个 batch：DEF</p>
+<p>序列：ABCDEFGH...</p>
+<p>第一个 batch：ABC</p>
+<p>第二个 batch：DEF</p>
 </blockquote>
 <p>因此每个batch之间的state为了继承上一次计算后的结果，就没有进行初始化。只进行计算图的剥离。即s.detach_()。</p>
 <p>如果不进行该操作的话，当前的s在计算图中还会指向上一次batch中的计算，比如：</p>
@@ -478,6 +482,9 @@ batch_size)，使之与前面的outputs对齐。 然后通过<code>view(-1)</cod
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2025/10/08/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-5/" rel="next" title="动手学深度学习 6.5 循环神经网络的简洁实现">
+                  动手学深度学习 6.5 循环神经网络的简洁实现 <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
