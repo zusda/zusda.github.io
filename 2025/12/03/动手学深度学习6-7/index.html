@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动手学深度学习 6.7 门控循环单元（GRU）">
+<meta property="og:url" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203101848040.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203102132880.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/1.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/1-1764728574585-4.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/2.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203102423668.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/1-1764728718393-7.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/2-1764728718393-8.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/1-1764728760735-11.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203102831517.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203103634342.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203104044207.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203104540221.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203111131425.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203111859111.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203111951958.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/1.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203113453369.png">
+<meta property="og:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203115030620.png">
+<meta property="article:published_time" content="2025-12-03T02:10:15.000Z">
+<meta property="article:modified_time" content="2025-12-03T03:50:45.290Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="动手学习深度学习">
+<meta property="article:tag" content="第6节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203101848040.png">
+
+
+<link rel="canonical" href="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/","path":"2025/12/03/动手学深度学习6-7/","title":"动手学深度学习 6.7 门控循环单元（GRU）"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>动手学深度学习 6.7 门控循环单元（GRU） | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%A8%E6%8E%A7%E5%BE%AA%E7%8E%AF%E5%8D%95%E5%85%83"><span class="nav-number">2.</span> <span class="nav-text">1. 门控循环单元</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E7%BD%AE%E9%97%A8-%E5%92%8C-%E6%9B%B4%E6%96%B0%E9%97%A8"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 重置门 和 更新门</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%80%99%E9%80%89%E9%9A%90%E8%97%8F%E7%8A%B6%E6%80%81"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 候选隐藏状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%90%E8%97%8F%E7%8A%B6%E6%80%81"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 隐藏状态</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">3.</span> <span class="nav-text">2. 读取数据集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">3. 从零开始实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%A8%A1%E5%9E%8B%E5%8F%82%E6%95%B0"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 初始化模型参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 定义模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B%E5%B9%B6%E5%88%9B%E4%BD%9C%E6%AD%8C%E8%AF%8D"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 训练模型并创作歌词</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E6%B4%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.</span> <span class="nav-text">4 简洁实现</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="动手学深度学习 6.7 门控循环单元（GRU） | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动手学深度学习 6.7 门控循环单元（GRU）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-03 10:10:15 / 修改时间：11:50:45" itemprop="dateCreated datePublished" datetime="2025-12-03T10:10:15+08:00">2025-12-03</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<hr>
+<p>上一节介绍了循环神经网络中的梯度计算方法。我们发现，当时间步数较大或者时间步较小时，循环神经网络的梯度较容易出现衰减或爆炸。虽然裁剪梯度可以应对梯度爆炸，但无法解决梯度衰减的问题。</p>
+<p>通常由于这个原因，循环神经网络在实际中较难捕捉时间序列中时间步距离较大的依赖关系。</p>
+<p><strong>门控循环神经网络</strong>（gated recurrent neural
+network）的提出，正是为了更好地捕捉<strong>时间序列中时间步距离较大的依赖关系</strong>。</p>
+<p>它通过可以学习的门来控制信息的流动。其中，门控循环单元（gated
+recurrent
+unit，GRU）是一种常用的门控循环神经网络。另一种常用的门控循环神经网络则将在下一节中介绍。</p>
+<h2 id="门控循环单元">1. 门控循环单元</h2>
+<p>下面将介绍门控循环单元的设计。它引入了重置门（reset
+gate）和更新门（update
+gate）的概念，从而修改了循环神经网络中隐藏状态的计算方式。</p>
+<h3 id="重置门-和-更新门">1.1 重置门 和 更新门</h3>
+<p>如图6.4所示，门控循环单元中的<strong>重置门和更新门的输入</strong>均为当前时间步输入
+<span class="math inline">\(X_t\)</span> 与上一时间步隐藏状态 <span class="math inline">\(H_{t−1}\)</span>
+，输出由激活函数为sigmoid函数的全连接层计算得到。</p>
+<p><img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203101848040.png" style="zoom:67%;"></p>
+<p>具体来说，假设隐藏单元个数为h，给定时间步 t 的小批量输入
+<img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203102132880.png" alt style="zoom:50%;">
+（样本数为n，输入个数为d）和上一时间步隐藏状态
+<img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/1.png" alt style="zoom:50%;">
+。</p>
+<p>重置门
+<img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/1-1764728574585-4.png" style="zoom:50%;">
+和更新门
+<img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/2.png" style="zoom:50%;">
+的计算如下：</p>
+<p><img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203102423668.png" style="zoom:60%;"></p>
+<p>其中
+<img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/1-1764728718393-7.png" style="zoom:50%;">
+和
+<img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/2-1764728718393-8.png" style="zoom:50%;">
+是权重参数，<img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/1-1764728760735-11.png" style="zoom:50%;">
+是偏差参数。</p>
+<p>3.8节（多层感知机）节中介绍过，sigmoid函数可以将元素的值变换到0和1之间。因此，重置门
+<span class="math inline">\(R_t\)</span> 和更新门 <span class="math inline">\(Z_t\)</span> 中每个元素的值域都是[0,1]</p>
+<h3 id="候选隐藏状态">1.2 候选隐藏状态</h3>
+<p>接下来，门控循环单元将计算候选隐藏状态来辅助稍后的隐藏状态计算。如图6.5所示，我们将<strong>当前时间步重置门的输出</strong>与<strong>上一时间步隐藏状态</strong>做按元素乘法（符号为⊙）。</p>
+<p><img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203102831517.png" style="zoom:67%;"></p>
+<p>如果<strong>重置门中元素值接近0</strong>，那么意味着重置对应隐藏状态元素为0，<strong>即丢弃上一时间步的隐藏状态</strong>。如果元素值<strong>接近1</strong>，那么表示<strong>保留上一时间步的隐藏状态</strong>。</p>
+<p>然后，将按元素乘法的结果与当前时间步的输入连结，再通过含激活函数tanh的全连接层计算出候选隐藏状态，其所有元素的值域为[−1,1]。</p>
+<p>具体来说，时间步t的候选隐藏状态 <span class="math inline">\(H_t\)</span> 的计算为</p>
+<p><img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203103634342.png" style="zoom: 50%;"></p>
+<p>从上面这个公式可以看出，重置门 控制了上一时间步的隐藏状态
+如何流入当前时间步的候选隐藏状态。而上一时间步的隐藏状态可能包含了时间序列截至上一时间步的全部历史信息。因此，重置门可以用来丢弃与预测无关的历史信息。</p>
+<p>可以与正常循环神经网络（下图公式）的隐藏状态计算明显看出不同。</p>
+<p><img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203104044207.png" style="zoom:50%;"></p>
+<h3 id="隐藏状态">1.3 隐藏状态</h3>
+<p>最后，时间步t的隐藏状态 <span class="math inline">\(H_t\)</span>
+的计算使用当前时间步的更新门 <span class="math inline">\(Z_t\)</span>
+来对上一时间步的隐藏状态 <span class="math inline">\(H_{t−1}\)</span>
+和当前时间步的候选隐藏状态 <span class="math inline">\(\tilde{H_t}\)</span> 做组合：</p>
+<p><img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203104540221.png" style="zoom: 50%;"></p>
+<p>可以很明显看出，如果更新门趋于1，那么就近乎不更新，直接保留上一步骤的隐藏状态
+<span class="math inline">\(H_{t−1}\)</span>
+。如果趋于0，则完全不保存上一步骤的隐藏状态 <span class="math inline">\(H_{t−1}\)</span> 。</p>
+<blockquote>
+<p>我们这里简单概述重置门与更新门的关系与作用。</p>
+<p>GRU 想做到：在决定“下一步怎么思考”时，可以选择性地忽略旧记忆（由 r
+控制），但在真正更新隐藏状态时再决定是否保留旧记忆（由 z 控制）。</p>
+<p>也就是：<strong>重置门r
+控制“在更新时看不看旧记忆”</strong>，<strong>更新门z
+控制“最终隐藏状态要保留多少旧记忆”</strong>。</p>
+<p>这两个作用独立，缺一不可。</p>
+<p><img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203111131425.png" style="zoom: 60%;"></p>
+</blockquote>
+<h2 id="读取数据集">2. 读取数据集</h2>
+<p>为了实现并展示门控循环单元，下面依然使用周杰伦歌词数据集来训练模型作词。这里除门控循环单元以外的实现已在6.2节（循环神经网络）中介绍过。以下为读取数据集部分。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn, optim</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line">sys.path.append(<span class="string">&quot;..&quot;</span>)</span><br><span class="line"><span class="keyword">import</span> d2lzh_pytorch <span class="keyword">as</span> d2l</span><br><span class="line">device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br><span class="line"></span><br><span class="line">(corpus_indices, char_to_idx, idx_to_char, vocab_size) = d2l.load_data_jay_lyrics()</span><br></pre></td></tr></table></figure>
+<h2 id="从零开始实现">3. 从零开始实现</h2>
+<h3 id="初始化模型参数">3.1 初始化模型参数</h3>
+<p>下面的代码对模型参数进行初始化。超参数num_hiddens定义了隐藏单元的个数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">num_inputs, num_hiddens, num_outputs = vocab_size, <span class="number">256</span>, vocab_size</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;will use&#x27;</span>, device)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_params</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_one</span>(<span class="params">shape</span>):</span><br><span class="line">        ts = torch.tensor(np.random.normal(<span class="number">0</span>, <span class="number">0.01</span>, size=shape), device=device, dtype=torch.float32)</span><br><span class="line">        <span class="keyword">return</span> torch.nn.Parameter(ts, requires_grad=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_three</span>():</span><br><span class="line">        <span class="keyword">return</span> (_one((num_inputs, num_hiddens)),</span><br><span class="line">                _one((num_hiddens, num_hiddens)),</span><br><span class="line">                torch.nn.Parameter(torch.zeros(num_hiddens, device=device, dtype=torch.float32), requires_grad=<span class="literal">True</span>))</span><br><span class="line"></span><br><span class="line">    W_xz, W_hz, b_z = _three()  <span class="comment"># 更新门参数</span></span><br><span class="line">    W_xr, W_hr, b_r = _three()  <span class="comment"># 重置门参数</span></span><br><span class="line">    W_xh, W_hh, b_h = _three()  <span class="comment"># 候选隐藏状态参数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 输出层参数</span></span><br><span class="line">    W_hq = _one((num_hiddens, num_outputs))</span><br><span class="line">    b_q = torch.nn.Parameter(torch.zeros(num_outputs, device=device, dtype=torch.float32), requires_grad=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">return</span> nn.ParameterList([W_xz, W_hz, b_z, W_xr, W_hr, b_r, W_xh, W_hh, b_h, W_hq, b_q])</span><br></pre></td></tr></table></figure>
+<p>也就是下图所需的参数</p>
+<p><img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203111859111.png" alt="=" style="zoom:50%;"></p>
+<p><img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203111951958.png" style="zoom:50%;"></p>
+<h3 id="定义模型">3.2 定义模型</h3>
+<p>下面的代码定义隐藏状态初始化函数init_gru_state。同6.4节（循环神经网络的从零开始实现）中定义的init_rnn_state函数一样，它返回由一个形状为<strong>(批量大小,
+隐藏单元个数)</strong>的值为0的Tensor组成的元组。</p>
+<p>即初始化的隐藏状态H。<img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/1.png" alt style="zoom:50%;"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">init_gru_state</span>(<span class="params">batch_size, num_hiddens, device</span>):</span><br><span class="line">    <span class="keyword">return</span> (torch.zeros((batch_size, num_hiddens), device=device), )</span><br></pre></td></tr></table></figure>
+<p>下面根据门控循环单元的计算表达式定义模型。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">gru</span>(<span class="params">inputs, state, params</span>):</span><br><span class="line">    W_xz, W_hz, b_z, W_xr, W_hr, b_r, W_xh, W_hh, b_h, W_hq, b_q = params</span><br><span class="line">    H, = state</span><br><span class="line">    outputs = []</span><br><span class="line">    <span class="keyword">for</span> X <span class="keyword">in</span> inputs:</span><br><span class="line">        Z = torch.sigmoid(torch.matmul(X, W_xz) + torch.matmul(H, W_hz) + b_z)</span><br><span class="line">        R = torch.sigmoid(torch.matmul(X, W_xr) + torch.matmul(H, W_hr) + b_r)</span><br><span class="line">        H_tilda = torch.tanh(torch.matmul(X, W_xh) + torch.matmul(R * H, W_hh) + b_h)</span><br><span class="line">        H = Z * H + (<span class="number">1</span> - Z) * H_tilda</span><br><span class="line">        Y = torch.matmul(H, W_hq) + b_q</span><br><span class="line">        outputs.append(Y)</span><br><span class="line">    <span class="keyword">return</span> outputs, (H,)</span><br></pre></td></tr></table></figure>
+<h3 id="训练模型并创作歌词">3.3 训练模型并创作歌词</h3>
+<p>我们在训练模型时只使用相邻采样。设置好超参数后，我们将训练模型并根据前缀“分开”和“不分开”分别创作长度为50个字符的一段歌词。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">num_epochs, num_steps, batch_size, lr, clipping_theta = <span class="number">160</span>, <span class="number">35</span>, <span class="number">32</span>, <span class="number">1e2</span>, <span class="number">1e-2</span></span><br><span class="line">pred_period, pred_len, prefixes = <span class="number">40</span>, <span class="number">50</span>, [<span class="string">&#x27;分开&#x27;</span>, <span class="string">&#x27;不分开&#x27;</span>]</span><br></pre></td></tr></table></figure>
+<p>我们每过40个迭代周期便根据当前训练的模型创作一段歌词。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">d2l.train_and_predict_rnn(gru, get_params, init_gru_state, num_hiddens,</span><br><span class="line">                          vocab_size, device, corpus_indices, idx_to_char,</span><br><span class="line">                          char_to_idx, <span class="literal">False</span>, num_epochs, num_steps, lr,</span><br><span class="line">                          clipping_theta, batch_size, pred_period, pred_len,</span><br><span class="line">                          prefixes)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203113453369.png" style="zoom: 67%;"></p>
+<h2 id="简洁实现">4 简洁实现</h2>
+<p>在PyTorch中我们直接调用nn模块中的GRU类即可。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">lr = <span class="number">1e-2</span> <span class="comment"># 注意调整学习率</span></span><br><span class="line">gru_layer = nn.GRU(input_size=vocab_size, hidden_size=num_hiddens)</span><br><span class="line">model = d2l.RNNModel(gru_layer, vocab_size).to(device)</span><br><span class="line"></span><br><span class="line">d2l.train_and_predict_rnn_pytorch(model, num_hiddens, vocab_size, device,</span><br><span class="line">                                corpus_indices, idx_to_char, char_to_idx,</span><br><span class="line">                                num_epochs, num_steps, lr, clipping_theta,</span><br><span class="line">                                batch_size, pred_period, pred_len, prefixes)</span><br></pre></td></tr></table></figure>
+<p><img src="/2025/12/03/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-7/image-20251203115030620.png"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
+              <a href="/tags/%E7%AC%AC6%E8%8A%82/" rel="tag"># 第6节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/10/29/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A06-6/" rel="prev" title="动手学深度学习 6.6 通过时间反向传播">
+                  <i class="fa fa-angle-left"></i> 动手学深度学习 6.6 通过时间反向传播
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
