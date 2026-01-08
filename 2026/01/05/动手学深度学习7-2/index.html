@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动手学深度学习 7.2 梯度下降和随机梯度下降">
+<meta property="og:url" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106222845708.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106223216744.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106223749530.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106223803732.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106223915636.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106224051387.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106224300756.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106224549684.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108213144670.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108214319350.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108224208712.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108224221399.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108225012058.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108225044399.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108225735442.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108225913699.png">
+<meta property="og:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108225946089.png">
+<meta property="article:published_time" content="2026-01-05T15:32:56.000Z">
+<meta property="article:modified_time" content="2026-01-08T15:07:42.304Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="动手学习深度学习">
+<meta property="article:tag" content="第7节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106222845708.png">
+
+
+<link rel="canonical" href="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/","path":"2026/01/05/动手学深度学习7-2/","title":"动手学深度学习 7.2 梯度下降和随机梯度下降"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>动手学深度学习 7.2 梯度下降和随机梯度下降 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E7%BB%B4%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D"><span class="nav-number">2.</span> <span class="nav-text">1. 一维梯度下降</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%A6%E4%B9%A0%E7%8E%87"><span class="nav-number">3.</span> <span class="nav-text">2. 学习率</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E7%BB%B4%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D"><span class="nav-number">4.</span> <span class="nav-text">3. 多维梯度下降</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D"><span class="nav-number">5.</span> <span class="nav-text">4. 随机梯度下降</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">49</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="动手学深度学习 7.2 梯度下降和随机梯度下降 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动手学深度学习 7.2 梯度下降和随机梯度下降
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-01-05 23:32:56" itemprop="dateCreated datePublished" datetime="2026-01-05T23:32:56+08:00">2026-01-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-01-08 23:07:42" itemprop="dateModified" datetime="2026-01-08T23:07:42+08:00">2026-01-08</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<hr>
+<p>在本节中，我们将介绍梯度下降（gradient
+descent）的工作原理。虽然梯度下降在深度学习中很少被直接使用，但理解梯度的意义以及沿着梯度反方向更新自变量可能降低目标函数值的原因是学习后续优化算法的基础。</p>
+<p>随后，我们将引出随机梯度下降（stochastic gradient descent）。</p>
+<blockquote>
+<p>本篇中解释说明了为什么
+减去梯度可以减少损失函数。以及随机梯度为什么可行的原理</p>
+</blockquote>
+<h2 id="一维梯度下降">1. 一维梯度下降</h2>
+<p>我们先以简单的一维梯度下降为例，解释梯度下降算法可能降低目标函数值的原因。</p>
+<p>假设连续可导的函数 <span class="math inline">\(f:R→R\)</span>
+的输入和输出都是标量。给定绝对值足够小的数 <span class="math inline">\(ϵ\)</span>，根据泰勒展开公式，我们得到以下的近似：
+<span class="math display">\[
+f(x+ϵ) ≈ f(x) + ϵf&#39;(x)
+\]</span> 这里 <span class="math inline">\(f&#39;(x)\)</span>
+是函数<span class="math inline">\(f\)</span>在<span class="math inline">\(x\)</span>处的梯度。一维函数的梯度是一个标量，也称为<strong>导数</strong>。</p>
+<p>接下来，找到一个常数<span class="math inline">\(η&gt;0\)</span>，使得<span class="math inline">\(∣ηf&#39;(x)∣\)</span>足够小，那么可以将<span class="math inline">\(ϵ\)</span>替换为<span class="math inline">\(−ηf&#39;(x)\)</span>并得到 <span class="math display">\[
+f(x−ηf&#39;(x)) ≈ f(x) − ηf&#39;(x)^2
+\]</span> 如果导数<span class="math inline">\(f&#39;(x)≠0\)</span>那么，那么<span class="math inline">\(ηf&#39;(x)^2&gt;0\)</span>，所以 <span class="math display">\[
+f(x−ηf&#39;(x)) ≲ f(x)
+\]</span> 这意味着，如果通过</p>
+<p><span class="math display">\[
+x \leftarrow x−ηf&#39;(x)
+\]</span> 来迭代<span class="math inline">\(x\)</span>，函数<span class="math inline">\(f(x)\)</span>的值可能会降低。</p>
+<p>因此在梯度下降中，我们先选取一个初始值<span class="math inline">\(x\)</span>和常数<span class="math inline">\(η&gt;0\)</span>，然后不断通过上式来迭代<span class="math inline">\(x\)</span>，直到达到停止条件，例如<span class="math inline">\(f&#39;(x)^2\)</span>的值已足够小或迭代次数已达到某个值。</p>
+<blockquote>
+<p>可能懵逼的同学看完后还是有点懵逼，我简单说一下。</p>
+<p>存在 <span class="math inline">\(输入x\)</span>，<span class="math inline">\(输出f(x)\)</span> ，然后计算出当前的导数 <span class="math inline">\(ηf&#39;(x)\)</span></p>
+<p>倘若我们 将 <span class="math inline">\(原本的x\)</span> 用 <span class="math inline">\(x−ηf&#39;(x)\)</span> 替代的话，我们得到 <span class="math inline">\(f(x−ηf&#39;(x))\)</span></p>
+<p>根据之前的公式，<span class="math inline">\(f(x−ηf&#39;(x)) ≲
+f(x)\)</span> 此时替换后算出的结果必定不会比原来大。</p>
+<p>那么在实际中，这个<span class="math inline">\(f(x)\)</span>
+就是我们的损失函数，x就是我们网络的各种参数 <span class="math inline">\(\theta\)</span>
+，在求导过程中，我们正向计算的图片等输入在此时都是常数。那么我们将原本的参数
+<span class="math inline">\(\theta\)</span> 用 <span class="math inline">\(\theta−ηf&#39;(\theta)\)</span>
+替换，那么我们就能让损失函数降低或者不变。</p>
+<p>（记住前提是 <span class="math inline">\(∣ηf&#39;(x)∣\)</span>足够小，公式才成立 ）</p>
+<p>也就是直觉中导数正负指明x的前进方向，然后减去导数就是往反方向（值变小的方向）走的理论依据。</p>
+</blockquote>
+<p>下面我们以目标函数 <span class="math inline">\(f(x)=x^2\)</span>
+为例来看一看梯度下降是如何工作的。虽然我们知道最小化f(x)的解为x=0，这里依然使用这个简单函数来观察x是如何被迭代的。</p>
+<p>使用 <span class="math inline">\(x=10\)</span> 作为初始值，并设 <span class="math inline">\(η=0.2\)</span>
+。使用梯度下降对x迭代10次，可见最终x的值较接近最优解。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">gd</span>(<span class="params">eta</span>):</span><br><span class="line">    x = <span class="number">10</span></span><br><span class="line">    results = [x]</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">        x -= eta * <span class="number">2</span> * x  <span class="comment"># f(x) = x * x的导数为f&#x27;(x) = 2 * x</span></span><br><span class="line">        results.append(x)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;epoch 10, x:&#x27;</span>, x)</span><br><span class="line">    <span class="keyword">return</span> results</span><br><span class="line"></span><br><span class="line">res = gd(<span class="number">0.2</span>)</span><br></pre></td></tr></table></figure>
+<p>可以看到x在10轮后非常接近于0 （<span class="math inline">\(f(x)\)</span> 为最小值时的<span class="math inline">\(x\)</span>）</p>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106222845708.png" style="zoom:67%;"></p>
+<p>下面将绘制出自变量x的迭代轨迹。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">show_trace</span>(<span class="params">res</span>):</span><br><span class="line">    n = <span class="built_in">max</span>(<span class="built_in">abs</span>(<span class="built_in">min</span>(res)), <span class="built_in">abs</span>(<span class="built_in">max</span>(res)), <span class="number">10</span>)</span><br><span class="line">    f_line = np.arange(-n, n, <span class="number">0.1</span>)</span><br><span class="line">    d2l.set_figsize()</span><br><span class="line">    d2l.plt.plot(f_line, [x * x <span class="keyword">for</span> x <span class="keyword">in</span> f_line])</span><br><span class="line">    d2l.plt.plot(res, [x * x <span class="keyword">for</span> x <span class="keyword">in</span> res], <span class="string">&#x27;-o&#x27;</span>)</span><br><span class="line">    d2l.plt.xlabel(<span class="string">&#x27;x&#x27;</span>)</span><br><span class="line">    d2l.plt.ylabel(<span class="string">&#x27;f(x)&#x27;</span>)</span><br><span class="line">    d2l.plt.show()</span><br><span class="line">show_trace(res)</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106223216744.png" style="zoom:50%;"></p>
+<h2 id="学习率">2. 学习率</h2>
+<p>上述梯度下降算法中的正数 <span class="math inline">\(η\)</span>
+通常叫作学习率。这是一个超参数，需要人工设定。</p>
+<p>如果使用<strong>过小的学习率</strong>，会导致<strong>x更新缓慢</strong>从而需要更多的迭代才能得到较好的解。</p>
+<p>下面展示使用学习率 <span class="math inline">\(η=0.05\)</span>
+时自变量x的迭代轨迹。可见，同样迭代10次后，当学习率过小时，最终x的值依然与最优解存在较大偏差。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show_trace(gd(<span class="number">0.05</span>))</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106223749530.png" style="zoom: 67%;"></p>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106223803732.png" alt=" " style="zoom:50%;"></p>
+<p>如果使用<strong>过大的学习率</strong>，∣ηf′(x)∣
+可能会过大从而使前面提到的<strong>一阶泰勒展开公式不再成立</strong>：这时我们无法保证迭代x会降低f(x)的值。</p>
+<p>举个例子，当设学习率η=1.1时，可以看到x不断越过（overshoot）最优解x=0并逐渐发散。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show_trace(gd(<span class="number">1.1</span>))</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106223915636.png" style="zoom: 67%;"></p>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106224051387.png" style="zoom:50%;"></p>
+<h2 id="多维梯度下降">3. 多维梯度下降</h2>
+<p>在了解了一维梯度下降之后，我们再考虑一种更广义的情况：目标函数的输入为向量，输出为标量。假设
+<span class="math inline">\(目标函数f\)</span> 的输入是一个d维向量 <span class="math inline">\(x=[x_1,x_2,…,x_d]^⊤\)</span>。目标函数f(x)<strong>有关x的梯度</strong>是一个由<strong>d个偏导数组成的向量</strong>：</p>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106224300756.png" style="zoom:80%;"></p>
+<p>为表示简洁，我们用 <span class="math inline">\(∇f(x)\)</span> 代替
+<span class="math inline">\(∇_xf(x)\)</span> 。</p>
+<p>梯度中每个偏导数元素 <span class="math inline">\(∂f(x)/∂x_i\)</span>
+代表着 f 在x有关输入<span class="math inline">\(x_i\)</span>
+的变化率。</p>
+<p>为了测量f沿着 <span class="math inline">\(单位向量u\)</span>（即
+<span class="math inline">\(∥u∥=1\)</span>
+）方向上的变化率，在多元微积分中，我们定义f在x上沿着u方向的方向导数为</p>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260106224549684.png" style="zoom: 80%;"></p>
+<p>依据方向导数性质，以上方向导数可以改写为</p>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108213144670.png" style="zoom:80%;"></p>
+<p>方向导数 <span class="math inline">\(D_uf(x)\)</span> 给出了 <span class="math inline">\(f\)</span> 在 <span class="math inline">\(x\)</span> 上沿着所有可能方向的变化率。为了最小化
+<span class="math inline">\(f\)</span>，我们希望找到 <span class="math inline">\(f\)</span>
+能被降低最快的方向。因此，我们可以<strong>通过单位向量 <span class="math inline">\(u\)</span> 来最小化方向导数</strong> <span class="math inline">\(D_uf(x)\)</span> 。</p>
+<p>由于</p>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108214319350.png" style="zoom: 80%;"></p>
+<p>其中 <strong><span class="math inline">\(θ\)</span> 为梯度 <span class="math inline">\(∇f(x)\)</span> 和单位向量 <span class="math inline">\(u\)</span> 之间的夹角</strong>，</p>
+<p>当 <span class="math inline">\(θ=\pi\)</span> 时，<span class="math inline">\(cos(θ)\)</span> 取得最小值−1。因此，<strong>当
+<span class="math inline">\(u\)</span> 在梯度方向 <span class="math inline">\(∇f(x)\)</span>
+的相反方向时</strong>，<strong>方向导数 <span class="math inline">\(D_uf(x)\)</span>
+被最小化。</strong>因此，我们可能通过梯度下降算法来不断降低目标函数
+<span class="math inline">\(f\)</span> 的值： <span class="math display">\[
+x \leftarrow x−η∇f(x)
+\]</span> 同样，其中 <span class="math inline">\(η\)</span>（取正数）称作学习率。</p>
+<p>下面我们构造一个输入为二维向量 <span class="math inline">\(x=[x_1,x_2]^⊤\)</span> 和输出为标量的 目标函数
+<span class="math inline">\(f(x)=x_1^2+2x_2^2\)</span> 。那么，梯度为
+<span class="math inline">\(∇f(x)=[2x_1,4x_2]^⊤\)</span> 。</p>
+<p>我们将观察梯度下降从初始位置 <span class="math inline">\([−5,−2]\)</span> 开始对自变量 <span class="math inline">\(x\)</span> 的迭代轨迹。</p>
+<p>我们先定义两个辅助函数，</p>
+<p>第一个函数使用给定的自变量更新函数，从初始位置 <span class="math inline">\([−5,−2]\)</span> 开始迭代自变量<span class="math inline">\(x\)</span>共20次，</p>
+<p>第二个函数对自变量x的迭代轨迹进行可视化。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">train_2d</span>(<span class="params">trainer</span>):  <span class="comment"># 本函数将保存在d2lzh_pytorch包中方便以后使用</span></span><br><span class="line">    x1, x2, s1, s2 = -<span class="number">5</span>, -<span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>  <span class="comment"># s1和s2是自变量状态，本章后续几节会使用</span></span><br><span class="line">    results = [(x1, x2)]</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>):</span><br><span class="line">        x1, x2, s1, s2 = trainer(x1, x2, s1, s2)</span><br><span class="line">        results.append((x1, x2))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;epoch %d, x1 %f, x2 %f&#x27;</span> % (i + <span class="number">1</span>, x1, x2))</span><br><span class="line">    <span class="keyword">return</span> results</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">show_trace_2d</span>(<span class="params">f, results</span>):  <span class="comment"># 本函数将保存在d2lzh_pytorch包中方便以后使用</span></span><br><span class="line">    d2l.plt.plot(*<span class="built_in">zip</span>(*results), <span class="string">&#x27;-o&#x27;</span>, color=<span class="string">&#x27;#ff7f0e&#x27;</span>)</span><br><span class="line">    x1, x2 = np.meshgrid(np.arange(-<span class="number">5.5</span>, <span class="number">1.0</span>, <span class="number">0.1</span>), np.arange(-<span class="number">3.0</span>, <span class="number">1.0</span>, <span class="number">0.1</span>))</span><br><span class="line">    cs = d2l.plt.contour(x1, x2, f(x1, x2), colors=<span class="string">&#x27;#1f77b4&#x27;</span>)</span><br><span class="line">    d2l.plt.clabel(cs)  <span class="comment"># 给每条等高线加上数值标签</span></span><br><span class="line">    d2l.plt.xlabel(<span class="string">&#x27;x1&#x27;</span>)</span><br><span class="line">    d2l.plt.ylabel(<span class="string">&#x27;x2&#x27;</span>)</span><br><span class="line">    d2l.plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>然后，观察学习率为0.1时自变量的迭代轨迹。使用梯度下降对自变量x迭代20次后，可见最终x的值较接近最优解[0,0]。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">eta = <span class="number">0.1</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">f_2d</span>(<span class="params">x1, x2</span>):  <span class="comment"># 目标函数</span></span><br><span class="line">    <span class="keyword">return</span> x1 ** <span class="number">2</span> + <span class="number">2</span> * x2 ** <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">gd_2d</span>(<span class="params">x1, x2, s1, s2</span>):</span><br><span class="line">    <span class="keyword">return</span> (x1 - eta * <span class="number">2</span> * x1, x2 - eta * <span class="number">4</span> * x2, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">show_trace_2d(f_2d, train_2d(gd_2d))</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108224208712.png" style="zoom:67%;"></p>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108224221399.png" style="zoom:67%;"></p>
+<p>我们清晰的看到每次 <span class="math inline">\(x_1,x_2\)</span>
+更新后，<span class="math inline">\(f(x_1,x_2)\)</span> 的值就会越小</p>
+<h2 id="随机梯度下降">4. 随机梯度下降</h2>
+<p>在深度学习里，目标函数通常是训练数据集中有关各个样本的损失函数的平均。设
+<span class="math inline">\(f_i(x)\)</span> 是有关索引为 <span class="math inline">\(i\)</span> 的训练数据样本的损失函数，<span class="math inline">\(n\)</span> 是训练数据样本数，<span class="math inline">\(x\)</span>
+是模型的参数向量，那么目标函数定义为</p>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108225012058.png" style="zoom:80%;"></p>
+<p>目标函数在 <span class="math inline">\(x\)</span> 处的梯度计算为</p>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108225044399.png" style="zoom: 80%;"></p>
+<p>如果使用梯度下降，每次自变量迭代的计算开销为O(n)，它随着n线性增长。因此，当训练数据样本数很大时，梯度下降每次迭代的计算开销很高。</p>
+<p><strong>随机梯度下降</strong>（stochastic gradient
+descent，SGD）减少了每次迭代的计算开销。在随机梯度下降的每次迭代中，我们随机均匀采样的一个样本索引
+<span class="math inline">\(i∈{1,…,n}\)</span> ，并计算梯度 <span class="math inline">\(∇f_i(x)\)</span> 来迭代 <span class="math inline">\(x\)</span> ：</p>
+<blockquote>
+<p>这里是意思是随机挑选1个样本然后计算他的梯度来迭代x，而并不是跟之前一样n个样本的全部导数计算出来后更新</p>
+</blockquote>
+<p><span class="math display">\[
+x \leftarrow x−η∇f&#39;(x)
+\]</span></p>
+<p>这里 <span class="math inline">\(η\)</span>
+同样是学习率。可以看到每次迭代的计算开销从梯度下降的O(n)降到了常数O(1)。值得强调的是，<strong>随机梯度
+<span class="math inline">\(∇f_i(x)\)</span> 是对梯度 <span class="math inline">\(∇f(x)\)</span> 的无偏估计</strong>：</p>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108225735442.png" style="zoom:80%;"></p>
+<p>这意味着，平均来说，随机梯度是对梯度的一个良好的估计。</p>
+<p>下面我们通过在梯度中添加均值为0的随机噪声来模拟随机梯度下降，以此来比较它与梯度下降的区别。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">sgd_2d</span>(<span class="params">x1, x2, s1, s2</span>):</span><br><span class="line">    <span class="keyword">return</span> (x1 - eta * (<span class="number">2</span> * x1 + np.random.normal(<span class="number">0.1</span>)),</span><br><span class="line">            x2 - eta * (<span class="number">4</span> * x2 + np.random.normal(<span class="number">0.1</span>)), <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">show_trace_2d(f_2d, train_2d(sgd_2d))</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108225913699.png" style="zoom: 67%;"></p>
+<p><img src="/2026/01/05/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-2/image-20260108225946089.png" style="zoom:67%;"></p>
+<p>可以看到，随机梯度下降中自变量的迭代轨迹相对于梯度下降中的来说更为曲折。这是由于实验所添加的噪声使模拟的随机梯度的准确度下降。在实际中，这些噪声通常指训练数据集中的无意义的干扰。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
+              <a href="/tags/%E7%AC%AC7%E8%8A%82/" rel="tag"># 第7节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/12/24/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-1/" rel="prev" title="动手学深度学习 7.1 优化与深度学习">
+                  <i class="fa fa-angle-left"></i> 动手学深度学习 7.1 优化与深度学习
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
