@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动手学深度学习 7.4 动量法">
+<meta property="og:url" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260118213850830.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260118213929984.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260122223852633.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260122223917637.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260122225253278.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260122225315099.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260122233940252.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260122234041081.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260123000731176.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260123001351496.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260123003218108.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124143547005.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124143854670.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125024143293.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124151137678.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124151337724.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124151525421.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124151550616.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124151829842.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124151850666.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124153309649.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124153318705.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124161208986.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125023433080.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125023447385.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125023747801.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125023821862.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125023913942.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125024143293.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125024851361.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125025000740.png">
+<meta property="og:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125025309698.png">
+<meta property="article:published_time" content="2026-01-18T12:57:20.000Z">
+<meta property="article:modified_time" content="2026-01-24T19:05:54.198Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="动手学习深度学习">
+<meta property="article:tag" content="第7节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260118213850830.png">
+
+
+<link rel="canonical" href="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/","path":"2026/01/18/动手学深度学习7-4/","title":"动手学深度学习 7.4 动量法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>动手学深度学习 7.4 动量法 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">1. 梯度下降的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E9%87%8F%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">2. 动量法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E6%95%B0%E5%8A%A0%E6%9D%83%E7%A7%BB%E5%8A%A8%E5%B9%B3%E5%9D%87"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 指数加权移动平均</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%B1%E6%8C%87%E6%95%B0%E5%8A%A0%E6%9D%83%E7%A7%BB%E5%8A%A8%E5%B9%B3%E5%9D%87%E7%90%86%E8%A7%A3%E5%8A%A8%E9%87%8F%E6%B3%95"><span class="nav-number">3.2.</span> <span class="nav-text">2.2
+由指数加权移动平均理解动量法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E6%80%BB%E7%BB%93"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 小总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">3. 从零开始实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">4.1.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E6%B4%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.</span> <span class="nav-text">4. 简洁实现</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="动手学深度学习 7.4 动量法 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动手学深度学习 7.4 动量法
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-01-18 20:57:20" itemprop="dateCreated datePublished" datetime="2026-01-18T20:57:20+08:00">2026-01-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-01-25 03:05:54" itemprop="dateModified" datetime="2026-01-25T03:05:54+08:00">2026-01-25</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<hr>
+<p>在7.2节（梯度下降和随机梯度下降）中我们提到，目标函数有关自变量的梯度代表了目标函数在自变量当前位置下降最快的方向。因此，梯度下降也叫作最陡下降（steepest
+descent）。</p>
+<h2 id="梯度下降的问题">1. 梯度下降的问题</h2>
+<p>让我们考虑一个输入和输出分别为二维向量 <span class="math inline">\(x=[x_1,x_2]^⊤\)</span> 和标量的目标函数 <span class="math inline">\(f(x)=0.1x_1^2+2x_2^2\)</span>
+。与7.2节中不同，这里将 <span class="math inline">\(x_1^2\)</span>
+系数从 <span class="math inline">\(1\)</span> 减小到了 <span class="math inline">\(0.1\)</span>
+。下面实现基于这个目标函数的梯度下降，并演示使用学习率为 <span class="math inline">\(0.4\)</span> 时自变量的迭代轨迹。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">eta = <span class="number">0.4</span> <span class="comment"># 学习率</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">f_2d</span>(<span class="params">x1, x2</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0.1</span> * x1 ** <span class="number">2</span> + <span class="number">2</span> * x2 ** <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">gd_2d</span>(<span class="params">x1, x2, s1, s2</span>):</span><br><span class="line">    <span class="keyword">return</span> (x1 - eta * <span class="number">0.2</span> * x1, x2 - eta * <span class="number">4</span> * x2, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">d2l.show_trace_2d(f_2d, d2l.train_2d(gd_2d))</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260118213850830.png" style="zoom:67%;"></p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260118213929984.png" style="zoom: 67%;"></p>
+<p>可以看到，同一位置上，目标函数在竖直方向（x2轴方向）比在水平方向（x1轴方向）的斜率的绝对值更大。因此，给定学习率，梯度下降迭代自变量时会使自变量在竖直方向比在水平方向移动幅度更大。</p>
+<p>那么，我们需要一个<strong>较小的学习率从而避免自变量在竖直方向上越过目标函数最优解</strong>。然而，这会<strong>造成自变量在水平方向上朝最优解移动变慢</strong>。</p>
+<p>下面我们<strong>试着将学习率调得稍大一点</strong>，此时自变量在竖直方向不断越过最优解并逐渐发散。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">eta = <span class="number">0.6</span></span><br><span class="line">d2l.show_trace_2d(f_2d, d2l.train_2d(gd_2d))</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260122223852633.png" style="zoom:67%;"></p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260122223917637.png" style="zoom:50%;"></p>
+<h2 id="动量法">2. 动量法</h2>
+<p>动量法的提出是为了解决梯度下降的上述问题。</p>
+<p>由于小批量随机梯度下降比梯度下降更为广义，本章后续讨论将沿用7.3节（小批量随机梯度下降）中时间步t
+的小批量随机梯度 <span class="math inline">\(g_t\)</span> 的定义。</p>
+<p>设时间步<span class="math inline">\(t\)</span> 的自变量为 <span class="math inline">\(x_t\)</span> ，学习率为 <span class="math inline">\(\eta_t\)</span> 。 在时间步0，动量法创建速度变量
+<span class="math inline">\(v_0\)</span> ，并将其元素初始化成0。在时间步
+<span class="math inline">\(t&gt;0\)</span>
+，动量法对每次迭代的步骤做如下修改： <span class="math display">\[
+\begin{align*}
+v_t &amp;\leftarrow \gamma v_{t-1} + \eta_t g_t \\
+x_t &amp;\leftarrow x_{t-1} - v_t
+\end{align*}
+\]</span> 其中，动量超参数 <span class="math inline">\(\gamma\)</span>
+满足 <span class="math inline">\(0≤\gamma&lt;1\)</span> 。当 <span class="math inline">\(γ=0\)</span>
+时，动量法等价于小批量随机梯度下降。</p>
+<p>在解释动量法的数学原理前，让我们先从实验中观察梯度下降在使用动量法后的迭代轨迹。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">momentum_2d</span>(<span class="params">x1, x2, v1, v2</span>):</span><br><span class="line">    v1 = gamma * v1 + eta * <span class="number">0.2</span> * x1</span><br><span class="line">    v2 = gamma * v2 + eta * <span class="number">4</span> * x2</span><br><span class="line">    <span class="keyword">return</span> x1 - v1, x2 - v2, v1, v2</span><br><span class="line"></span><br><span class="line">eta, gamma = <span class="number">0.4</span>, <span class="number">0.5</span></span><br><span class="line">d2l.show_trace_2d(f_2d, d2l.train_2d(momentum_2d))</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260122225253278.png" style="zoom: 67%;"></p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260122225315099.png" style="zoom:67%;"></p>
+<p>可以看到使用较小的学习率 <span class="math inline">\(η=0.4\)</span>
+和动量超参数 <span class="math inline">\(γ=0.5\)</span>
+时，动量法在竖直方向上的移动更加平滑，且在水平方向上更快逼近最优解。下面使用较大的学习率η=0.6，此时自变量也不再发散。</p>
+<h3 id="指数加权移动平均">2.1 指数加权移动平均</h3>
+<p>为了从<strong>数学上理解动量法</strong>，让我们先解释一下指数加权移动平均（exponentially
+weighted moving average）。</p>
+<p>给定超参数 <span class="math inline">\(0≤γ&lt;1\)</span>
+，当前时间步t 的变量 <span class="math inline">\(y_t\)</span>
+是上一时间步 <span class="math inline">\(t−1\)</span> 的变量 <span class="math inline">\(y_{t−1}\)</span> 和当前时间步另一变量 <span class="math inline">\(x_t\)</span> 的线性组合：</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260122233940252.png" style="zoom: 67%;"></p>
+<p>我们可以对 <span class="math inline">\(y_t\)</span> 展开：</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260122234041081.png" style="zoom:67%;"></p>
+<p>令 <span class="math inline">\(n= \frac {1}{1-\gamma}\)</span> ，那么
+<span class="math inline">\((1- \frac {1}{n} )^n =
+\gamma^{1/(1-\gamma)}\)</span> ，这里我们<strong>用<span class="math inline">\(n\)</span> 构建了 <span class="math inline">\(γ\)</span> 的指数形式</strong>： <span class="math inline">\(\gamma^{1/(1-\gamma)}\)</span></p>
+<p>因为 <span class="math inline">\(\lim_{n \to \infty} (1- \frac
+{1}{n})^n = exp(-1) \approx 0.3679\)</span></p>
+<p>所以当 $ {} $ 时，因为 <span class="math inline">\(n= \frac
+{1}{1-\gamma}\)</span> ，所以 $ {n } $ ，此时 $(1- )^n = ^{1/(1-)} =
+exp(-1) $ ，</p>
+<p>如 <span class="math inline">\(\gamma = 0.95\)</span> 时，<span class="math inline">\(\gamma^{1/(1-\gamma)} = 0.95^{20} \approx
+exp(-1)\)</span></p>
+<p>如果<strong>把 <span class="math inline">\(exp(−1)\)</span>
+当作一个比较小的数</strong>，我们可以在<strong>近似中忽略所有含 <span class="math inline">\(\gamma^{1/(1-\gamma)}\)</span> 和比 <span class="math inline">\(\gamma^{1/(1-\gamma)}\)</span>
+更高阶的系数的项</strong> 。</p>
+<p>那么把 <span class="math inline">\(\gamma = 0.95\)</span>
+带入到原本的 <span class="math inline">\(y_t\)</span> 中 <span class="math display">\[
+y_t \approx 0.05 \sum_{i=0}^{19}{0.95^ix_{t-i}}
+\]</span> 即</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260123000731176.png" style="zoom:67%;"></p>
+<h3 id="由指数加权移动平均理解动量法">2.2
+由指数加权移动平均理解动量法</h3>
+<p>现在，我们对动量法的速度变量做变形： <span class="math display">\[
+\eta_tg_t = (1-\gamma)(\frac{\eta_t}{1-\gamma}g_t)
+\]</span>
+<img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260123001351496.png" style="zoom:80%;"></p>
+<p>由指数加权移动平均的形式可得，速度变量 <span class="math inline">\(v_t\)</span> 实际上对序列<br>
+<span class="math display">\[
+\frac {\eta_{t-i}}{(1-\gamma)}g_{t-i}: i=0,...,\frac{1}{(1-\gamma)}-1
+\]</span> 做了指数加权移动平均。</p>
+<p>为什么是以 <span class="math inline">\(\frac{1}{(1-\gamma)}-1\)</span> 结尾呢，因为</p>
+<p>我们2.1的原理里面学过
+<img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260123003218108.png" style="zoom: 67%;"></p>
+<p>然后我们说过可以在<strong>近似中忽略所有含 <span class="math inline">\(\gamma^{1/(1-\gamma)}\)</span> 和比 <span class="math inline">\(\gamma^{1/(1-\gamma)}\)</span>
+更高阶的系数的项</strong> 。</p>
+<p>那么我们单独看<strong>指数项</strong>，其实就是 0 到 <span class="math inline">\(\frac{1}{1-\gamma}\)</span> 个项的 <span class="math inline">\(\gamma\)</span> 指数，由于我们忽略了第 <span class="math inline">\(\frac{1}{1-\gamma}\)</span> 项，即 <span class="math inline">\(\gamma^{1/(1-\gamma)}\)</span> ，所以一共就是 0 到
+<span class="math inline">\(\frac{1}{1-\gamma}-1\)</span> 个项。</p>
+<p>换句话说，相比于小批量随机梯度下降，动量法在每个时间步的自变量更新量近似于将<strong>最近
+<span class="math inline">\(\frac{1}{1-\gamma}\)</span>
+个时间步</strong>的普通<strong>更新量</strong>（即学习率乘以梯度）做了<strong>指数加权移动平均</strong>后再除以1−γ。就是下面这个
+<span class="math display">\[
+\frac {\eta_{t}}{(1-\gamma)}g_{t}
+\]</span>
+<img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124143547005.png" style="zoom:67%;"></p>
+<p>我们可以看到 <span class="math inline">\(\frac
+{\eta_{t}}{(1-\gamma)}g_{t}\)</span> 相当于指数加权移动平均中的 <span class="math inline">\(x_t\)</span></p>
+<p>那么我们将 <span class="math inline">\(\frac
+{\eta_{t}}{(1-\gamma)}g_{t}\)</span> 带入到展开式中</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124143854670.png" style="zoom: 67%;"></p>
+<p>我们能抵消掉 <span class="math inline">\((1-\gamma)\)</span>
+，最终结果实际上就是 <span class="math inline">\(\eta_{t}g_t\)</span>
+的用权重 <span class="math inline">\(\gamma\)</span>
+做的指数加权平均</p>
+<p>即</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125024143293.png"></p>
+<p>所以，<strong>在动量法中，自变量在各个方向上的移动幅度不仅取决当前梯度，还取决于过去的各个梯度在各个方向上是否一致</strong>。在本节之前示例的优化问题中，所有梯度在水平方向上为正（向右），而在竖直方向上时正（向上）时负（向下）。这样，我们就可以使用较大的学习率，从而使自变量向最优解更快移动。</p>
+<h3 id="小总结">3.3 小总结</h3>
+<p>我们原本的动量法公式</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124151137678.png" style="zoom:67%;"></p>
+<p>实际上我们展开后相当于</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124151337724.png"></p>
+<h2 id="从零开始实现">3. 从零开始实现</h2>
+<p>相对于小批量随机梯度下降，动量法需要对每一个自变量维护一个同它一样形状的速度变量，且超参数里多了动量超参数。实现中，我们将速度变量用更广义的状态变量states表示。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">features, labels = d2l.get_data_ch7()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">init_momentum_states</span>():</span><br><span class="line">    v_w = torch.zeros((features.shape[<span class="number">1</span>], <span class="number">1</span>), dtype=torch.float32)</span><br><span class="line">    v_b = torch.zeros(<span class="number">1</span>, dtype=torch.float32)</span><br><span class="line">    <span class="keyword">return</span> (v_w, v_b)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sgd_momentum</span>(<span class="params">params, states, hyperparams</span>):</span><br><span class="line">    <span class="keyword">for</span> p, v <span class="keyword">in</span> <span class="built_in">zip</span>(params, states):</span><br><span class="line">        v.data = hyperparams[<span class="string">&#x27;momentum&#x27;</span>] * v.data + hyperparams[<span class="string">&#x27;lr&#x27;</span>] * p.grad.data</span><br><span class="line">        p.data -= v.data</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>我们先将<strong>动量超参数momentum设0.5</strong>，这时可以看成是特殊的小批量随机梯度下降：其小批量随机梯度为<strong>最近2个时间步2倍的小批量梯度的加权平均</strong>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">d2l.train_ch7(sgd_momentum, init_momentum_states(),</span><br><span class="line">              &#123;<span class="string">&#x27;lr&#x27;</span>: <span class="number">0.02</span>, <span class="string">&#x27;momentum&#x27;</span>: <span class="number">0.5</span>&#125;, features, labels)</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124151525421.png" style="zoom:67%;"></p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124151550616.png" style="zoom: 67%;"></p>
+<p>将动量超参数momentum增大到0.9，这时依然可以看成是特殊的小批量随机梯度下降：其小批量随机梯度为最近10个时间步的10倍小批量梯度的加权平均。我们先保持学习率0.02不变。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">d2l.train_ch7(sgd_momentum, init_momentum_states(),</span><br><span class="line">              &#123;<span class="string">&#x27;lr&#x27;</span>: <span class="number">0.02</span>, <span class="string">&#x27;momentum&#x27;</span>: <span class="number">0.9</span>&#125;, features, labels)</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124151829842.png" style="zoom: 67%;"></p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124151850666.png" style="zoom:67%;"></p>
+<p>可见目标函数值在后期迭代过程中的变化不够平滑。直觉上，10倍小批量梯度比2倍小批量梯度大了5倍，我们可以试着将学习率减小到原来的1/5。此时目标函数值在下降了一段时间后变化更加平滑。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">d2l.train_ch7(sgd_momentum, init_momentum_states(),</span><br><span class="line">              &#123;<span class="string">&#x27;lr&#x27;</span>: <span class="number">0.004</span>, <span class="string">&#x27;momentum&#x27;</span>: <span class="number">0.9</span>&#125;, features, labels)</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124153309649.png" style="zoom:67%;"></p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124153318705.png" style="zoom:67%;"></p>
+<h3 id="小结">小结</h3>
+<p>前面说的几倍几倍的，这里解释一下。</p>
+<p>先回忆我们的公式</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260124161208986.png"></p>
+<p>我们将权重部分提取出来，趋于无限，加和得到</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125023433080.png" style="zoom:67%;"></p>
+<p>那么带入0.5和0.9结果如下</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125023447385.png" style="zoom:67%;"></p>
+<p>以0.9为例，如果趋于无限项的时候，上图中权重和是10，那么就说明我们
+<strong><span class="math inline">\(v_t\)</span> 里面带有10倍的
+单步梯度的量级</strong> ( 可以理解成“单步梯度” =
+当前一步的小批量梯度平均值 )</p>
+<p>因此 动量0.9 的 <span class="math inline">\(v\)</span> 相对于
+动量0.5的 <span class="math inline">\(v\)</span>
+来说，其数值大小相差了5倍。</p>
+<p>实际上我们项是有限的</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125023747801.png" style="zoom: 67%;"></p>
+<p>换成我们的项数，得到公式</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125023821862.png" style="zoom:67%;"></p>
+<p>然后带入γ = 0.5和γ = 0.9，分别得到刚才图中的中间列</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125023913942.png" style="zoom:67%;"></p>
+<p>数值上来说 γ=0.9的实际权重总和 仍然近似是 γ=0.5的实际权重总和
+5倍。</p>
+<p>好了，现在我们知道以下结果</p>
+<p>动量0.9梯度 = 10倍的 单步梯度的量级</p>
+<p>动量0.5梯度 = 2倍的 单步梯度的量级</p>
+<p>那么在将<strong>动量从0.5修改成0.9</strong>的时候，我们应该将<strong>学习率变成原来的1/5</strong>
+，<strong>保持在动量0.5更新时候的更新幅度</strong>（前面实验看到那个时候是比较平滑的）这样，即使动量更大，参数每次更新的实际幅度仍然和动量较小时相当，<strong>保证训练平稳</strong>。</p>
+<p>也就是说将以下公式中的 η 变成原来的1/5，那么实际上就是 v_0.9 = v_0.5
+* 1/5</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125024143293.png"></p>
+<h2 id="简洁实现">4. 简洁实现</h2>
+<p>在PyTorch中，只需要通过参数momentum来指定动量超参数即可使用动量法。</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125024851361.png" style="zoom:67%;"></p>
+<p>这里用指针的方式直接传入参数。（我们能发现实际就是原本 随机梯度下降的
+<code>torch.optim.SGD</code> 里面在添加学习率 <code>lr</code>
+参数的同时，将参数 <code>momentum</code>
+也传入，就会自动切换成动量法的随机梯度下降 ）</p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125025000740.png"></p>
+<p><img src="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/image-20260125025309698.png" style="zoom:67%;"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 动手学习深度学习</a>
+              <a href="/tags/%E7%AC%AC7%E8%8A%82/" rel="tag"># 第7节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-3/" rel="prev" title="动手学深度学习 7.3 小批量随机梯度下降">
+                  <i class="fa fa-angle-left"></i> 动手学深度学习 7.3 小批量随机梯度下降
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
