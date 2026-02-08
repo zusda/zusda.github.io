@@ -32,18 +32,31 @@
     id="7120442532"> 
 </meting-js> 
 
-    <meta property="og:type" content="article">
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
 <meta property="og:title" content="动手学深度学习 7.7 AdaDelta算法">
 <meta property="og:url" content="http://example.com/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202204843921.png">
+<meta property="og:image" content="http://example.com/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202204945549.png">
+<meta property="og:image" content="http://example.com/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202205122019.png">
+<meta property="og:image" content="http://example.com/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202205306160.png">
+<meta property="og:image" content="http://example.com/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202205122019.png">
+<meta property="og:image" content="http://example.com/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202205306160.png">
+<meta property="og:image" content="http://example.com/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202204945549.png">
+<meta property="og:image" content="http://example.com/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260207172824007.png">
+<meta property="og:image" content="http://example.com/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260207172900180.png">
+<meta property="og:image" content="http://example.com/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260207173503211.png">
 <meta property="article:published_time" content="2026-02-02T12:36:47.000Z">
-<meta property="article:modified_time" content="2026-02-02T12:38:06.280Z">
+<meta property="article:modified_time" content="2026-02-07T21:50:03.671Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ai">
 <meta property="article:tag" content="动手学习深度学习">
 <meta property="article:tag" content="第7节">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202204843921.png">
 
 
 <link rel="canonical" href="http://example.com/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/">
@@ -143,7 +156,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -156,6 +169,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">2. 从零开始实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E6%B4%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">3. 简洁实现</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -168,7 +182,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-count">55</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -234,9 +248,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2026-02-02 20:36:47 / 修改时间：20:38:06" itemprop="dateCreated datePublished" datetime="2026-02-02T20:36:47+08:00">2026-02-02</time>
+      <time title="创建时间：2026-02-02 20:36:47" itemprop="dateCreated datePublished" datetime="2026-02-02T20:36:47+08:00">2026-02-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-08 05:50:03" itemprop="dateModified" datetime="2026-02-08T05:50:03+08:00">2026-02-08</time>
     </span>
 
   
@@ -248,7 +268,66 @@
     
     
     
-    <div class="post-body" itemprop="articleBody">
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
+<p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<hr>
+<p>除了RMSProp算法以外，另一个常用优化算法AdaDelta算法也针对AdaGrad算法在迭代后期可能较难找到有用解的问题做了改进
+。有意思的是，<strong>AdaDelta算法没有学习率</strong>这一超参数。</p>
+<p>#1. 算法</p>
+<p>AdaDelta算法也像RMSProp算法一样，使用了小批量随机梯度gt按元素平方的指数加权移动平均变量
+<span class="math inline">\(s_t\)</span> 。</p>
+<p>在时间步0，它的所有元素被初始化为0。给定超参数 <span class="math inline">\(0≤ρ&lt;1\)</span> （对应RMSProp算法中的γ），</p>
+<p>在时间步 <span class="math inline">\(t&gt;0\)</span>
+，同RMSProp算法一样计算</p>
+<p><img src="/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202204843921.png" style="zoom:67%;"></p>
+<p>与RMSProp算法不同的是，<strong>AdaDelta算法还维护一个额外的状态变量
+<span class="math inline">\(Δx_t\)</span> ，</strong></p>
+<p>其元素同样在时间步0时被初始化为0。我们使用 <span class="math inline">\(Δx_{t−1}\)</span> 来计算自变量的变化量</p>
+<p><img src="/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202204945549.png" style="zoom:67%;"></p>
+<p>其中ϵ是为了维持数值稳定性而添加的常数，如 <span class="math inline">\(10^{-5}\)</span> 。</p>
+<p>接着更新自变量：</p>
+<p><img src="/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202205122019.png" style="zoom:67%;"></p>
+<p>最后，我们使用 <span class="math inline">\(Δx_t\)</span>
+来记录自变量变化量 <span class="math inline">\(g^′_t\)</span>
+按元素平方的指数加权移动平均：</p>
+<p><img src="/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202205306160.png" style="zoom:67%;"></p>
+<p>可以看到，如不考虑ϵ的影响，AdaDelta算法跟RMSProp算法的不同之处在于使用
+<span class="math inline">\(\sqrt{\triangle x_{t-1}}\)</span>
+来替代学习率 <span class="math inline">\(η\)</span> 。</p>
+<blockquote>
+<p>从
+<img src="/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202205122019.png" style="zoom:67%;">
+中我们能看出，<span class="math inline">\(g&#39;_t\)</span> 是 <span class="math inline">\(x\)</span> 的更新量。</p>
+<p><img src="/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202205306160.png" style="zoom:67%;"></p>
+<p>而 <span class="math inline">\(Δx_t\)</span> 则是 <span class="math inline">\(x\)</span> 更新量的加权平均。</p>
+<p>使用 <span class="math inline">\(Δx_t\)</span>
+作为梯度更新的分子。使得<strong>“更新量该有多大”不是绝对的，是“相对参数尺度”的</strong>。即上一次更新量
+<span class="math inline">\(g&#39;_{t-1}\)</span>
+相比以前更大的话，那么此时更新后的 <span class="math inline">\(Δx_t\)</span> 相比以前更大，所以
+带入以下公式中，此时的学习率的分子也相比以前更大。（这里是指数滑动平均，单次大更新
+不会 让 Δx 突然变大，必须
+持续很多步都大，只有持续可控的变化才能积累。对于更新量越大， <span class="math inline">\(Δx_t\)</span>
+更大可以通俗的理解为：我已经反复这样走过，而且没出事，所以我要加快进度。）</p>
+<p><img src="/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260202204945549.png" style="zoom:67%;"></p>
+</blockquote>
+<h2 id="从零开始实现">2. 从零开始实现</h2>
+<p>AdaDelta算法需要对每个自变量维护两个状态变量，即 <span class="math inline">\(s_t\)</span> 和 <span class="math inline">\(Δx_t\)</span>
+。我们按AdaDelta算法中的公式实现该算法。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">init_adadelta_states</span>():</span><br><span class="line">    s_w, s_b = torch.zeros((features.shape[<span class="number">1</span>], <span class="number">1</span>), dtype=torch.float32), torch.zeros(<span class="number">1</span>, dtype=torch.float32)</span><br><span class="line">    delta_w, delta_b = torch.zeros((features.shape[<span class="number">1</span>], <span class="number">1</span>), dtype=torch.float32), torch.zeros(<span class="number">1</span>, dtype=torch.float32)</span><br><span class="line">    <span class="keyword">return</span> ((s_w, delta_w), (s_b, delta_b))</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">adadelta</span>(<span class="params">params, states, hyperparams</span>):</span><br><span class="line">    rho, eps = hyperparams[<span class="string">&#x27;rho&#x27;</span>], <span class="number">1e-5</span></span><br><span class="line">    <span class="keyword">for</span> p, (s, delta) <span class="keyword">in</span> <span class="built_in">zip</span>(params, states):</span><br><span class="line">        s[:] = rho * s + (<span class="number">1</span> - rho) * (p.grad.data**<span class="number">2</span>)</span><br><span class="line">        g = p.grad.data * torch.sqrt((delta + eps) / (s + eps))</span><br><span class="line">        p.data -= g</span><br><span class="line">        delta[:] = rho * delta + (<span class="number">1</span> - rho) * g * g</span><br></pre></td></tr></table></figure>
+<p>使用超参数 ρ=0.9 来训练模型。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">d2l.train_ch7(adadelta, init_adadelta_states(), &#123;<span class="string">&#x27;rho&#x27;</span>: <span class="number">0.9</span>&#125;, features, labels)</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260207172824007.png" style="zoom:67%;"></p>
+<p><img src="/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260207172900180.png" style="zoom:67%;"></p>
+<h2 id="简洁实现">3. 简洁实现</h2>
+<p>通过名称为Adadelta的优化器方法，我们便可使用PyTorch提供的AdaDelta算法。它的超参数可以通过rho来指定。(rho
+也就是 <span class="math inline">\(\rho\)</span>
+，即我们的指数加权移动平均的衰减系数，算法中的 <span class="math inline">\(s和Δx_t\)</span> 共用同一个 rho )</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">d2l.train_pytorch_ch7(torch.optim.Adadelta, &#123;<span class="string">&#x27;rho&#x27;</span>: <span class="number">0.9</span>&#125;, features, labels)</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/02/02/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-7/image-20260207173503211.png" style="zoom:67%;"></p>
 
     </div>
 
@@ -272,6 +351,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2026/02/07/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-8/" rel="next" title="动手学深度学习7-8">
+                  动手学深度学习7-8 <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
