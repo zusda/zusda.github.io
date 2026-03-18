@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="强化学习 3.表格型方法（理论部分）">
+<meta property="og:url" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316144632665.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316145717098.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316150611617.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316150645243.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316151032995.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316151554527.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316152404254.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316153207307.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316154754466.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316160612573.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316160840104.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316174716772.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180047874.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180117613.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180134358.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180251237.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180353204.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180402867.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180427426.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180435937.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180450864.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180500767.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180659788.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317163647372.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317164015375.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317164125318.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317164544355.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317164850251.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317165758408.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317170418898.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317171022646.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317171108500.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317172944424.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317174103831.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317174130306.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317175124020.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317175213363.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318002012729.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318002847399.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318002012729.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318144224373.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318144242679.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318144518235.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318144602255.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318144752176.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145031957.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145051700.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145123309.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145216469.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145303110.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145639767.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145729447.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145756330.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145851860.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145915907.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318150714752.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318150745459.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318150808756.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318171534186.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317164850251.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318172226308.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318172643555.png">
+<meta property="article:published_time" content="2026-03-16T06:39:22.000Z">
+<meta property="article:modified_time" content="2026-03-18T09:41:32.773Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="第3节">
+<meta property="article:tag" content="蘑菇书">
+<meta property="article:tag" content="强化想学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316144632665.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/","path":"2026/03/16/强化学习3/","title":"强化学习 3.表格型方法（理论部分）"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>强化学习 3.表格型方法（理论部分） | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%89%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%85%8D%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">1.有模型与免模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 有模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%8D%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 免模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#q-%E8%A1%A8%E6%A0%BC"><span class="nav-number">3.</span> <span class="nav-text">2. Q 表格</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%8D%E6%A8%A1%E5%9E%8B%E9%A2%84%E6%B5%8B-%E4%BB%B7%E5%80%BC%E8%AF%84%E4%BC%B0"><span class="nav-number">4.</span> <span class="nav-text">3. 免模型预测 (价值评估)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E7%AD%96%E7%95%A5%E8%AF%84%E4%BC%B0"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 蒙特卡洛策略评估</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E5%BA%8F%E5%B7%AE%E5%88%86"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 时序差分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E6%96%B9%E6%B3%95%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E6%96%B9%E6%B3%95%E4%BB%A5%E5%8F%8A%E6%97%B6%E5%BA%8F%E5%B7%AE%E5%88%86%E6%96%B9%E6%B3%95%E7%9A%84%E8%87%AA%E4%B8%BE%E5%92%8C%E9%87%87%E6%A0%B7"><span class="nav-number">4.3.</span> <span class="nav-text">3.3
+动态规划方法、蒙特卡洛方法以及时序差分方法的自举和采样</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%8D%E6%A8%A1%E5%9E%8B%E6%8E%A7%E5%88%B6"><span class="nav-number">5.</span> <span class="nav-text">4. 免模型控制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%BF%E4%B9%89%E7%AD%96%E7%95%A5%E8%BF%AD%E4%BB%A3generalized-policy-iterationgpi"><span class="nav-number">5.1.</span> <span class="nav-text">4.1
+广义策略迭代（generalized policy iteration，GPI）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sarsa%E5%90%8C%E7%AD%96%E7%95%A5%E6%97%B6%E5%BA%8F%E5%B7%AE%E5%88%86%E6%8E%A7%E5%88%B6"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 Sarsa：同策略时序差分控制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E7%9A%84%E5%9B%9E%E6%8A%A5return-td%CE%BB%CE%BB-return"><span class="nav-number">5.3.</span> <span class="nav-text">4.3 特殊的回报(return)：
+TD(λ)&#x2F;λ-return</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B5%84%E6%A0%BC%E8%BF%B9"><span class="nav-number">5.4.</span> <span class="nav-text">4.4 资格迹</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%AC%E5%85%B1%E8%AE%A1%E7%AE%97%E5%86%85%E5%AE%B9"><span class="nav-number">5.4.1.</span> <span class="nav-text">4.4.1 公共计算内容</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B4%AF%E8%AE%A1%E8%BF%B9"><span class="nav-number">5.4.2.</span> <span class="nav-text">4.4.2 累计迹</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%BF%E6%8D%A2%E8%BF%B9"><span class="nav-number">5.4.3.</span> <span class="nav-text">4.4.3 替换迹</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%AF%E8%AE%A1%E8%BF%B9%E4%B8%8E-%CE%BB-return%E7%9A%84%E7%AD%89%E5%BC%8F%E8%AF%81%E6%98%8E"><span class="nav-number">5.5.</span> <span class="nav-text">4.5 累计迹与
+λ-return的等式证明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%AF%E8%AE%A1%E8%BF%B9%E7%9A%84%E6%84%8F%E4%B9%89"><span class="nav-number">5.6.</span> <span class="nav-text">4.6 累计迹的意义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%CE%BB-return-%E5%9C%A8%E6%9C%89%E9%99%90%E6%AD%A5%E4%B8%8B%E7%9A%84%E5%8F%98%E5%8C%96"><span class="nav-number">5.7.</span> <span class="nav-text">4.7 λ-return 在有限步下的变化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#q%E5%AD%A6%E4%B9%A0%E5%BC%82%E7%AD%96%E7%95%A5%E6%97%B6%E5%BA%8F%E5%B7%AE%E5%88%86%E6%8E%A7%E5%88%B6"><span class="nav-number">5.8.</span> <span class="nav-text">4.6 Q学习：异策略时序差分控制</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">58</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="强化学习 3.表格型方法（理论部分） | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          强化学习 3.表格型方法（理论部分）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-03-16 14:39:22" itemprop="dateCreated datePublished" datetime="2026-03-16T14:39:22+08:00">2026-03-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-18 17:41:32" itemprop="dateModified" datetime="2026-03-18T17:41:32+08:00">2026-03-18</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《蘑菇书》原文（课本）：https://datawhalechina.github.io/easy-rl/#/</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<p>蘑菇书的文章结构不会跟之前《动手学深度学习》按照原文章节进行，个人会适当调节。</p>
+<hr>
+<p>策略最简单的表示是查找表（look-up table），即表格型策略（tabular
+policy）。</p>
+<p>使用查找表的强化学习方法称为表格型方法（tabular
+method），如蒙特卡洛、Q学习和Sarsa。本章通过最简单的表格型方法来讲解如何使用基于价值的方法求解强化学习问题。</p>
+<h2 id="有模型与免模型">1.有模型与免模型</h2>
+<h3 id="有模型">1.1 有模型</h3>
+<p>如果我们<strong>知道环境的状态转移概率和奖励函数</strong>，就可以认为这个环境是已知的，因为我们用这两个函数来描述环境。如果环境是已知的，我们其实可以用动态规划算法去计算。</p>
+<p>在有模型的情况下，如图 3.4
+所示，策略迭代和价值迭代都需要得到环境的转移和奖励函数，所以在这个过程中，智能体没有与环境进行交互。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316144632665.png" style="zoom:67%;"></p>
+<h3 id="免模型">1.2 免模型</h3>
+<p>强化学习可以应用于完全未知的和随机的环境。</p>
+<p>强化学习像人类一样学习，人类通过尝试不同的路来学习，通过尝试不同的路，人类可以慢慢地了解哪个状态会更好。</p>
+<p>免模型强化学习方法没有获取环境的状态转移和奖励函数，而是让智能体与环境进行交互，采集大量的轨迹数据，智能体从轨迹中获取信息来改进策略，从而获得更多的奖励。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316145717098.png" style="zoom:67%;"></p>
+<h2 id="q-表格">2. Q 表格</h2>
+<p>在野外遇到熊的时候，我们可以选择装死或者逃跑，在多次尝试和熊打交道之后，我们就可以对熊的不同的状态做出判断，用状态动作价值来表达在某个状态下某个动作的好坏。</p>
+<p>如图 3.6 所示，如果 Q
+表格是一张已经训练好的表格，这张表格就像是一本生活手册。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316150611617.png" style="zoom:67%;"></p>
+<p>我们再举个例子。悬崖行走问题是强化学习的一个经典问题，如图 3.9 所示，
+该问题需要智能体从出发点 S 出发，到达目的地
+G，同时避免掉进悬崖（cliff），每走一步就有 −1分 的惩罚，掉进悬崖会有
+−100
+分的惩罚，但游戏不会结束，智能体会回到出发点，游戏继续，直到到达目的地结束游戏。</p>
+<p>智能体需要尽快地到达目的地。
+为了到达目的地，智能体可以沿着例如蓝线和红线的路线行走。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316150645243.png" style="zoom:67%;"></p>
+<p>在悬崖行走问题的环境中，我们<strong>怎么计算状态动作价值/Q值（未来的总奖励）呢？</strong></p>
+<p>我们可以选择一条路线，计算出这条路线上每个状态动作的价值。在悬崖行走问题里面，智能体每走一步都会拿到
+−1 分的奖励，只有到达目的地之后，智能体才会停止。</p>
+<p>第二章我们讲过价值的计算如下，其原因也之前说过因此不再累述 <span class="math display">\[
+G_t = r_{t+1}+\gamma r_{t+2} +\gamma^2 r_{t+3}+...
+\]</span> 以图中红色线路为例。如果 γ=0.6，如图 3.10c
+所示。我们可以利用如下公式从后往前推。 <span class="math display">\[
+G_t=r_{t+1}+\gamma G_{t+1}
+\]</span>
+<img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316151032995.png" style="zoom: 80%;"></p>
+<p>我们得到了该路线上所有状态对应动作走右边的价值，即Q(s,右)的值。</p>
+<p>最后我们要求解的就是一张 Q 表格，类似于图
+3.11，它的行数是所有状态的数量，一般可以用坐标来表示格子的状态，也可以用
+1、2、3、4、5、6、7 来表示不同的位置。Q
+表格的列表示上、下、左、右4个动作。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316151554527.png" style="zoom:67%;"></p>
+<h2 id="免模型预测-价值评估">3. 免模型预测 (价值评估)</h2>
+<h3 id="蒙特卡洛策略评估">3.1 蒙特卡洛策略评估</h3>
+<p>蒙特卡洛方法是基于采样的方法，给定策略
+π，我们让智能体与环境进行交互，可以得到很多轨迹。每个轨迹都有对应的回报：
+<span class="math display">\[
+G_t = r_{t+1}+\gamma r_{t+2} +\gamma^2 r_{t+3}+...
+\]</span>
+我们求出所有轨迹的回报的平均值，就可以知道某一个策略对应状态的价值，即</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316152404254.png" style="zoom:67%;"></p>
+<p>蒙特卡洛仿真是指我们可以<strong>采样大量的轨迹，计算所有轨迹的真实回报，然后计算平均值</strong>。蒙特卡洛方法使用经验平均回报（empirical
+mean
+return）的方法来估计，它不需要马尔可夫决策过程的状态转移函数和奖励函数，并且不需要像动态规划那样用自举的方法。</p>
+<p>此外，蒙特卡洛方法有一定的局限性，它只能用在有终止的马尔可夫决策过程中。</p>
+<blockquote>
+<p>接下来，我们对蒙特卡洛方法进行总结。为了得到评估
+V(s)，我们采取了如下的步骤。</p>
+<p>（1）在每个回合中，如果在时间步 t 状态 s 被访问了，那么</p>
+<p>​ • 状态s 的 <strong>访问数N(s)</strong> 增加 1，<span class="math inline">\(N(s)←N(s)+1\)</span>。</p>
+<p>​ • 状态s 的 <strong>总的回报S(s)</strong> 增加 <span class="math inline">\(G_t\)</span>，<span class="math inline">\(S(s)←S(s)+G_t\)</span>。</p>
+<p>（2）状态 s 的价值可以通过回报的平均来估计，即 <span class="math inline">\(V(s)=S(s)/N(s)\)</span> 。</p>
+</blockquote>
+<p>根据大数定律，只要我们得到足够多的轨迹，就可以趋近这个策略对应的价值函数。当
+<span class="math inline">\(N(s)→∞\)</span> 时。 <span class="math display">\[
+V(s) \rightarrow V_\pi(s)
+\]</span></p>
+<p>假设现在有样本 <span class="math inline">\(x_1,x_2,⋯ ,x_t\)</span>我们可以把经验均值（empirical
+mean）转换成增量均值（incremental mean）的形式：</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316153207307.png" style="zoom:67%;"></p>
+<p>通过这种转换，我们就可以把<strong>上一时刻的平均值</strong>与<strong>现在时刻的值</strong>建立联系，即
+<span class="math display">\[
+u_t=u_{t-1}+\frac{1}{t}{(x_t-u_{t-1})}
+\]</span>
+我们可以把蒙特卡洛方法更新的方法写成增量式蒙特卡洛（incremental
+MC）方法。我们采集数据，得到一个新的轨迹
+(s1,a1,r1,…,st)。对于这个轨迹，我们采用增量的方法进行更新：</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316154754466.png" style="zoom:67%;"></p>
+<p>我们可以直接把 <span class="math inline">\(\frac{1}{N(s_t)}\)</span>
+换成<span class="math inline">\(\alpha\)</span> （学习率），即 <span class="math display">\[
+V(s_t) \leftarrow V(s_{t})+\alpha(G_t-V(s_{t}))
+\]</span> 其中，α 代表更新的速率，我们可以对其进行设置。</p>
+<blockquote>
+<p>为什么可以把 <span class="math inline">\(\frac{1}{N(s_t)}\)</span>
+换成<span class="math inline">\(\alpha\)</span> （学习率）？</p>
+<p>原因是：在强化学习中，我们往往不需要严格的“统计平均真值”，而是希望：</p>
+<ul>
+<li>在数据不断变化的环境（非平稳环境）中持续学习</li>
+<li>更重视新数据（因为策略在变）</li>
+<li>允许一定偏差，用于更快收敛</li>
+</ul>
+<p>如果我们去除 公式 <span class="math inline">\(V(s_t) \leftarrow
+V(s_{t})+\alpha(G_t-V(s_{t}))\)</span>
+中的括号并重新整合，我们得到如下公式 <span class="math display">\[
+V(s_t) \leftarrow (1-\alpha)V(s_{t})+\alpha G_t
+\]</span> 其本质是 指数<strong>加权移动平均</strong>，参考 <a href="https://zusda.github.io/2026/01/18/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A07-4/">动手学深度学习
+7.4 动量法</a></p>
+</blockquote>
+<p>我们再来看一下动态规划方法 和 蒙特卡洛方法的差异。</p>
+<p>动态规划也是常用的估计价值函数的方法。在动态规划方法里面，我们使用了自举的思想。自举就是我们基于之前估计的量来估计一个量。此外，动态规划方法使用贝尔曼期望备份（Bellman
+expectation backup），通过上一时刻的值 <span class="math inline">\(V_{i-1}(s&#39;)\)</span> 来更新当前时刻的值 <span class="math inline">\(V_i(s)\)</span> ，即</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316160612573.png" style="zoom:67%;"></p>
+<p>将其不停迭代，最后可以收敛。</p>
+<p>蒙特卡洛方法通过一个回合的经验平均回报（实际得到的奖励）来进行更新，即
+<span class="math display">\[
+V(s_t) \leftarrow V(s_{t})+\alpha(G_t-V(s_{t}))
+\]</span> 如图 3.13
+所示，我们使用蒙特卡洛方法得到的轨迹对应树上蓝色的轨迹，轨迹上的状态已经是决定的，采取的动作也是已经决定的。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316160840104.png" style="zoom:67%;"></p>
+<p>我们现在只更新这条轨迹上的所有状态，<strong>与这条轨迹没有关系的状态都不进行更新</strong>。</p>
+<ol type="1">
+<li>蒙特卡洛方法适用于环境未知的情况，而动态规划只适合有模型的方法。</li>
+<li>蒙特卡洛方法只需要更新一条轨迹的状态，而动态规划方法需要更新所有的状态。状态数量很多的时候（比如100万个、200万个），我们使用动态规划方法进行迭代，速度是非常慢的。这也是基于采样的蒙特卡洛方法相对于动态规划方法的优势。</li>
+</ol>
+<h3 id="时序差分">3.2 时序差分</h3>
+<p>时序差分是介于蒙特卡洛和动态规划之间的方法，它是免模型的，不需要马尔可夫决策过程的转移矩阵和奖励函数。</p>
+<p>此外，时序差分方法可以从不完整的回合中学习，并且结合了自举的思想。</p>
+<p>接下来，我们对时序差分方法进行总结。</p>
+<p>时序差分方法的目的是对于某个给定的策略
+π，在线（online）地算出它的价值函数 <span class="math inline">\(V_\pi\)</span>​
+，即一步一步地（step-by-step）算。</p>
+<p>最简单的算法是一步时序差分（one-step
+TD），即TD(0)。每往前走一步，就做一步自举，用得到的估计回报（estimated
+return） <span class="math inline">\(r_{t+1}+\gamma V(s_{t+1})\)</span>
+来更新上一时刻的值 <span class="math inline">\(V(s_t)\)</span>。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316174716772.png" style="zoom:67%;"></p>
+<p>估计回报 <span class="math inline">\(r_{t+1}+\gamma
+V(s_{t+1})\)</span>) 被称为<strong>时序差分目标</strong>（TD target），
+时序差分目标是带衰减的未来奖励的总和。</p>
+<p>时序差分目标由两部分组成：</p>
+<ol type="1">
+<li>我们走了某一步后得到的实际奖励 <span class="math inline">\(r_{t+1}\)</span></li>
+<li>我们利用了之前的估计 <span class="math inline">\(V(s_{t+1})\)</span>
+，并且加了折扣因子，即 <span class="math inline">\(\gamma
+V(s_{t+1})\)</span></li>
+</ol>
+<p>时序差分误差（TD error）: <span class="math display">\[
+\delta = r_{t+1}+\gamma V(s_{t+1})-V(s_t)
+\]</span></p>
+<blockquote>
+<p>我们对比一下蒙特卡洛方法和时序差分方法。</p>
+<p>在蒙特卡洛方法里面, <span class="math inline">\(G_t\)</span>
+是实际得到的值（可以看成目标），因为它已经把一条轨迹跑完了，可以算出每个状态实际的回报。</p>
+<p>时序差分不等轨迹结束，往前走一步，就可以更新价值函数。</p>
+<ol type="1">
+<li>时序差分方法可以在线学习（online
+learning），每走一步就可以更新，效率高。蒙特卡洛方法必须等游戏结束时才可以学习。</li>
+<li>时序差分方法可以从不完整序列上进行学习。蒙特卡洛方法只能从完整的序列上进行学习。</li>
+<li>时序差分方法可以在连续的环境下（没有终止）进行学习。蒙特卡洛方法只能在有终止的情况下学习。</li>
+<li>时序差分方法利用了马尔可夫性质，在马尔可夫环境下有更高的学习效率。蒙特卡洛方法没有假设环境具有马尔可夫性质，利用采样的价值来估计某个状态的价值，在不是马尔可夫的环境下更加有效。</li>
+</ol>
+</blockquote>
+<p>如图 3.18
+所示，我们可以把时序差分方法进行进一步的推广。之前是只往前走一步，即TD(0)。</p>
+<p>我们可以调整步数（step），变成 n步时序差分（n-step TD）。比如
+TD(2)，即往前走两步，利用两步得到的回报，使用自举来更新状态的价值。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180047874.png" style="zoom:67%;"></p>
+<p>n步，指的是执行了n次动作a。</p>
+<p>这样我们就可以通过步数来调整算法需要的实际奖励和自举。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180117613.png" style="zoom:67%;"></p>
+<p>n步时序差分可写为</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180134358.png" style="zoom:67%;"></p>
+<p>如果T是终点，那么V(T)一般是0。带入公式中也符合。</p>
+<p>得到时序差分目标之后，我们用增量式学习（incremental
+learning）的方法来更新状态的价值：</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180251237.png" style="zoom:67%;"></p>
+<h3 id="动态规划方法蒙特卡洛方法以及时序差分方法的自举和采样">3.3
+动态规划方法、蒙特卡洛方法以及时序差分方法的自举和采样</h3>
+<p><strong>动态规划</strong>方法没有使用采样，它是直接用贝尔曼期望方程来更新状态价值的。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180353204.png" style="zoom:67%;"></p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180402867.png" style="zoom: 50%;"></p>
+<p><strong>蒙特卡洛</strong>方法在当前状态下，采取一条支路，在这条路径上进行更新，更新这条路径上的所有状态，即</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180427426.png" style="zoom:67%;"></p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180435937.png" style="zoom:50%;"></p>
+<p><strong>时序差分</strong>从当前状态开始，往前走了一步，关注的是非常局部的步骤，即</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180450864.png" style="zoom:67%;"></p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180500767.png" style="zoom:50%;"></p>
+<h2 id="免模型控制">4. 免模型控制</h2>
+<h3 id="广义策略迭代generalized-policy-iterationgpi">4.1
+广义策略迭代（generalized policy iteration，GPI）</h3>
+<p>在我们不知道马尔可夫决策过程模型的情况下，如何优化价值函数，得到最佳的策略呢？</p>
+<p>我们可以把策略迭代进行广义的推广，使它能够兼容蒙特卡洛和时序差分的方法，即带有蒙特卡洛方法和时序差分方法的广义策略迭代（generalized
+policy iteration，GPI）。</p>
+<p>策略迭代由两个步骤组成:</p>
+<ol type="1">
+<li>我们根据给定的当前策略 π 来估计价值函数。</li>
+<li>得到估计的价值函数后，我们通过贪心的方法来改进策略。</li>
+</ol>
+<p>这里有一个问题：当我们不知道奖励函数和状态转移时，如何进行策略的优化？</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260316180659788.png" style="zoom: 67%;"></p>
+<p>我们对策略评估部分进行修改，使用蒙特卡洛的方法代替动态规划的方法估计
+Q 函数。</p>
+<p>我们首先进行策略评估，使用蒙特卡洛方法来估计策略 <span class="math inline">\(Q=Q_\pi\)</span>
+，然后进行策略更新，即<strong>得到 Q
+函数后，我们就可以通过贪心的方法去改进它</strong>：</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317163647372.png" style="zoom:67%;"></p>
+<p>图 3.25 所示为蒙特卡洛方法估计 Q 函数的算法。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317164015375.png" style="zoom:67%;"></p>
+<p>为了确保蒙特卡洛方法能够有足够的探索，我们使用了
+ε-贪心（ε-greedyε-greedy）探索。</p>
+<p>ε-贪心是指我们有ε的概率随机决定动作，通常 ε 就设一个很小的值， 1−ε
+可能是 0.9，也就是 0.9 的概率会按照Q函数来决定动作，但是我们有 0.1
+的概率是随机的。</p>
+<p>通常在实现上，ε
+的值会随着时间递减。在最开始的时候，因为我们还不知道哪个动作是比较好的，所以会花比较多的时间探索。接下来随着训练的次数越来越多，我们已经比较确定哪一个动作是比较好的，就会减少探索，把
+ε 的值变小。主要根据 Q函数来决定动作，比较少随机决定动作，这就是
+ε-贪心。</p>
+<p>基于 ε-贪心探索的蒙特卡洛方法如图 3.26 所示。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317164125318.png" style="zoom:67%;"></p>
+<blockquote>
+<p>与蒙特卡洛方法相比，时序差分方法有如下几个优势：低方差，能够在线学习，能够从不完整的序列中学习。
+所以我们可以把时序差分方法也放到控制循环（control
+loop）里面去估计Q表格，再采取
+ε-贪心探索改进。这样就可以在回合没结束的时候更新已经采集到的状态价值</p>
+<p>偏差（bias）：描述的是预测值（估计值）的期望与真实值之间的差距。偏差越高，越偏离真实数据，如图
+3.27 第2行所示。</p>
+<p>方差（variance）：描述的是预测值的变化范围、离散程度，也就是离其期望值的距离。方差越高，数据的分布越分散，如图
+3.27 右列所示。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317164544355.png" style="zoom: 67%;"></p>
+</blockquote>
+<h3 id="sarsa同策略时序差分控制">4.2 Sarsa：同策略时序差分控制</h3>
+<p>时序差分方法是给定一个策略，然后我们去估计它的价值函数。接着我们要考虑<strong>怎么使用时序差分方法的框架来估计Q函数</strong>，也就是
+Sarsa 算法。</p>
+<p>Sarsa 所做出的改变很简单，它<strong>将原本时序差分方法更新 V
+的过程，变成了更新 Q</strong>，即</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317164850251.png" alt=" " style="zoom: 67%;"></p>
+<p>式(3.4)是指我们可以用下一步的 Q 值 <span class="math inline">\(Q(s_{t+1},a_{t+1})\)</span> 来更新这一步的 Q 值
+<span class="math inline">\(Q(s_{t},a_{t})\)</span> 。 Sarsa 直接估计 Q
+表格，得到 Q 表格后，就可以更新策略。</p>
+<p>为了理解式(3.4)， 如图 3.28 所示，我们先把 <span class="math inline">\(r_{t+1}+\gamma Q(s_{t+1},a_{t+1})\)</span>
+当作目标值，即 <span class="math inline">\(Q(s_{t},a_{t})\)</span>
+想要逼近的目标值。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317165758408.png" style="zoom: 67%;"></p>
+<p>(这里 <span class="math inline">\(R_{t+1}\)</span> 指的是 在 <span class="math inline">\(s_t\)</span> 执行了动作 <span class="math inline">\(a_t\)</span> 后获得的奖励，一般我使用 <span class="math inline">\(R_t\)</span> 表示)</p>
+<p>我们想要计算的就是 <span class="math inline">\(Q(s_{t},a_{t})\)</span> 。因为最开始 Q
+值都是随机初始化或者是初始化为0，所以它需要不断地去逼近它理想中真实的 Q
+值（时序差分目标）， <span class="math inline">\(r_{t+1}+\gamma
+Q(s_{t+1},a_{t+1})-Q(s_{t},a_{t})\)</span> 就是时序差分误差。</p>
+<p>该算法由于每次更新值函数时需要知道当前的状态（state）、当前的动作（action）、奖励（reward）、下一步的状态（state）、下一步的动作（action），即
+<span class="math inline">\((s_{t},a_{t}.r_{t},s_{t+1},a_{t+1})\)</span>
+这几个值 ，因此得名 Sarsa 算法。它走了一步之后，获取了 <span class="math inline">\((s_{t},a_{t}.r_{t},s_{t+1},a_{t+1})\)</span>
+之后，就可以做一次更新。</p>
+<blockquote>
+<p>Sarsa 属于单步更新算法，每执行一个动作，就会更新一次价值和策略。</p>
+<p>我们考虑 n 步的回报（n=1,2,⋯ ,∞），如式(3.5)所示。</p>
+<p>如果不进行单步更新，而是采取 n 步更新或者回合更新，即在执行 n
+步之后再更新价值和策略，这样我们就得到了 n 步 Sarsa（n-step
+Sarsa）。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317170418898.png" style="zoom:67%;"></p>
+<p>对于 n 步 Sarsa，它的 n 步 Q 回报为</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317171022646.png" style="zoom:67%;"></p>
+</blockquote>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317171108500.png" style="zoom: 80%;"></p>
+<h3 id="特殊的回报return-tdλλ-return">4.3 特殊的回报(return)：
+TD(λ)/λ-return</h3>
+<p>sarsa 的 <span class="math inline">\(Q^n_t\)</span> 指的是
+在同一策略控制下获取的 action，构造起来的 <span class="math inline">\((s_1,a_1,r_1),(s_2,a_2,r_2),...,(s_n,a_n,r_n)\)</span>
+链的n步回报（return）</p>
+<p>如果给 <span class="math inline">\(Q^n_t\)</span>
+加上衰减参数（decay-rate parameter for eligibility traces）λ
+并进行求和，即可得到 Sarsa(λ) 的 Q 回报 <span class="math display">\[
+Q^{\lambda}_t=(1-\lambda)\sum^{\infty}_{n=1}{\lambda^{n-1}Q^n_t}
+\]</span></p>
+<p>λ-Return
+做的事情是：<code>把所有能用的 n-step 回报组合起来，对远期回报给更小的权重</code></p>
+<blockquote>
+<p>为什么权重是 <span class="math inline">\((1-\lambda)\lambda^{n-1}\)</span> 呢？</p>
+<p>因为这是一个归一化因子，几何级数的和为：</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317172944424.png" style="zoom: 67%;"></p>
+<p>他的权重和为1，即如果参数全部为1，其加权和为1。</p>
+<p>同时 <span class="math inline">\(\lambda^{n-1}\)</span> 中，n实现了
+越远的回报权重越低的功能。</p>
+<p>• λ 越小 → 趋向于使用短期的 1-step 回报（接近普通 Sarsa）；</p>
+<p>• λ 越大 → 趋向于使用长期的多步回报（接近蒙特卡洛）。</p>
+</blockquote>
+<p>首先我们来理解 <span class="math inline">\(Q^{\lambda}_t=(1-\lambda)\sum^{\infty}_{n=1}{\lambda^{n-1}Q^n_t}\)</span>
+的计算，以3时间步举例，得到计算如下</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317174103831.png" style="zoom:67%;"></p>
+<p>其中</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317174130306.png" style="zoom:67%;"></p>
+<p>现在我们再来解释</p>
+<p>• λ 越小 → 趋向于使用短期的 1-step 回报（接近普通 Sarsa）</p>
+<p>首先我们得了解λ = 0时的计算，如下</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317175124020.png" style="zoom:67%;"></p>
+<p>因此λ = 0时等于 Sarsa.</p>
+<p>当 λ = 0.5 或 λ = 0.9 时， <span class="math inline">\((1-\lambda)\lambda^{n-1}\)</span>
+的计算结果如下</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317175213363.png" style="zoom:67%;"></p>
+<p>我们能发现前n步的权重占比变大了。λ越接近1，每第n项的权重也越来越接近1</p>
+<p>因此</p>
+<p>• λ 越大 → 趋向于使用长期的多步回报（接近蒙特卡洛）</p>
+<p>但我们知道我们有 (1−λ)
+的限制在，因此只能无限接近1，也就是无限接近蒙特卡洛（因为n=2开始的每项权重不可能为1）</p>
+<p>最后在来谈其意义：<strong>不再对某一单一步过分依赖，避免高方差的整回合估计，也能利用更多真实奖励信息，减少偏差</strong>。</p>
+<h3 id="资格迹">4.4 资格迹</h3>
+<p>我们在如下 λ-Return 的计算公式中能发现，每一个 <span class="math inline">\(Q^{\lambda}_t\)</span> 都需要等待所有的 <span class="math inline">\(Q^n_t\)</span>
+的结果出来后才能够计算。因此，这个定义下的λ-Return也被称为：
+<strong>前向视角下的λ-Return</strong> 或 <strong>离线
+TD(λ)</strong>（因为必须等完整 episode 结束） <span class="math display">\[
+Q^{\lambda}_t=(1-\lambda)\sum^{\infty}_{n=1}{\lambda^{n-1}Q^n_t}
+\]</span> 资格迹是实现 TD(λ)/λ-return 的一种在线机制。在 TD(λ) 的
+forward view（前向视角） 中，λ-return 原本需要未来信息。</p>
+<p>通过引入资格迹。我们能够从 backward view（后向视角）进行实现。</p>
+<p>资格迹是一个总的概念，其有<strong>累计迹 /
+替换迹</strong>两种具体实现方式。</p>
+<h4 id="公共计算内容">4.4.1 公共计算内容</h4>
+<p>首先我们回顾之前说的TD误差： <span class="math display">\[
+\delta_t = r_{t+1}+\gamma V(s_{t+1})-V(s_t)
+\]</span> 举个例子，存在以下轨迹</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318002012729.png" style="zoom:67%;"></p>
+<p>计算每个步骤中的TD误差 <span class="math display">\[
+\begin{align*}
+δ_0 = r_1 + γQ(s_1,a_1) - Q(s_0,a_0)\\
+δ_1 = r_2 + γQ(s_2,a_2) - Q(s_1,a_1)\\
+δ_2 = r_3 + γQ(s_3,a_3) - Q(s_2,a_2)\\
+δ_3 = r_4 + γQ(s_4,a_4) - Q(s_3,a_3)
+\end{align*}
+\]</span> 那么我们在 <span class="math inline">\(t=0\)</span>
+时刻，在状态 <span class="math inline">\(s_0\)</span> 处能得到如下的公式
+<span class="math display">\[
+Q_{s_0}^λ - Q(s_0,a_0)= (γλ)^0δ_0 + (γλ)^1δ_1 + (γλ)^2δ_2 + (γλ)^3δ_3 +
+...
+\]</span> 与之前sarsa中更新Q值公式图对比，我们能发现 <span class="math inline">\(Q_{s_0}^λ - Q(s_0,a_0)\)</span>
+其实就是下面的<strong>软更新部分</strong>（软更新部分其实就是与原来Q(s_0,a_0)之间的偏差，后面<strong>用<span class="math inline">\(\Delta Q(s,a)\)</span> 表示</strong>）。（<span class="math inline">\(Q_{s_0}^λ\)</span> 是目标值，而 <span class="math inline">\(Q(s_0,a_0)\)</span> 是当前值）</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318002847399.png" style="zoom: 80%;"></p>
+<h4 id="累计迹">4.4.2 累计迹</h4>
+<p>在累计迹中，我们有如下定义</p>
+<p>累计迹： <span class="math display">\[
+E(s,a) \leftarrow \gamma\lambda E(s,a) +1_{st=s,at=a}
+\]</span></p>
+<p>TD误差： <span class="math display">\[
+\delta_t = r_{t+1}+\gamma V(s_{t+1})-V(s_t)
+\]</span> 计算公式 <span class="math display">\[
+\Delta Q(s,a) = \alpha \sum^{T-1}_{t=0}{\delta_tE_t(s,a)}
+\]</span></p>
+<p>实际算法中的更新公式： <span class="math display">\[
+Q(s,a) \leftarrow Q(s,a)+\alpha \delta_tE_t(s,a)
+\]</span> 这个是什么意思呢</p>
+<p>还是以之前的轨迹链举例</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318002012729.png" style="zoom:67%;"></p>
+<p>每一组（s,a）都维持了一个E(s,a)。以 <span class="math inline">\(E(s_0,a_0)\)</span> 举例。（初始 <span class="math inline">\(E(s_0,a_0)\)</span> 为0）</p>
+<p>当t=0时，我们执行 <span class="math inline">\((s_0,a_0)\)</span> ,
+状态动作与 <span class="math inline">\(E(s_0,a_0)\)</span> 一致，因此
+<span class="math inline">\(E(s_0,a_0) = \gamma\lambda*0+1
+=1\)</span></p>
+<p>t=1时，我们执行 <span class="math inline">\((s_1,a_1)\)</span>
+,状态动作与 <span class="math inline">\(E(s_0,a_0)\)</span> 不一致，因此
+<span class="math inline">\(E(s_0,a_0) = \gamma\lambda*1
+=\gamma\lambda\)</span> 。</p>
+<p>同理，</p>
+<p>t=2时， <span class="math inline">\(E(s_0,a_0) =
+\gamma\lambda*\gamma\lambda =（\gamma\lambda)^2\)</span></p>
+<p>t=3时， <span class="math inline">\(E(s_0,a_0) =
+\gamma\lambda*（\gamma\lambda)^2 =（\gamma\lambda)^3\)</span></p>
+<p>我们假设，在执行完 <span class="math inline">\((s_3,a_3)\)</span>
+后，我们再次到达了状态 <span class="math inline">\(s_0\)</span>
+，然后我们再次执行了动作 <span class="math inline">\(a_0\)</span>
+，那么我们此时的 <span class="math inline">\(E(s_0,a_0)\)</span>
+变成如下</p>
+<p><span class="math display">\[
+E(s_0,a_0)=\gamma\lambda*（\gamma\lambda)^3+1 =（\gamma\lambda)^4+1
+\]</span> 我们不断操作此过程，然后将得到的各个时刻t阶段的 <span class="math inline">\(E(s_0,a_0)\)</span> 带入如下公式中 <span class="math display">\[
+\Delta Q(s,a) = \alpha \sum^{T-1}_{t=0}{\delta_tE_t(s,a)}
+\]</span> 展开来看其实就是我们之前写的 <span class="math display">\[
+Q_{s_0}^λ - Q(s_0,a_0)=\Delta Q(s,a) = (γλ)^0δ_0 + (γλ)^1δ_1 + (γλ)^2δ_2
++ (γλ)^3δ_3 + ...
+\]</span> 但在实际应用中我们不可能等全部计算出来再求 <span class="math inline">\(\Delta Q(s,a)\)</span>
+，因此我们每执行一步，就更新一次 <span class="math inline">\(\Delta
+Q(s,a)\)</span> ，即 <span class="math display">\[
+Q(s,a) \leftarrow Q(s,a)+\alpha \delta_tE_t(s,a)
+\]</span></p>
+<h4 id="替换迹">4.4.3 替换迹</h4>
+<p>在累计迹中，每次遇到相同的 <span class="math inline">\((s_0,a_0)\)</span> 我们就会在 <span class="math inline">\(E(s_0,a_0)\)</span> 中 <span class="math inline">\(+1\)</span> ，而在替换迹中，我们直接将其变为1，即
+<span class="math display">\[
+E(s,a) \leftarrow max(\gamma\lambda E(s,a) ,1_{st=s,at=a})
+\]</span>
+虽然只是一个简单的改动，但是我们在工程中往往使用的是替换迹而不是累计迹。</p>
+<p>累计迹的问题：累计迹会把同一个状态的访问次数不断叠加，访问越多，权重越大。这样容易导致某些状态被“过度更新”，尤其在有循环路径时，数值会变大，训练不稳定甚至震荡。</p>
+<p>替换迹的改进：替换迹不会累加，而是每次访问直接把权重设为
+1，相当于“只记最近一次”。这样每个状态的影响都有上限，避免重复放大。</p>
+<p>虽然替换迹不严格等价前向视角（会有一点偏差），但它大幅降低了方差，让训练更稳定。在实际（尤其是函数逼近、神经网络）中，这种稳定性比严格等价更重要。</p>
+<blockquote>
+<p>为什么这反而更好？</p>
+<p>累计迹：同一个状态反复出现 → 被认为“贡献越来越大”</p>
+<p>但现实中，它只是被重复访问，不代表贡献更大</p>
+<p>替换迹：“你出现过就够了，不需要重复加权”</p>
+</blockquote>
+<h3 id="累计迹与-λ-return的等式证明">4.5 累计迹与
+λ-return的等式证明</h3>
+<p>（最初是纸上写的，太多式子，因此直接贴图了）</p>
+<p>即证明以下等式两边成立： <span class="math display">\[
+Q_{s_0}^λ - Q(s_0,a_0)=\Delta Q(s,a) = (γλ)^0δ_0 + (γλ)^1δ_1 + (γλ)^2δ_2
++ (γλ)^3δ_3 + ...
+\]</span> 首先我们定义存在轨迹</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318144224373.png" style="zoom:50%;"></p>
+<p>接下来将理论公式展开</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318144242679.png" style="zoom:67%;"></p>
+<p>其中，其中后面的添加项为</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318144518235.png" style="zoom:50%;"></p>
+<p>将该添加项提取出来，整合成如下</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318144602255.png" style="zoom:67%;"></p>
+<p>这里我们先着重关注 <span class="math inline">\(Q^n-Q(s_0,a_0)\)</span> 的计算（下面的V其实是
+<span class="math inline">\(\gamma\)</span>
+，跟奖励r太像了，因此直接写成了V）</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318144752176.png" style="zoom:67%;"></p>
+<p>最终我们原本的公式变成</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145031957.png" style="zoom:67%;"></p>
+<p>接下来我们需要将双层嵌套循环进行转换，我们将k放在外层，n放在内层</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145051700.png" alt="image-20260318145051700" style="zoom:67%;"></p>
+<p>我们再计算内层公式</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145123309.png" style="zoom: 67%;"></p>
+<p>最终我们原本的公式变成如下</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145216469.png" style="zoom:67%;"></p>
+<p>完整计算如图</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145303110.png" style="zoom:67%;"></p>
+<h3 id="累计迹的意义">4.6 累计迹的意义</h3>
+<p>在理解公式后，我们需要再理解 <span class="math inline">\((γλ)^0δ_0\)</span> 是什么，或者说 <span class="math inline">\(\sum^{\infty}_{k=0}(\lambda^k\gamma^k\delta_k)\)</span>
+意味着什么。</p>
+<p>举例我们需要计算 <span class="math inline">\(s_0\)</span>
+所在位置的软更新时：<span class="math inline">\(Q_0^λ -
+Q(s_0,a_0)\)</span></p>
+<p>我们发现 <span class="math inline">\(δ_0\)</span>
+在所有步骤中都涉及到。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145639767.png" style="zoom:67%;"></p>
+<p>我们如果套入原本如下的公式中</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145729447.png" style="zoom: 67%;"></p>
+<p>对于 <span class="math inline">\(δ_0\)</span> ，我们能得到</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145756330.png" style="zoom:67%;"></p>
+<p>对于 <span class="math inline">\(δ_1\)</span>，我们能发现仅从第二步开始才参与 <span class="math inline">\(Q_0^λ - Q(s_0,a_0)\)</span> 的更新</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145851860.png" style="zoom:67%;"></p>
+<p>再次套入公式中我们能得到</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318145915907.png" style="zoom:67%;"></p>
+<p>同理我们可以得到其他的 <span class="math inline">\(\delta\)</span></p>
+<p>那么我们可以简单总结，<span class="math inline">\(\delta\)</span>
+表示参与 <span class="math inline">\(Q_0^λ - Q(s_0,a_0)\)</span>
+更新计算的误差值，而 <span class="math inline">\(\lambda\gamma\)</span>
+则是表示 <span class="math inline">\(\delta\)</span>
+在更新计算中的占比多少 或者说占 <span class="math inline">\(Q_0^λ -
+Q(s_0,a_0)\)</span> 计算中的权重多少。</p>
+<p><span class="math inline">\(δ_0\)</span>
+由于全程参与，因此该权重为1， 而 <span class="math inline">\(δ_1\)</span> 通过计算得出其权重占比为 <span class="math inline">\(\lambda\gamma\)</span> ，同理 <span class="math inline">\(δ_2\)</span> 的权重为 <span class="math inline">\((\lambda\gamma)^2\)</span> 。</p>
+<h3 id="λ-return-在有限步下的变化">4.7 λ-return 在有限步下的变化</h3>
+<p>接下来我们讨论 有限步骤的情况。</p>
+<p>我们之前讨论的理论公式中可以看出，n是趋于无穷大的。这是因为我们要符合将所有权重相加为1的条件。
+<span class="math display">\[
+Q^{\lambda}_t=(1-\lambda)\sum^{\infty}_{n=1}{\lambda^{n-1}Q^n_t}
+\]</span> 这里的权重是一个归一化因子，几何级数的和为：</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318150714752.png" style="zoom:67%;"></p>
+<p>在有限步骤中，最后一项的参数中去除了1-λ</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318150745459.png" style="zoom:67%;"></p>
+<p>举例3步到达终点的情况。 <span class="math inline">\(s_1 \rightarrow
+s_2 \rightarrow s_3 \rightarrow s_T\)</span>。其计算公式如下</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318150808756.png" style="zoom:67%;"></p>
+<blockquote>
+<p>在前向视角（forward view）下，是以不同步长的 return（如 <span class="math inline">\(G_1,G_2,...,G_n\)</span>
+）为单位进行加权求和，本质上是在对不同时间尺度的回报进行加权。</p>
+<p>这些权重为： <span class="math display">\[
+(1−λ),(1−λ)λ,(1−λ)λ^2,…
+\]</span> 在<strong>无限步的理想情况</strong>下，这些权重之和为
+1，因此可以看作是一个完整的加权平均。</p>
+<p>但在<strong>有限轨迹（episode
+会终止）的情况</strong>下，假设最多只能到第 m 步，那么后续更长步长的
+return 不再存在。此时，原本分配给更远未来的权重（即 <span class="math inline">\((1-\lambda)\lambda^m\)</span>
+及之后的部分）不会消失，而是自然合并到最后一个可计算的 return <span class="math inline">\(G^{(m)}\)</span> 上。</p>
+<p>因此，最后一项的权重变为： <span class="math display">\[
+λ^{m−1}
+\]</span> 而不再带有 <span class="math inline">\(1−λ\)</span>，从而保证<strong>所有权重之和仍然为
+1</strong>。</p>
+</blockquote>
+<h3 id="q学习异策略时序差分控制">4.6 Q学习：异策略时序差分控制</h3>
+<p><strong>Sarsa
+是一种同策略（on-policy）算法</strong>，它优化的是它实际执行的策略，它直接用下一步会执行的动作去优化
+Q 表格。</p>
+<p>同策略在学习的过程中，只存在一种策略，它用<strong>一种策略去做动作的选取</strong>，<strong>也用一种策略去做优化</strong>。所以
+Sarsa
+知道它下一步的动作有可能会跑到悬崖那边去，它就会在优化自己的策略的时候，尽可能离悬崖远一点。这样子就会保证，它下一步哪怕是有随机动作，它也还是在安全区域内</p>
+<p><strong>Q学习是一种异策略（off-policy）算法</strong>。</p>
+<p>异策略在学习的过程中，有两种不同的策略：目标策略（target policy）和
+行为策略（behavior policy）。</p>
+<ol type="1">
+<li><strong>目标策略</strong>是我们需要去学习的策略，一般用 π
+来表示。目标策略就像是在后方指挥战术的一个军师，它可以根据自己的经验来学习最优的策略，不需要去和环境交互。</li>
+<li><strong>行为策略</strong>是探索环境的策略，一般用 μ
+来表示。行为策略可以大胆地去探索到所有可能的轨迹，采集轨迹，采集数据，然后把采集到的数据“喂”给目标策略学习。而且“喂”给目标策略的数据中并不需要
+<span class="math inline">\(a_{t+1}\)</span> ，而 Sarsa 是要有 <span class="math inline">\(a_{t+1}\)</span> 的。</li>
+</ol>
+<p>行为策略像是一个战士，可以在环境里面探索所有的动作、轨迹和经验，然后把这些经验交给目标策略去学习。比如目标策略优化的时候，Q学习不会管我们下一步去往哪里探索，它只选取奖励最大的策略。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318171534186.png" style="zoom:67%;"></p>
+<p>我们在sarsa中，我们使用策略π获取了轨迹。在如下更新的公式中，我们的下一状态的动作
+<span class="math inline">\(a_{t+1}\)</span> 是由策略π在状态 <span class="math inline">\(s_{t+1}\)</span>
+产生的。因此<strong>sarsa被称为同策略</strong>。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260317164850251.png" alt=" " style="zoom: 67%;"></p>
+<p>而在Q学习中。我们还是先用策略π获取了轨迹。但我们更新公式改为如下，我们的下一状态的动作
+<span class="math inline">\(a_{t+1}\)</span> 并不是由策略π在状态 <span class="math inline">\(s_{t+1}\)</span> 产生的，而是直接查询状态 <span class="math inline">\(s_{t+1}\)</span> 下能获得最大值的动作a。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318172226308.png" style="zoom:67%;"></p>
+<p>在该例子中</p>
+<ul>
+<li>行为策略：我们获取轨迹的策略π。</li>
+<li>目标策略：直接查询状态 <span class="math inline">\(s_{t+1}\)</span>
+下能获得最大值的动作a。与策略π无关。</li>
+</ul>
+<p>因此<strong>Q学习被称为异策略</strong>。</p>
+<p><img src="/2026/03/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03/image-20260318172643555.png" style="zoom:67%;"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E7%AC%AC3%E8%8A%82/" rel="tag"># 第3节</a>
+              <a href="/tags/%E8%98%91%E8%8F%87%E4%B9%A6/" rel="tag"># 蘑菇书</a>
+              <a href="/tags/%E5%BC%BA%E5%8C%96%E6%83%B3%E5%AD%A6%E4%B9%A0/" rel="tag"># 强化想学习</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/02/16/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A02/" rel="prev" title="强化学习 2. 马尔可夫决策过程">
+                  <i class="fa fa-angle-left"></i> 强化学习 2. 马尔可夫决策过程
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
