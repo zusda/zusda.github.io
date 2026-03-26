@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="强化学习 4.策略梯度算法">
+<meta property="og:url" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324110713133.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324111130872.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324111220596.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324111620269.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324112139603.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324112219883.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324115154948.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324180106555.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324180232692.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324180805796.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325132113373.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325134014407.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325134147169.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325142004811.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325152631978.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325152922985.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325164704059.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325170340042.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325170404603.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325171654977.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325172838540.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325173303762.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325174004871.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326043907001.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326043948935.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326050719963.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326130744095.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326130806886.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326131345841.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326132550807.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326132626855.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326133106732.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326134311115.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326174348935.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326174622374.png">
+<meta property="article:published_time" content="2026-03-24T02:59:12.000Z">
+<meta property="article:modified_time" content="2026-03-26T09:51:16.154Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="第4节">
+<meta property="article:tag" content="蘑菇书">
+<meta property="article:tag" content="强化学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324110713133.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/","path":"2026/03/24/强化学习4/","title":"强化学习 4.策略梯度算法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>强化学习 4.策略梯度算法 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AD%96%E7%95%A5%E6%A2%AF%E5%BA%A6%E7%AE%97%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">4.1 策略梯度算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AD%96%E7%95%A5%E6%A2%AF%E5%BA%A6%E5%AE%9E%E7%8E%B0%E6%8A%80%E5%B7%A7"><span class="nav-number">3.</span> <span class="nav-text">2. 策略梯度实现技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E5%B7%A7-1%E6%B7%BB%E5%8A%A0%E5%9F%BA%E7%BA%BF"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 技巧 1：添加基线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E5%B7%A7-2%E5%88%86%E9%85%8D%E5%90%88%E9%80%82%E7%9A%84%E5%88%86%E6%95%B0"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 技巧 2：分配合适的分数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#reinforce%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E7%AD%96%E7%95%A5%E6%A2%AF%E5%BA%A6"><span class="nav-number">4.</span> <span class="nav-text">3. REINFORCE：蒙特卡洛策略梯度</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">60</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="强化学习 4.策略梯度算法 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          强化学习 4.策略梯度算法
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-03-24 10:59:12" itemprop="dateCreated datePublished" datetime="2026-03-24T10:59:12+08:00">2026-03-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-26 17:51:16" itemprop="dateModified" datetime="2026-03-26T17:51:16+08:00">2026-03-26</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《蘑菇书》原文（课本）：https://datawhalechina.github.io/easy-rl/#/</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<p>蘑菇书的文章结构不会跟之前《动手学深度学习》按照原文章节进行，个人会适当调节。</p>
+<hr>
+<h2 id="策略梯度算法">4.1 策略梯度算法</h2>
+<p><strong>策略梯度</strong>，也可以看成梯度策略。甚么东西有梯度呢，参数。也就是说梯度策略就是<strong>带参数的策略</strong>。即我们从表格法正式切换到网络策略的第一个最简单的网络算法。</p>
+<p>之前我们第三章，我们通过回报来修改Q表格，最后决策的时候使用我们得出的最优Q表的结果选择动作。</p>
+<p>这一章我们
+使用回报来修改网络。我们的动作由网络生成，而并非从Q表中获取。<strong>通过这种方法，我们可以有无数的状态</strong>，非常适合连续的场景，如CartPole-v1。</p>
+<p>我们<strong>通过类似之前
+分类网络的方法，输入当前状态s，输出几个动作的概率</strong>。</p>
+<p>策略一般记作
+π。假设我们使用深度学习来做强化学习，策略就是一个网络。网络里面有一些参数，我们用
+θ 来代表 π
+的参数。网络的输入是智能体看到的东西，如果让智能体玩视频游戏，智能体看到的东西就是游戏的画面。</p>
+<p>图 4.2
+就是具体的例子，策略是一个网络；输入是游戏的画面，它通常是由像素组成的；输出是我们可以执行的动作，有几个动作，输出层就有几个神经元。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324110713133.png" style="zoom:67%;"></p>
+<p>接下来我们用一个例子来说明演员与环境交互的过程。</p>
+<p>我们把游戏初始的画面记作 <span class="math inline">\(s_1\)</span>，
+把第一次执行的动作记作 <span class="math inline">\(a_1\)</span>，把第一次执行动作以后得到的奖励记作
+<span class="math inline">\(r_1\)</span>
+。演员决定一个动作以后，就会看到一个新的游戏画面 <span class="math inline">\(s_2\)</span>。把 <span class="math inline">\(s_2\)</span>
+输入给演员，演员决定要开火，它可能打败了一只怪兽，就得到五分。</p>
+<p>这个过程反复地持续下去，直到在某一个时间点执行某一个动作，得到奖励之后，环境决定这个游戏结束。例如，如果在这个游戏里面，我们控制宇宙飞船去击杀怪兽，如果宇宙飞船被毁或是把所有的怪兽都清空，游戏就结束了。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324111130872.png" style="zoom: 67%;"></p>
+<p>如图 4.4
+所示，一场游戏称为一个回合。将这场游戏里面得到的<strong>所有奖励都加起来，就是总奖励（total
+reward）</strong>，也就是<strong>回报</strong>，我们用R来表示它。演员要想办法来最大化它可以得到的奖励。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324111220596.png" style="zoom:67%;"></p>
+<p>如图 4.5
+所示，首先，环境是一个函数，我们可以把游戏的主机看成一个函数，虽然它不一定是神经网络，可能是基于规则的（rule-based）模型，但我们可以把它看作一个函数。这个函数一开始先“吐”出一个状态（游戏画面
+<span class="math inline">\(s_1\)</span>），接下来演员看到游戏画面 <span class="math inline">\(s_1\)</span> 以后，它“吐”出动作 <span class="math inline">\(a_1\)</span>。环境把动作 <span class="math inline">\(a_1\)</span> 当作它的输入，再“吐”出新的游戏画面
+<span class="math inline">\(s_2\)</span>。演员看到新的游戏画面 <span class="math inline">\(s_2\)</span>，再采取新的动作 <span class="math inline">\(a_2\)</span>。环境看到 <span class="math inline">\(a_2\)</span>，再“吐”出 <span class="math inline">\(s_3\)</span>
+，这个过程会一直持续下去，直到环境觉得应该要停止为止。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324111620269.png" style="zoom:67%;"></p>
+<p>在一场游戏里面，我们把环境输出的 s 与演员输出的动作 a
+全部组合起来，就是一个轨迹，即 <span class="math display">\[
+\tau = {s_1,a_1,s_2,a_2,...,s_t,a_t}
+\]</span> 给定演员的参数 <span class="math inline">\(\theta\)</span>，我们可以计算某个轨迹 <span class="math inline">\(\tau\)</span> 发生的概率为</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324112139603.png" style="zoom:80%;"></p>
+<p>在强化学习里面，除了环境与演员以外，还有奖励函数。如图 4.6
+所示，奖励函数根据在某一个状态采取的某一个动作决定这个动作可以得到的分数。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324112219883.png" style="zoom:80%;"></p>
+<p>对奖励函数输入 <span class="math inline">\(s_1\)</span> 、<span class="math inline">\(a_1\)</span>，它会输出 <span class="math inline">\(r_1\)</span>；输入 <span class="math inline">\(s_2\)</span>、<span class="math inline">\(a_2\)</span>，奖励函数会输出 <span class="math inline">\(r_2\)</span>。 我们把轨迹所有的奖励 r
+都加起来，就得到了 <span class="math inline">\(R(\tau)\)</span>
+，其<strong>代表某一个轨迹 τ 的奖励</strong>。</p>
+<p>因为我们要让奖励越大越好，所以可以使用梯度上升（gradient
+ascent）来最大化期望奖励。要进行梯度上升，我们先要计算期望奖励 <span class="math inline">\(\bar{R_\theta}\)</span> 的梯度。我们对 <span class="math inline">\(\bar{R_\theta}\)</span> 做梯度运算</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324115154948.png" style="zoom:80%;"></p>
+<p>其中，只有 <span class="math inline">\(p_θ(\tau)\)</span> 与 参数θ
+有关。</p>
+<blockquote>
+<p>奖励函数 R(τ)
+不需要是可微分的（differentiable），这不影响我们解决接下来的问题。</p>
+<p>例如，如果在生成对抗网络（generative adversarial
+network，GAN）里面，R(τ)
+是一个判别器（discriminator），它就算无法微分，我们还是可以做接下来的运算。</p>
+</blockquote>
+<p>我们可以对 <span class="math inline">\(p_θ(\tau)\)</span>
+使用公式式(4.1)，</p>
+<p><span class="math display">\[
+\nabla f(x)=f(x)\nabla \log f(x)\tag{4.1}
+\]</span> 得到 <span class="math display">\[
+\nabla p_θ(\tau)=p_θ(\tau)\nabla \log p_θ(\tau)
+\]</span> 转换形式，得到 <span class="math display">\[
+\frac{\nabla p_θ(\tau)}{p_θ(\tau)} =\nabla \log p_θ(\tau)
+\]</span> 如式(4.2)所示，我们对 τ 进行求和，把 R(τ) 和 <span class="math inline">\(\log p_θ(\tau)\)</span> 这两项使用 <span class="math inline">\(p_θ(\tau)\)</span> 进行加权， 既然使用 <span class="math inline">\(p_θ(\tau)\)</span> 进行加权
+，它们就可以<strong>被写成期望的形式</strong>。也就是我们<strong>从
+<span class="math inline">\(p_θ(\tau)\)</span> 这个分布里面采样 <span class="math inline">\(\tau\)</span></strong> ， 去计算 R(τ) 乘 <span class="math inline">\(\nabla \log p_θ(\tau)\)</span>，对所有可能的 τ
+进行求和，就是期望的值（expected value）。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324180106555.png"></p>
+<p>实际上该期望值无法计算，所以我们<strong>用采样的方式，用策略 <span class="math inline">\(\pi_\theta\)</span> 采样 N 个 <span class="math inline">\(\tau\)</span>
+并计算每一个的值，把每一个的值加起来，就可以得到梯度</strong>，即</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324180232692.png" style="zoom:67%;"></p>
+<blockquote>
+<p>因为 策略 <span class="math inline">\(\pi_\theta\)</span> 生成 <span class="math inline">\(\tau\)</span> 是符合 <span class="math inline">\(p_θ(\tau)\)</span> 的概率分布的。</p>
+</blockquote>
+<blockquote>
+<p>上式中对对参数 θ求导具体过程如下</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260324180805796.png" style="zoom:67%;"></p>
+<p>注意 <span class="math inline">\(p(s_1)\)</span> 与 <span class="math inline">\(p(s_{t+1}|s_t,a_t)\)</span> 来自环境，只有 <span class="math inline">\(p_θ(a_t|s_t)\)</span> 来自智能体。因此只有 <span class="math inline">\(p_θ(a_t|s_t)\)</span> 与网络参数 <span class="math inline">\(\theta\)</span>
+有关，其他两个在求导的时候值为0。</p>
+</blockquote>
+<p>完整求导公式如下：
+<img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325132113373.png" style="zoom:67%;"></p>
+<blockquote>
+<p>我们网络的输入就是状态s，输出就是动作a的概率。因此 <span class="math inline">\(p_\theta(a^n_t|s^n_t)\)</span>
+就是我们的网络输出。</p>
+</blockquote>
+<p>我们可以直观地理解式(4.3)，也就是在我们采样到的数据里面，采样到在某一个状态
+<span class="math inline">\(s_t\)</span> 要执行某一个动作 <span class="math inline">\(a_t\)</span> ， 是在整个轨迹 <span class="math inline">\(\tau\)</span> 的里面的某一个状态和动作的对。</p>
+<p>假设我们在 <span class="math inline">\(s_t\)</span> 执行 <span class="math inline">\(a_t\)</span> ，最后发现 <span class="math inline">\(\tau\)</span> 的奖励是正的，我们就要增加在 <span class="math inline">\(s_t\)</span> 执行 <span class="math inline">\(a_t\)</span> 的概率。反之，如果在 <span class="math inline">\(s_t\)</span> 执行 <span class="math inline">\(a_t\)</span> 会导致 <span class="math inline">\(\tau\)</span> 的奖励变成负的， 我们就要减少在
+<span class="math inline">\(s_t\)</span> 执行 <span class="math inline">\(a_t\)</span> 的概率。</p>
+<p>这怎么实现呢？我们用梯度上升来更新参数，原来有一个参数 θ ，把 θ
+加上梯度 <span class="math inline">\(\nabla\bar{R_\theta}\)</span>
+，当然我们要有一个学习率 η，学习率也是要调整的，可用 Adam、RMSProp
+等方法来调整学习率，即</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325134014407.png" style="zoom:80%;"></p>
+<p>实际上要计算梯度，如图 4.7
+所示，首先我们要收集很多s与a的对（pair），还要知道这些s与a在与环境交互的时候，会得到多少奖励。
+这些数据怎么收集呢？我们要<strong>用参数为 θ
+的智能体与环境交互</strong>，
+也就是拿已经训练好的智能体先与环境交互，交互完以后，就可以得到大量游戏的数据，我们会记录在第一场游戏里面，我们在状态
+<span class="math inline">\(s_1\)</span> 采取动作 <span class="math inline">\(a_1\)</span>，在状态 <span class="math inline">\(s_2\)</span> 采取动作 <span class="math inline">\(a_2\)</span> 。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325134147169.png" style="zoom:67%;"></p>
+<p>我们把图中采样到的数据代入式(4.4)里面，把梯度算出来。也就是把每一个s与a的对拿进来，计算在某一个状态下采取某一个动作的对数概率（log
+probability）$ p_θ(a<sup>n_t|s</sup>n_t)$
+。对这个概率取梯度，在梯度前面乘一个权重，权重就是这场游戏的奖励。我们计算出梯度后，就可以更新模型。</p>
+<p><strong>更新完模型以后，我们要重新采样数据再更新模型</strong>。注意，一般策略梯度（policy
+gradient，PG）采样的数据只会用一次。我们采样这些数据，然后用这些数据更新参数，再丢掉这些数据。接着重新采样数据，才能去更新参数。</p>
+<blockquote>
+<p>因为更新后，我们的参数 <span class="math inline">\(\theta\)</span>
+已经变了，不符合原来的分布了，而旧的数据是在旧的分布上采集来的。</p>
+</blockquote>
+<p>接下来我们讲一些实现细节。如图 4.8
+所示，我们可以<strong>把强化学习想成一个分类问题</strong>，这个分类问题就是输入一个图像，输出某个类。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325142004811.png" style="zoom:67%;"></p>
+<p>在解决分类问题时，我们要收集一些训练数据，数据中要有输入与输出的对。在实现的时候，我们把状态当作分类器的输入，就像在解决图像分类的问题，只是现在的类不是图像里面的东西，而是看到这张图像我们要采取什么样的动作，<strong>每一个动作就是一个类</strong>。比如第一个类是向左，第二个类是向右，第三个类是开火。</p>
+<p>在解决分类问题时，我们要有输入和正确的输出，要有训练数据。但在强化学习中，我们通过采样来获得训练数据。</p>
+<p>假设在采样的过程中，在某个状态下，我们采样到要采取动作 a，
+那么就把动作 a 当作标准答案（ground truth）。</p>
+<p>比如，我们在某个状态下，采样到要向左。因为是采样，所以向左这个动作不一定概率最高。假设我们采样到向左，在训练的时候，让智能体调整网络的参数，
+如果看到某个状态，我们就向左。在一般的分类问题里面，我们在实现分类的时候，目标函数都会写成最小化交叉熵（cross
+entropy），最小化交叉熵就是最大化对数似然（log likelihood）。</p>
+<p>我们在解决分类问题的时候，目标函数就是最大化或最小化的对象，因为我们现在是最大化似然（likelihood），所以其实是最大化，我们要最大化</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325152631978.png" style="zoom:67%;"></p>
+<p>我们可在 PyTorch
+里调用现成的函数来自动计算损失函数，并且把梯度计算出来。这是一般的分类问题，<strong>强化学习与分类问题唯一不同的地方是损失前面乘一个权重</strong>——<strong>整场游戏得到的总奖励
+R(τ)</strong>，而不是在状态s采取动作a的时候得到的奖励，即</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325152922985.png" style="zoom:67%;"></p>
+<p>我们要把每一笔训练数据，都使用 R(τ) 进行加权。如图 4.9 所示，我们使用
+PyTorch 或 TensorFlow
+之类的深度学习框架计算梯度就结束了，与一般分类问题差不多。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325164704059.png" style="zoom:80%;"></p>
+<blockquote>
+<p>在一般的分类问题中（比如 softmax + 交叉熵），我们损失如下 <span class="math display">\[
+L=-\log \pi_\theta(类别|图像)
+\]</span> 这里我们的类别是确定的，因此我们尽力取减小该类别的误差。</p>
+<p>类比到我们的强化学习中 <span class="math display">\[
+L=-\log \pi_\theta(a|s)
+\]</span>
+这里我们的动作并不一定是对的，只是说明我们采样的时候用的动作是a。</p>
+<p>因此强化学习中我们在loss前加上总奖励 <span class="math inline">\(R(\tau)\)</span> 来当权重。</p>
+<p>如果总奖励越高，那么loss就会越高，因此我们更新幅度就会越大，然后我们这个状态-动作组的概率就会提的更高。</p>
+<p>简单来说，如果总奖励 <span class="math inline">\(R(\tau)\)</span>
+越高，说明本次轨迹链中的所有状态动作组的概率都会更高。</p>
+</blockquote>
+<h2 id="策略梯度实现技巧">2. 策略梯度实现技巧</h2>
+<h3 id="技巧-1添加基线">2.1 技巧 1：添加基线</h3>
+<p>第一个技巧：添加基线（baseline）。</p>
+<p>如果给定状态 s 采取动作 a，整场游戏得到正的奖励，就要增加 (s,a)
+的概率。</p>
+<p>如果给定状态 s 执行动作 a，整场游戏得到负的奖励，就要减小 (s,a)
+的概率。</p>
+<p>但在很多游戏里面，奖励总是正的，最低都是 0。比如打乒乓球游戏， 分数为
+0 ~ 21
+分，所以R(τ)总是正的。假设我们直接使用式(4.5)，在训练的时候告诉模型，不管是什么动作，都应该要把它的概率提升。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325170340042.png" style="zoom:67%;"></p>
+<p>虽然R(τ)总是正的，但它的值是有大有小的，比如我们在玩乒乓球游戏时，得到的奖励总是正的，但采取某些动作可能得到
+0 分，采取某些动作可能得到 20 分。</p>
+<p>如图 4.10 所示，假设我们在某一个状态有 3 个动作
+a、b、c可以执行。根据式(4.6)，我们要把这 3
+个动作的概率，对数概率都提高。
+但是它们前面的权重R(τ)是不一样的。权重是有大有小的，权重小的，该动作的概率提高的就少；权重大的，该动作的概率提高的就多。
+<strong>因为动作概率和为1，
+所以提高少的，在做完归一化（normalize）以后，动作 b
+的概率就是下降的；提高多的，该动作的概率才会上升</strong>。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325170404603.png" style="zoom:80%;"></p>
+<p>这是一个理想的情况，但是实际上，我们是在做采样。本来这边应该是一个期望（expectation），对所有可能的s与a的对进行求和。
+但我们真正在学习的时候，只是采样了少量的s与a的对。
+因为我们做的是采样，所以<strong>有一些动作可能从来都没有被采样到。</strong></p>
+<p>如图 4.11 所示，在某一个状态，虽然可以执行的动作有
+a、b、c，但我们可能只采样到动作 b 或者 只采样到动作 c，没有采样到动作
+a。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325171654977.png" style="zoom:67%;"></p>
+<p>但现在所有动作的奖励都是正的，所以根据式(4.6)，在这个状态采取a、b、c的概率都应该要提高。<strong>我们会遇到的问题是，因为
+a 没有被采样到，所以其他动作的概率如果都要提高，a
+的概率就要下降。</strong> 所以a不一定是一个不好的动作，
+它只是没有被采样到。但因为 a
+没有被采样到，它的概率就会下降，这显然是有问题的。要怎么解决这个问题呢？我们会希望奖励不总是正的。</p>
+<p>为了解决奖励总是正的的问题，我们可以把奖励减 b，即</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325172838540.png" style="zoom:67%;"></p>
+<p>其中，b 称为基线。通过这种方法，我们就可以让 R(τ)−b
+这一项有正有负。如果我们得到的总奖励R(τ)&gt;b，就让 (s,a)
+的概率上升。如果R(τ)&lt;b，就算R(τ)是正的，值很小也是不好的，我们就让(s,a)的概率下降，让这个状态采取这个动作的分数下降。</p>
+<p>b 怎么设置呢？我们可以对 τ 的值取期望， 计算 τ 的平均值，令 <span class="math display">\[
+b \approx \mathbb{E}_{\tau \sim \pi_\theta}[R(\tau)]
+\]</span> 所以在训练的时候，我们会不断地把
+R(τ)的值记录下来，<strong>会不断地计算 R(τ)
+的平均值</strong>，把这个平均值当作 b 来使用。
+这样就可以让我们在训练的时候，R(τ)−b 是有正有负的，这是第一个技巧。</p>
+<blockquote>
+<p>这是个很有效的方法。可以简单理解为，当值为正数的时候，在同一状态下，这个动作的<strong>表现比其他的动作相对要好</strong>，因此增加这个动作的概率。</p>
+</blockquote>
+<h3 id="技巧-2分配合适的分数">2.2 技巧 2：分配合适的分数</h3>
+<p>第二个技巧：给<strong>每一个动作</strong>分配合适的分数（credit）。</p>
+<p>如式(4.7)所示，只要在同一个回合里面，在同一场游戏里面，所有的状态-动作对就使用同样的奖励项进行加权。这显然是不公平的，因为在同一场游戏里面，也许有些动作是好的，有些动作是不好的。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325173303762.png" style="zoom:67%;"></p>
+<p>假设整场游戏的结果是好的，
+但并不代表这场游戏里面每一个动作都是好的。若是整场游戏结果不好，
+但并不代表游戏里面的每一个动作都是不好的。</p>
+<p>所以我们希望可以<strong>给每一个不同的动作前面都乘上不同的权重</strong>。每一个动作的不同权重反映了每一个动作到底是好的还是不好的。</p>
+<p>例如，如图 4.12a 所示，假设游戏都很短，只有 3 ~ 4 个交互，在 <span class="math inline">\(s_a\)</span> 执行 <span class="math inline">\(a_1\)</span> 得到 5 分，在 <span class="math inline">\(s_b\)</span> 执行 <span class="math inline">\(a_2\)</span> 得到 0 分，在 <span class="math inline">\(s_c\)</span> 执行 <span class="math inline">\(a_3\)</span> 得到 −2 分。 整场游戏下来，我们得到
++3 分，那我们得到 +3 分 代表在 <span class="math inline">\(s_b\)</span>
+执行 <span class="math inline">\(a_2\)</span> 是好的吗？
+这并不一定代表在 <span class="math inline">\(s_b\)</span> 执行 <span class="math inline">\(a_2\)</span> 是好的。因为这个正的分数，主要来自在
+<span class="math inline">\(s_a\)</span> 执行了 <span class="math inline">\(a_1\)</span>，与在 <span class="math inline">\(s_b\)</span> 执行 <span class="math inline">\(a_2\)</span> 是没有关系的，也许在 <span class="math inline">\(s_b\)</span> 执行 <span class="math inline">\(a_2\)</span> 反而是不好的，
+因为它导致我们接下来会进入 <span class="math inline">\(s_c\)</span>
+，执行 <span class="math inline">\(a_3\)</span>
+被扣分。所以整场游戏得到的结果是好的， 并不代表每一个动作都是好的。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260325174004871.png" style="zoom:80%;"></p>
+<p>如果按照我们刚才的说法，整场游戏得到的分数是 +3
+分，因此在训练的时候， 每一个状态-动作对都会被乘上 +3。
+在理想的状况下，如果我们的采样数据够多，就可以解决这个问题。因为假设我们的采样数据够多，(
+<span class="math inline">\(s_b\)</span> , <span class="math inline">\(a_2\)</span> )被采样到很多。某一场游戏里，在 <span class="math inline">\(s_b\)</span> 执行 <span class="math inline">\(a_2\)</span> ，我们会得到 +3 分。
+但在另外一场游戏里，如图 4.12b 所示，在 <span class="math inline">\(s_b\)</span> 执行 <span class="math inline">\(a_2\)</span> ，我们却得到了 −7 分，为什么会得到 −7
+分呢？ 因为我们在 <span class="math inline">\(s_b\)</span> 执行 <span class="math inline">\(a_2\)</span> 之前， 在 <span class="math inline">\(s_a\)</span> 执行 <span class="math inline">\(a_2\)</span> 得到 −5 分，−5 分也不是在 <span class="math inline">\(s_b\)</span> 执行 <span class="math inline">\(a_2\)</span> 导致的。因为 ( <span class="math inline">\(s_a\)</span> , <span class="math inline">\(a_2\)</span> ) 先发生，所以 ( <span class="math inline">\(s_a\)</span> , <span class="math inline">\(a_2\)</span> ) 与 ( <span class="math inline">\(s_b\)</span> , <span class="math inline">\(a_2\)</span> ) 是没有关系的。在 <span class="math inline">\(s_b\)</span> 执行 <span class="math inline">\(a_2\)</span> 可能造成的问题只有会在接下来得到 −2
+分，而与前面的 −5
+分没有关系。但是假设我们采样状态-动作对的次数够多，把所有产生这种情况的分数通通都集合起来，
+这可能不是一个问题。</p>
+<p>但现在的问题是，<strong>我们采样的次数是不够多的。在采样的次数不够多的情况下，我们要给每一个状态-动作对分配合理的分数，要让大家知道它合理的贡献</strong>。</p>
+<p>一个做法是计算某个状态-动作对的奖励的时候，不把整场游戏得到的奖励全部加起来，只计算从这个动作执行以后得到的奖励。因为这场游戏在<strong>执行这个动作之前发生的事情是与执行这个动作是没有关系的</strong>，所以<strong>在执行这个动作之前得到的奖励都不能算是这个动作的贡献</strong>。我们把执行这个动作以后发生的所有奖励加起来，才是这个动作真正的贡献。所以图
+4.12a 中，在 <span class="math inline">\(s_b\)</span> 执行 <span class="math inline">\(a_2\)</span>
+这件事情，也许它真正会导致我们得到的分数应该是 −2 分而不是 +3
+分，因为前面的 +5 分 并不是执行 <span class="math inline">\(a_2\)</span>
+的功劳。实际上执行 <span class="math inline">\(a_2\)</span>
+以后，到游戏结束前， 我们只被扣了 2 分，所以分数应该是 −2。同理，图
+4.12b 中，执行 <span class="math inline">\(a_2\)</span> 实际上不应该是扣
+7 分，因为前面扣 5 分，与在 <span class="math inline">\(s_b\)</span>
+执行 <span class="math inline">\(a_2\)</span> 是没有关系的。在 <span class="math inline">\(s_b\)</span> 执行 <span class="math inline">\(a_2\)</span> ，只会让我们被扣两分而已。</p>
+<p>分配合适的分数这一技巧可以表达为</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326043907001.png" style="zoom: 80%;"></p>
+<p>原来的权重是整场游戏的奖励的总和，现在改成<strong>从某个时刻 t
+开始，假设这个动作是在 t 开始执行的，从 t
+一直到游戏结束所有奖励的总和</strong>才能代表这个动作的好坏。</p>
+<p>接下来更进一步，我们把未来的奖励做一个折扣，即</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326043948935.png" style="zoom:80%;"></p>
+<p>为什么要把未来的奖励做一个折扣呢？因为虽然在某一时刻，执行某一个动作，会影响接下来所有的结果（有可能在某一时刻执行的动作，接下来得到的奖励都是这个动作的功劳），但在一般的情况下，时间拖得越长，该动作的影响力就越小。</p>
+<p>公式中的 b 可以是依赖状态（state-dependent）的，事实上 b
+通常是一个网络估计出来的，它是一个网络的输出。我们把 <span class="math inline">\((R−b)\)</span>
+这一项称为<strong>优势函数（advantage function）</strong>， <strong>用
+<span class="math inline">\(A^\theta(s_t,a_t)\)</span>
+来表示优势函数</strong>。</p>
+<p>优势函数的意义是，假设我们在某一个状态 <span class="math inline">\(s_t\)</span> 执行某一个动作 <span class="math inline">\(a_t\)</span> ，相较于其他可能的动作， <span class="math inline">\(a_t\)</span>
+有多好。<strong>优势函数在意的不是绝对的好，而是相对的好，即相对优势（relative
+advantage）</strong>。因为在优势函数中，我们会减去一个基线
+b，所以这个动作是相对的好，不是绝对的好。</p>
+<h2 id="reinforce蒙特卡洛策略梯度">3. REINFORCE：蒙特卡洛策略梯度</h2>
+<p>如图 4.13
+所示，蒙特卡洛方法可以理解为算法完成一个回合之后，再利用这个回合的数据去学习，做一次更新。因为我们已经获得了整个回合的数据，所以也能够获得每一个步骤的奖励，我们可以很方便地计算每个步骤的未来总奖励，即回报
+<span class="math inline">\(G_t\)</span> 。<span class="math inline">\(G_t\)</span>
+是未来总奖励，代表从这个步骤开始，我们能获得的奖励之和。<span class="math inline">\(G_1\)</span>代表我们从第一步开始，往后能够获得的总奖励。
+<span class="math inline">\(G2\)</span>
+代表从第二步开始，往后能够获得的总奖励。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326050719963.png" style="zoom:80%;"></p>
+<p>相比蒙特卡洛方法一个回合更新一次，时序差分方法是每个步骤更新一次，即每走一步，更新一次，时序差分方法的更新频率更高。时序差分方法使用Q函数来近似地表示未来总奖励
+<span class="math inline">\(G_t\)</span> 。</p>
+<p>我们介绍一下策略梯度中最简单的也是最经典的一个算法REINFORCE。REINFORCE
+用的是回合更新的方式，它在代码上的处理上是先获取每个步骤的奖励，然后计算每个步骤的未来总奖励
+<span class="math inline">\(G_t\)</span> ，将每个 <span class="math inline">\(G_t\)</span> 代入</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326130744095.png" style="zoom:67%;"></p>
+<p>优化每一个动作的输出。所以我们在编写代码时会设计一个函数，这个函数的输入是每个步骤获取的奖励，输出是每一个步骤的未来总奖励。因为未来总奖励可写为</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326130806886.png" style="zoom:67%;"></p>
+<p>即上一个步骤和下一个步骤的未来总奖励的关系如式(4.8)所示，所以在代码的计算上，我们是从后往前推，一步一步地往前推，先算
+<span class="math inline">\(G_T\)</span> ，然后往前推，一直算到 <span class="math inline">\(G_1\)</span> 。</p>
+<p>如图 4.14 所示，REINFORCE 的伪代码主要看最后4行，</p>
+<ol type="1">
+<li><p>先产生一个回合的数据，比如 <span class="math inline">\((s_1,a_1,G_1),(s_2,a_2,G_2),...(s_T,a_T,G_T)\)</span>
+。</p></li>
+<li><p>然后对每个动作计算梯度 <span class="math inline">\(\nabla\log\pi(a_t|s_t,\theta)\)</span>
+。在代码上计算时，我们要获取神经网络的输出。</p>
+<blockquote>
+<p>神经网络会输出每个动作对应的概率值（比如0.2、0.5、0.3）（即 <span class="math inline">\(\pi(a_t|s_t,\theta)\)</span>
+的输出为0.2、0.5、0.3），然后我们获取实际的动作 <span class="math inline">\(a_t\)</span> ，把动作转成独热（one-hot）向量（比如
+<span class="math inline">\([0,1,0]\)</span> ）与 <span class="math inline">\(\log⁡[0.2,0.5,0.3]\)</span> 相乘就可以得到</p>
+</blockquote></li>
+</ol>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326131345841.png" style="zoom:67%;"></p>
+<p>如图 4.15
+所示，手写数字识别是一个经典的多分类问题，输入是一张手写数字的图片，经过神经网络处理后，输出的是各个类别的概率。我们希望输出的概率分布尽可能地贴近真实值的概率分布。因为真实值只有一个数字
+9，所以如果我们用独热向量的形式给它编码，也可以把真实值理解为一个概率分布，9
+的概率就是1，其他数字的概率就是
+0。神经网络的输出一开始可能会比较平均，通过不断地迭代、训练优化之后，我们会希望输出9
+的概率可以远高于输出其他数字的概率。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326132550807.png" style="zoom: 80%;"></p>
+<p>如图 4.16 所示，我们所要做的就是提高输出 9
+的概率，降低输出其他数字的概率，让神经网络输出的概率分布能够更贴近真实值的概率分布。我们可以用交叉熵来表示两个概率分布之间的差距。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326132626855.png" style="zoom: 80%;"></p>
+<p>我们看一下监督学习的优化流程，即怎么让输出逼近真实值。如图 4.17
+所示，监督学习的优化流程就是将图片作为输入传给神经网络，神经网络会判断图片中的数字属于哪一类数字，输出所有数字可能的概率，再计算交叉熵，即神经网络的输出
+<span class="math inline">\(Y_i\)</span> 和真实的标签值 <span class="math inline">\(Y&#39;_i\)</span> 之间的距离 <span class="math inline">\(-\sum{(Y&#39;_i\cdot\log(Y_i))}\)</span>
+。我们希望尽可能地缩小这两个概率分布之间的差距，计算出的交叉熵可以作为损失函数传给神经网络里面的优化器进行优化，以自动进行神经网络的参数更新。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326133106732.png" style="zoom:80%;"></p>
+<p>类似地，如图 4.18
+所示，策略梯度预测每一个状态下应该要输出的动作的概率，即输入状态 <span class="math inline">\(s_t\)</span> ，输出动作 <span class="math inline">\(a_t\)</span> 的概率，比如
+0.02、0.08、0.9。实际上输出给环境的动作是随机选择一个动作，比如我们选择向右这个动作，它的独热向量就是（0,0,1）。我们把神经网络的输出和实际动作代入交叉熵的公式就可以求出输出动作的概率和实际动作的概率之间的差距。</p>
+<p><strong>但实际的动作 <span class="math inline">\(a_t\)</span>
+只是我们输出的真实的动作，它不一定是正确的动作，它不能像手写数字识别一样作为一个正确的标签来指导神经网络朝着正确的方向更新，所以我们需要乘一个奖励回报
+Gt。</strong></p>
+<p><span class="math inline">\(G_t\)</span> 相当于对真实动作的评价。</p>
+<ul>
+<li>如果 <span class="math inline">\(G_t\)</span>
+越大，未来总奖励越大，那就说明当前输出的真实的动作就越好，损失就越需要重视。</li>
+<li>如果 <span class="math inline">\(G_t\)</span> 越小，那就说明动作
+<span class="math inline">\(a_t\)</span>
+不是很好，损失的权重就要小一点儿，优化力度也要小一点儿。</li>
+</ul>
+<p>通过与手写数字识别的一个对比，我们就知道为什么策略梯度损失会构造成这样。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326134311115.png" style="zoom: 80%;"></p>
+<p>如图 4.19
+所示，实际上我们在计算策略梯度损失的时候，要先对实际执行的动作取独热向量，再获取神经网络预测的动作概率，将它们相乘，我们就可以得到
+<span class="math inline">\(\log\pi(a_t|s_t,\theta)\)</span>
+，这就是我们要构造的损失。因为我们可以获取整个回合的所有的轨迹，所以我们可以对这一条轨迹里面的每个动作都去计算一个损失。把所有的损失加起来，我们再将其“扔”给
+Adam 的优化器去自动更新参数就好了。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326174348935.png" style="zoom:80%;"></p>
+<p>图 4.20 所示为REINFORCE
+算法示意，首先我们需要一个策略模型来输出动作概率，输出动作概率后，通过
+sample()
+函数得到一个具体的动作，与环境交互后，我们可以得到整个回合的数据。</p>
+<p>得到回合数据之后，我们再去执行 learn() 函数，在 learn()
+函数里面，我们就可以用这些数据去构造损失函数，“扔”给优化器优化，更新我们的策略模型。</p>
+<p><img src="/2026/03/24/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04/image-20260326174622374.png" style="zoom:80%;"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E7%AC%AC4%E8%8A%82/" rel="tag"># 第4节</a>
+              <a href="/tags/%E8%98%91%E8%8F%87%E4%B9%A6/" rel="tag"># 蘑菇书</a>
+              <a href="/tags/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0/" rel="tag"># 强化学习</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/03/19/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A03-1/" rel="prev" title="强化学习 3.表格型方法（实验部分）">
+                  <i class="fa fa-angle-left"></i> 强化学习 3.表格型方法（实验部分）
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
