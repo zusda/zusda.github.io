@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="强化学习 5.PPO 算法">
+<meta property="og:url" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328161842915.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328162309032.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328162332884.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328163833590.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328163906280.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328164150561.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328164222925.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328165003293.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328165848490.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328165856545.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328170146854.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328174510569.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328174817337.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328175904036.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328221955539.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328222041534.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328222300472.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328223313276.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328223403762.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328223610380.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329011706718.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329013342362.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329013438884.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329191853435.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329192311236.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329192438183.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329192650359.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329193152453.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329193651069.png">
+<meta property="article:published_time" content="2026-03-27T19:12:53.000Z">
+<meta property="article:modified_time" content="2026-03-29T12:22:42.594Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="第5节">
+<meta property="article:tag" content="蘑菇书">
+<meta property="article:tag" content="强化学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328161842915.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/","path":"2026/03/28/强化学习5/","title":"强化学习 5.PPO 算法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>强化学习 5.PPO 算法 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E6%80%A7%E9%87%87%E6%A0%B7"><span class="nav-number">2.</span> <span class="nav-text">1. 重要性采样</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%91%E7%AB%AF%E7%AD%96%E7%95%A5%E4%BC%98%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">2. 近端策略优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%91%E7%AB%AF%E7%AD%96%E7%95%A5%E4%BC%98%E5%8C%96%E6%83%A9%E7%BD%9A"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 近端策略优化惩罚</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%91%E7%AB%AF%E7%AD%96%E7%95%A5%E4%BC%98%E5%8C%96%E8%A3%81%E5%89%AA"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 近端策略优化裁剪</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="强化学习 5.PPO 算法 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          强化学习 5.PPO 算法
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-03-28 03:12:53" itemprop="dateCreated datePublished" datetime="2026-03-28T03:12:53+08:00">2026-03-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-29 20:22:42" itemprop="dateModified" datetime="2026-03-29T20:22:42+08:00">2026-03-29</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《蘑菇书》原文（课本）：https://datawhalechina.github.io/easy-rl/#/</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<p>蘑菇书的文章结构不会跟之前《动手学深度学习》按照原文章节进行，个人会适当调节。</p>
+<hr>
+<h2 id="重要性采样">1. 重要性采样</h2>
+<p>在介绍近端策略优化（proximal policy optimization，PPO）
+之前，我们先回顾同策略和异策略这两种训练方法的区别。在强化学习里面，要学习的是一个智能体。如果要学习的智能体（更新时生成的action，比如max(a)）和与环境交互的智能体（交换生成action，比如ε-贪心探索）是相同的，我们称之为同策略。如果要学习的智能体和与环境交互的智能体不是相同的，我们称之为异策略。</p>
+<p>为什么我们会想要考虑异策略？让我们回忆一下策略梯度。策略梯度是同策略的算法，因为在策略梯度中，我们需要一个智能体、一个策略和一个演员。演员去与环境交互搜集数据，搜集很多的轨迹
+τ，<strong>根据搜集到的数据按照策略梯度的公式更新策略的参数（更新同一个策略网络），所以策略梯度是一个同策略的算法</strong>。PPO是策略梯度的变形，它是现在
+OpenAI 默认的强化学习算法。</p>
+<p>策略梯度的 loss求导如下 <span class="math display">\[
+\nabla\bar{R_\theta}=\mathbb{E}_{\tau\sim
+p_\theta(\tau)}[R(\tau)\nabla\log p_\theta(\tau)]
+\]</span> 问题在于式中的 <span class="math inline">\(\mathbb{E}_{\tau\sim p_\theta(\tau)}\)</span>
+是对策略 <span class="math inline">\(\pi_\theta\)</span> 采样的轨迹 τ
+求期望。<strong>一旦更新了参数，从 θ 变成 <span class="math inline">\(\theta&#39;\)</span> ，概率 pθ(τ)
+就不对了</strong>，<strong>之前采样的数据也不能用了</strong>。所以策略梯度是一个会花很多时间来采样数据的算法，其大多数时间都在采样数据。</p>
+<p>智能体与环境交互以后，接下来就要更新参数。我们<strong>只能更新参数一次，然后就要重新采样数据，
+才能再次更新参数</strong>。这显然是非常花时间的，所以我们<strong>想要从同策略变成异策略</strong>，这样就可以用另外一个策略
+<span class="math inline">\(\pi_{\theta&#39;}\)</span> 、另外一个演员
+<span class="math inline">\(\theta&#39;\)</span> 与环境交互（<span class="math inline">\(\theta&#39;\)</span> 被固定了），用 <span class="math inline">\(\theta&#39;\)</span> 采样到的数据去训练
+θ。假设我们<strong>可以用 <span class="math inline">\(\theta&#39;\)</span> 采样到的数据去训练
+θ</strong>，我们<strong>可以多次使用 <span class="math inline">\(\theta&#39;\)</span>
+采样到的数据，可以多次执行梯度上升（gradient
+ascent），可以多次更新参数</strong>， 都只需要用同一批数据。因为假设 θ
+有能力学习另外一个演员 <span class="math inline">\(\theta&#39;\)</span>
+所采样的数据，所以<span class="math inline">\(\theta&#39;\)</span>
+只需采样一次，并采样多一点的数据，让 θ
+去更新很多次，这样就会比较有效率。</p>
+<p>具体怎么做呢？这就需要介绍<strong>重要性采样（importance
+sampling）</strong> 的概念。</p>
+<p>对于一个随机变量，我们通常用概率密度函数来刻画该变量的概率分布特性。具体来说，给定随机变量的一个取值，可以根据概率密度函数来计算该值对应的概率（密度）。反过来，也可以根据概率密度函数提供的概率分布信息来生成随机变量的一个取值，这就是采样。</p>
+<p>因此，从某种意义上来说，采样是概率密度函数的逆向应用。与根据概率密度函数计算样本点对应的概率值不同，采样过程往往没有那么直接，通常需要根据待采样分布的具体特点来选择合适的采样策略。</p>
+<p>假设我们有一个函数 <span class="math inline">\(f(x)\)</span>，要计算从 <span class="math inline">\(分布p\)</span> 采样 x，再把 x 代入 f ，得到
+f(x)。我们该怎么计算 f(x)的期望值呢？假设我们不能对分布 p
+做积分，但可以从 <span class="math inline">\(分布p\)</span> 采样一些数据
+<span class="math inline">\(x_i\)</span> 。把 <span class="math inline">\(x_i\)</span> 代入 f(x)，取它的平均值，就可以近似
+f(x) 的期望值。</p>
+<p>现在有另外一个问题，假设我们不能从 <span class="math inline">\(分布p\)</span> 采样数据，只能从另外一个 <span class="math inline">\(分布q\)</span> 采样数据x，q
+可以是任何分布。如果我们从 q 采样 <span class="math inline">\(x_i\)</span>
+，就不能使用式(5.2)。因为式(5.2)是假设 x 都是从 p 采样出来的。</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328161842915.png" style="zoom: 67%;"></p>
+<p>所以我们做一个修正，期望值 <span class="math inline">\(\mathbb{E}_{x\sim p}[f(x)]\)</span> 展开来就是：
+<span class="math inline">\(\int f(x)p(x)dx\)</span> 。</p>
+<p>我们对其做如下的变换：</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328162309032.png" style="zoom:67%;"></p>
+<p>即</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328162332884.png" style="zoom:67%;"></p>
+<p>这样我们就可以写成对 q 里面所采样出来的 x 取期望值。我们从 q 里面采样
+x，再计算 <span class="math inline">\(f(x)\frac{p(x)}{q(x)}\)</span>
+，再取期望值。所以就算我们不能从 p 里面采样数据，但只要能从 q
+里面采样数据，就可以计算从 p 采样 x 代入 f 以后的期望值。</p>
+<p>因为是从 q 采样数据，所以我们从 q
+采样出来的每一笔数据，都需要乘一个重要性权重（importance weight） <span class="math inline">\(\frac{p(x)}{q(x)}\)</span>
+来修正这两个分布的差异。q(x) 可以是任何分布，唯一的限制就是 q(x)
+的概率是 0 的时候，p(x) 的概率不为 0，不然会没有定义。假设 q(x) 的概率是
+0 的时候，p(x) 的概率也都是 0，p(x) 除以
+q(x)是有定义的。所以这个时候我们就可以使用重要性采样，把从 p 采样换成从
+q 采样。</p>
+<blockquote>
+<p>举个例子，策略 <span class="math inline">\(\pi_1\)</span>
+第一次生成了轨迹链 <span class="math inline">\(\tau\)</span>
+。我们在更新完网络后，新的策略为 <span class="math inline">\(\pi_2\)</span> 。</p>
+<p>至此位置，<span class="math inline">\(分布p\)</span>
+就是我们的当前网络 <span class="math inline">\(\pi_2\)</span> ，而旧网络
+<span class="math inline">\(\pi_1\)</span> 则遵从着旧的 <span class="math inline">\(分布q\)</span> 。</p>
+<p>我们使用旧网络生成的轨迹链对新网络进行训练，那么我们需要计算出该轨迹链在
+<span class="math inline">\(分布q\)</span> 中的概率 <span class="math inline">\(q(\tau)\)</span> 以及 该轨迹链在 <span class="math inline">\(新分布p\)</span> 中的概率 <span class="math inline">\(p(\tau)\)</span>
+，然后计算我们的目标函数，即总奖励 <span class="math inline">\(R(\tau)\)</span> 。</p>
+<p>根据之前学的，我们能够对轨迹链的概率进行展开</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328163833590.png" alt style="zoom:67%;"></p>
+<p>所以比值变成：</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328163906280.png" style="zoom: 80%;"></p>
+<p>求导公式也从原来的：</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328164150561.png" style="zoom:80%;"></p>
+<p>变成了</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328164222925.png" style="zoom:80%;"></p>
+<p>与原本相比，使用其他分布的数据，我们需要乘以 <span class="math inline">\(\frac{p(\tau)}{q(\tau)}\)</span>
+这一项。这一项也被称为<strong>重要性</strong>。</p>
+<p>重要性（importance）本质是在衡量：一个样本在目标分布 <span class="math inline">\(p\)</span>
+下“应该被重视的程度”，相对于它在采样分布 <span class="math inline">\(q\)</span> 下出现的程度。</p>
+<p>重要性权重 <span class="math inline">\(\frac{p}{q}\)</span>
+做的事情是：</p>
+<blockquote>
+<p><strong>重新加权样本，让“旧数据看起来像是从新策略采样的”</strong></p>
+</blockquote>
+</blockquote>
+<p>重要性采样有一些问题。虽然我们可以把 p 换成任何的 q。但是在实现上，
+<strong>p 和 q
+的差距不能太大</strong>。差距太大，会有一些问题。比如，虽然式(5.3)成立（式(5.3)左边是
+f(x) 的期望值，它的分布是 p，式(5.3)右边是 <span class="math inline">\(f(x)\frac{p(x)}{q(x)}\)</span>
+的期望值，它的分布是
+q），它们期望是一样的，但是<strong>方差不一样</strong>，即 <span class="math inline">\(Var_{x\sim p}[f(x)]\)</span> 和 <span class="math inline">\(Var_{x\sim q}[f(x)\frac{p(x)}{q(x)}]\)</span>
+是不一样的。</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328165003293.png" style="zoom:67%;"></p>
+<p>我们可以将 <span class="math inline">\(f(x)\)</span> 和 <span class="math inline">\(f(x)\frac{p(x)}{q(x)}\)</span> 代入方差的公式
+<span class="math inline">\(Var[x]=E[X^2]-(E[X])^2\)</span>
+（标准方程公式的变形），得到：</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328165848490.png" style="zoom:80%;"></p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328165856545.png" style="zoom:80%;"></p>
+<p><span class="math inline">\(Var_{x\sim p}[f(x)]\)</span> 和 <span class="math inline">\(Var_{x\sim q}[f(x)\frac{p(x)}{q(x)}]\)</span>
+的差别在于第一项是不同的。</p>
+<p><span class="math inline">\(Var_{x\sim
+q}[f(x)\frac{p(x)}{q(x)}]\)</span> 的第一项多乘了 <span class="math inline">\(\frac{p(x)}{q(x)}\)</span> ，如果 <span class="math inline">\(\frac{p(x)}{q(x)}\)</span> 差距很大，<span class="math inline">\(f(x)\frac{p(x)}{q(x)}\)</span>
+的方差就会很大。</p>
+<p>所以<strong>理论上它们的期望值一样，也就是，我们只要对分布p采样足够多次，对分布q采样足够多次，得到的结果会是一样的</strong>。但是<strong>如果我们采样的次数不够多，因为它们的方差差距是很大的，所以我们就有可能得到差别非常大的结果</strong>。</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328170146854.png" style="zoom: 80%;"></p>
+<p>例如，当 p(x) 和 q(x) 差距很大时，就会有问题。如图 5.1
+所示，假设蓝线是 p(x) 的分布，绿线是 q(x) 的分布，红线是
+f(x)。(分布即概率密度分布，指的x出现在该处的概率，可以看到绿色点从分布q中采样出来的。而q和p的分布几乎错开，因此两者差距极大。)</p>
+<p>如果我们要计算 f(x)的期望值，从分布 p(x) 做采样，显然 <span class="math inline">\(\mathbb{E}_{x\sim p}[f(x)]\)</span>
+是负的。这是因为<strong>左边区域 p(x)
+的概率很高</strong>，所以<strong>采样会到这个区域，而 f(x)
+在这个区域是负的</strong>，
+所以<strong>理论上这一项算出来会是负的</strong>。</p>
+<p>接下来我们改成从 q(x) 采样，因为 <strong>q(x)
+在右边区域的概率比较高</strong>，所以如果我们<strong>采样的点不够多，可能只会采样到右侧</strong>。如果我们只采样到右侧，，可能
+<span class="math inline">\(\mathbb{E}_{x\sim p}[f(x)]\)</span> 是正的。
+我们这边采样到这些点，去计算它们的 <span class="math inline">\(f(x)\frac{p(x)}{q(x)}\)</span> 都是正的。</p>
+<p>我们采样到这些点都是正的，取期望值以后也都是正的，这是因为采样的次数不够多。假设我们采样次数很少，只能采样到右边。左边虽然概率很低，但也有可能被采样到。假设我们好不容易采样到左边的点，因为左边的点的p(x)
+和 q(x) 是差很多的， 这边 p(x) 很大，q(x) 很小。 f(x)
+<strong>好不容易终于采样到一个负的，这个负的就会被乘上一个非常大的权重，这样就可以平衡刚才那边一直采样到正的值的情况。最终我们算出这一项的期望值，终究还是负的</strong>。</p>
+<p>但<strong>前提是我们要采样足够多次，这件事情才会发生</strong>。但有可能采样次数不够多，
+<span class="math inline">\(\mathbb{E}_{x\sim p}[f(x)]\)</span> 与 <span class="math inline">\(\mathbb{E}_{x\sim
+p}[f(x)\frac{p(x)}{q(x)}]\)</span>
+可能就有很大的差距。这就是重要性采样的问题。</p>
+<p>现在要做的就是把重要性采样用在异策略的情况中，把同策略训练的算法改成异策略训练的算法。</p>
+<p>怎么改呢？如式(5.4)所示，之前我们用策略 <span class="math inline">\(\pi_{\theta}\)</span> 与环境交互，采样出轨迹 <span class="math inline">\(\tau\)</span> ，计算 <span class="math inline">\(R(\tau)\nabla\log p_{\theta}(\tau)\)</span>
+。现在我们不用 <span class="math inline">\(\pi_{\theta}\)</span>
+与环境交互，假设有另外一个策略 <span class="math inline">\(\pi_{\theta}&#39;\)</span>
+，它就是另外一个演员，它的工作是做示范（demonstration）。</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328174510569.png" style="zoom:80%;"></p>
+<p><span class="math inline">\(\theta&#39;\)</span> 的工作是为θ
+做示范。它与环境交互，告诉 θ 它与环境交互会发生什么事，借此来训练
+θ。我们要训练的是 θ ，<span class="math inline">\(\theta&#39;\)</span>
+只负责做示范，负责与环境交互。</p>
+<p>我们现在的 τ 是从 <span class="math inline">\(\theta&#39;\)</span>
+采样出来的，是用 <span class="math inline">\(\theta&#39;\)</span>
+与环境交互。所以采样出来的 τ 是从 <span class="math inline">\(\theta&#39;\)</span>
+采样出来的，这两个分布不一样。但没有关系，假设我们本来是从 p
+采样，但发现不能从 p 采样，所以我们不用 θ 与环境交互，可以把 p 换成
+q，在后面补上一个重要性权重。同理，我们把 θ 换成 <span class="math inline">\(\theta&#39;\)</span> 后，要补上一个重要性权重
+<span class="math inline">\(\frac{p(x)}{q(x)}\)</span>
+。这个重要性权重就是某一个轨迹 τ 用 θ 算出来的概率除以这个轨迹 τ 用
+<span class="math inline">\(\theta&#39;\)</span>
+算出来的概率。这一项是很重要的，因为我们要学习的是演员 θ，而 θ 和 <span class="math inline">\(\theta&#39;\)</span> 是不太一样的，<span class="math inline">\(\theta&#39;\)</span> 见到的情形与 θ
+见到的情形可能不是一样的，所以中间要有一个修正的项。</p>
+<p>实际在做策略梯度的时候，我们并不是给整个轨迹 τ
+一样的分数，而是将每一个状态-动作对分开计算。实际更新梯度的过程可写为</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328174817337.png" style="zoom:67%;"></p>
+<p>我们用演员θ 采样出 <span class="math inline">\(s_t\)</span> 与 <span class="math inline">\(a_t\)</span>
+，采样出状态-动作的对，我们会计算这个状态-动作对的优势（advantage）<span class="math inline">\(A^θ(s_t,a_t)\)</span>， 就是它有多好。 <span class="math inline">\(A^θ(s_t,a_t)\)</span>
+即用累积奖励减去基线，这一项就是估测出来的。它要估测的是，在状态 <span class="math inline">\(s_t\)</span> 采取动作 <span class="math inline">\(a_t\)</span> 是好的还是不好的。接下来在后面乘
+<span class="math inline">\(\nabla\log p_{\theta}(a^n_t|s^n_t)\)</span>
+，也就是如果 <span class="math inline">\(A^θ(s_t,a_t)\)</span>
+是正的，就要增大概率；如果是负的，就要减小概率。</p>
+<p>我们可以通过重要性采样把同策略变成异策略，从 θ 变成 <span class="math inline">\(\theta&#39;\)</span>。所以现在 <span class="math inline">\(s_t\)</span> 、 <span class="math inline">\(a_t\)</span> 是 <span class="math inline">\(\theta&#39;\)</span>
+与环境交互以后所采样到的数据。 但是训练时，要调整的参数是模型 θ。因为
+<span class="math inline">\(\theta&#39;\)</span> 与 θ
+是不同的模型，所以我们要有一个修正的项。这个修正的项，就是用重要性采样的技术，把
+<span class="math inline">\(s_t\)</span> 、 <span class="math inline">\(a_t\)</span> 用 θ 采样出来的概率除以 <span class="math inline">\(s_t\)</span> 、 <span class="math inline">\(a_t\)</span> 用 <span class="math inline">\(\theta&#39;\)</span> 采样出来的概率。</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328175904036.png" style="zoom:80%;"></p>
+<p>其中， <span class="math inline">\(A^θ(s_t,a_t)\)</span> 有一个上标
+θ，θ 代表 <span class="math inline">\(A^θ(s_t,a_t)\)</span> 是演员 θ
+与环境交互的时候计算出来的。但是实际上从 θ 换到 θ′ 的时候， <span class="math inline">\(A^θ(s_t,a_t)\)</span> 应该改成 <span class="math inline">\(A^{θ&#39;}(s_t,a_t)\)</span> ，为什么呢？ <span class="math inline">\(A(s_t,a_t)\)</span>
+这一项是想要估测在某一个状态采取某一个动作，接下来会得到累积奖励的值减去基线的值。我们怎么估计
+<span class="math inline">\(A(s_t,a_t)\)</span> ? 我们在状态 <span class="math inline">\(s_t\)</span> 采取动作 <span class="math inline">\(a_t\)</span>
+，接下来会得到的奖励的总和，再减去基线就是 <span class="math inline">\(A(s_t,a_t)\)</span> 。之前是 θ
+与环境交互，所以我们观察到的是 θ 可以得到的奖励。但<strong>现在是 θ′
+与环境交互，所以我们得到的这个优势是根据 θ′
+所估计出来的优势。但我们现在先不要管那么多</strong>，就<strong>假设
+<span class="math inline">\(A^θ(s_t,a_t)\)</span> 和 <span class="math inline">\(A^{θ&#39;}(s_t,a_t)\)</span>
+可能是差不多的</strong>。</p>
+<blockquote>
+<p>由于奖励是环境决定的，所以我觉得相同轨迹下由奖励计算出来的回报也应该是一样的。</p>
+</blockquote>
+<p>接下来，我们可以拆解 <span class="math inline">\(p_{\theta}(a_t|s_t)\)</span> 和 <span class="math inline">\(p_{\theta&#39;}(a_t|s_t)\)</span> ，即</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328221955539.png" style="zoom: 67%;"></p>
+<p>于是我们可得</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328222041534.png" style="zoom: 67%;"></p>
+<p>这里需要做的一件事情是，假设模型是 θ 的时候，我们看到 <span class="math inline">\(s_t\)</span> 的概率，与模型是 θ′ 的时候，我们看到
+<span class="math inline">\(s_t\)</span> 的概率是一样的，即 <span class="math inline">\(p_θ(s_t)=p_{θ&#39;}(s_t)\)</span>。因为 <span class="math inline">\(p_θ(s_t)\)</span> 和 <span class="math inline">\(p_{θ&#39;}(s_t)\)</span>
+是一样的，所以我们可得</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328222300472.png" style="zoom:67%;"></p>
+<blockquote>
+<p>在工程实现上，我们根本没法计算 <span class="math inline">\(p_θ(s_t)\)</span> 。什么是 <span class="math inline">\(p_θ(s_t)\)</span> ？表示的是：在策略 <span class="math inline">\(\pi_\theta\)</span> 下，第 t 步到达状态 <span class="math inline">\(s_t\)</span> 的概率也就是说：所有能在第 t 步走到
+<span class="math inline">\(s_t\)</span>
+的轨迹概率的总和。它依赖“所有可能轨迹”。</p>
+<p>假如策略只变一点点 ⇒ 状态分布也只变一点点</p>
+<p>于是就有了经典近似：<span class="math inline">\(p_θ(s_t)\approx
+p_{θ&#39;}(s_t)\)</span></p>
+</blockquote>
+<p>式(5.5)是梯度，我们可以从下面的公式反推原来的目标函数：</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328223313276.png" style="zoom:67%;"></p>
+<p>注意，对 θ 求梯度时， <span class="math inline">\(p_{\theta&#39;}(a_t|s_t)\)</span> 和 <span class="math inline">\(A^{θ&#39;}(s_t,a_t)\)</span> 都是常数。</p>
+<p>所以实际上，当我们使用重要性采样的时候，要去优化的目标函数为</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328223403762.png" style="zoom:67%;"></p>
+<blockquote>
+<p>可能你会疑惑，为什么我们之前需要将分布p使用式子 <span class="math inline">\(\nabla f(x)=f(x)\nabla\log f(x)\)</span>
+进行转换，而现在使用原公式即可。其实这主要涉及到采样的问题。</p>
+<p>我们一开始对总奖励R的求导如下 <span class="math display">\[
+\nabla \bar{R}_\theta=\sum_{\tau}R(\tau)\nabla p_{\theta}(\tau)
+\]</span> 这里 <span class="math inline">\(\nabla
+p_{\theta}(\tau)\)</span>
+虽然本身可以计算，但求和是对所有可能轨迹穷举，轨迹空间过于巨大，实践中无法枚举。因此我们通过恒等变换将其转化为期望的形式：
+<span class="math display">\[
+\nabla \bar{R}_\theta=\mathbb{E}_{\tau\sim
+p_\theta(\tau)}[R(\tau)\nabla\log p_{\theta}(\tau)]
+\]</span> 这样，我们就能够通过分布p，采样数据然后开始计算 <span class="math inline">\(R(\tau)\nabla\log p_{\theta}(\tau)\)</span>
+的结果了。</p>
+<p>但是对于修改后的异策略方法来说，以下两个方法是等价的 <span class="math display">\[
+\mathbb{E}_{(s_t,a_t)\sim\pi_{\theta&#39;}}[\frac{p_\theta(a_t|s_t)}{p_{\theta&#39;}(a_t|s_t)}A^{\theta&#39;}(s_t,a_t)\nabla\log
+p_\theta(a^n_t|s^n_t)]=
+\mathbb{E}_{(s_t,a_t)\sim\pi_{\theta&#39;}}[\frac{\nabla
+p_\theta(a_t|s_t)}{p_{\theta&#39;}(a_t|s_t)}A^{\theta&#39;}(s_t,a_t)]
+\]</span> 因为存在恒等式 <span class="math inline">\(\nabla
+f(x)=f(x)\nabla\log f(x)\)</span> ，两式之间只是对 <span class="math inline">\(p_\theta\)</span> 做了等价变形。此处不需要对 <span class="math inline">\(\nabla p_\theta\)</span>
+单独采样，期望的采样分布始终是 <span class="math inline">\(\pi_{\theta&#39;}\)</span>，所以可以直接使用原始梯度形式而无需转换为
+<span class="math inline">\(⁡\log\)</span> 形式。</p>
+</blockquote>
+<h2 id="近端策略优化">2. 近端策略优化</h2>
+<p>我们可以通过重要性采样把同策略换成异策略，但重要性采样有一个问题：如果
+<span class="math inline">\(p_{\theta}(a_t|s_t)\)</span> 与 <span class="math inline">\(p_{\theta&#39;}(a_t|s_t)\)</span>
+相差太多，即<strong>这两个分布相差太多，重要性采样的结果就会不好</strong>。
+怎么避免它们相差太多呢？这就是PPO要做的事情。</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260328223610380.png" style="zoom: 67%;"></p>
+<p>如式(5.6)所示，PPO 需要优化目标函数 <span class="math inline">\(J^{θ&#39;}(θ)\)</span>
+。但是这个目标函数又牵涉到重要性采样。在做重要性采样的时候，<span class="math inline">\(p_\theta(a_t|s_t)\)</span> 不能与 <span class="math inline">\(p_{\theta&#39;}(a_t|s_t)\)</span>
+相差太多。<strong>做示范的模型不能与真正的模型相差太多，相差太多，重要性采样的结果就会不好</strong>。我们在训练的时候，应多加一个约束（constrain）。这个约束是
+<strong>θ 与 θ′ 输出的动作的 KL 散度（KL
+divergence）</strong>，这一项<strong>用于衡量 θ 与 θ′
+的相似程度</strong>。我们希望在训练的过程中，学习出的 θ 与 θ′
+越相似越好。因为如果 θ 与 θ′ 不相似，最后的结果就会不好。</p>
+<p>所以在 PPO 里面有两项：一项是优化本来要优化的 <span class="math inline">\(J^{θ&#39;}(θ)\)</span>
+，另一项是一个约束。这个约束就好像正则化（regularization）的项（term）
+一样，<strong>它所做的就是希望最后学习出的 θ 与 θ′
+相差不大</strong>。注意，虽然 PPO
+的优化目标涉及到了重要性采样，但其只用到了上一轮策略 θ′ 的数据。</p>
+<p>PPO 目标函数中<strong>加入了 KL 散度的约束，行为策略 θ′ 和目标策略 θ
+非常接近</strong>，PPO 的行为策略和目标策略可认为是同一个策略，因此
+<strong>PPO 是同策略算法</strong>。</p>
+<p>PPO 有一个前身：信任区域策略优化（trust region policy
+optimization，TRPO）。TRPO 可表示为</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329011706718.png" style="zoom:67%;"></p>
+<p>TRPO 与 PPO 不一样的地方是约束所在的位置不一样，PPO
+直接把约束放到要优化的式子里面，我们就可以用梯度上升的方法去最大化式(5.6)。</p>
+<p>但 TRPO 是把 KL 散度当作约束，它希望 θ 与 θ′ 的 KL 散度小于
+δ。如果我们使用的是基于梯度的优化，有约束是很难处理的。TRPO
+是很难处理的，因为它把 KL
+散度约束当作一个额外的约束，没有放在目标（objective）里面，所以它很难计算。</p>
+<p>因此我们一般就使用 PPO，而不使用 TRPO 。PPO 与 TRPO 的性能差不多，但
+PPO 在实现上比 TRPO 容易得多。</p>
+<blockquote>
+<p>KL 散度的<strong>输入是 θ 与 θ′
+所对应的行为分布</strong>，而非参数本身。所谓 θ 与 θ'
+之间的距离，并不是参数数值上的距离，而是行为上的距离。具体来说，假设我们有两个演员
+θ 和 θ'，以及 3 个可选动作 <span class="math inline">\(a_1, a_2,
+a_3\)</span> 。给定同一个状态 s，θ 输出的动作分布可能是
+(0.7,0.2,0.1)，而 θ' 输出的动作分布可能是 (0.3,0.4,0.3)。</p>
+<p>KL 散度的计算公式为：</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329013342362.png" style="zoom:67%;"></p>
+<p>套入刚才的例子，θ 输出分布 p=(0.7,0.2,0.1)，θ' 输出分布
+q=(0.3,0.4,0.3)，则：</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329013438884.png" style="zoom:67%;"></p>
+<p>0.485 表示在状态 s 下，θ 和 θ' 这两个演员的行为差异程度。KL
+散度的值越大，说明两个分布差异越大；越接近 0，说明两个分布越相似。</p>
+<p>DKL(p∥q) 的含义是：以 p 为基准，衡量用 q 来近似 p
+时的信息损失。公式中每一项的权重是 p(i)，所以 p
+概率大的地方贡献更大。一般我们以新策略为基准，衡量新策略p 偏离旧策略q
+的程度。这样新策略概率大的动作上的差异会被重点惩罚。但实际上也有用DKL(q∥p)的，有些实现甚至取两者的平均（称为
+Jensen-Shannon 散度）。</p>
+</blockquote>
+<h3 id="近端策略优化惩罚">2.1 近端策略优化惩罚</h3>
+<p>PPO
+算法有两个主要的变种：<strong>近端策略优化惩罚（PPO-penalty）</strong>和<strong>近端策略优化裁剪（PPO-clip）</strong>。</p>
+<p>我们来看一下 PPO1
+算法，即<strong>近端策略优化惩罚算法</strong>。它先初始化一个策略的参数
+<span class="math inline">\(θ^0\)</span>
+。在每一个迭代里面，我们用前一个训练的迭代得到的演员的参数 <span class="math inline">\(θ_k\)</span>
+与环境交互，采样到大量状态-动作对。根据 <span class="math inline">\(θ^k\)</span> 交互的结果，我们估测 <span class="math inline">\(A^{θ^k}(s_t,a_t)\)</span> 。我们使用 PPO
+的优化公式。但与原来的策略梯度不一样，原来的策略梯度只能更新一次参数，更新完以后，我们就要重新采样数据。但是现在不同，我们<strong>用
+<span class="math inline">\(θ^k\)</span>
+与环境交互，采样到这组数据以后，我们可以让 θ
+更新很多次，想办法最大化目标函数</strong>，如式(5.7)所示。这里面的 θ
+更新很多次也没有关系，因为我们已经有重要性采样，所以这些经验，这些状态-动作对是从
+<span class="math inline">\(θ^k\)</span> 采样出来的也没有关系。θ
+可以更新很多次，它与 <span class="math inline">\(θ^k\)</span>
+变得不太一样也没有关系，我们可以照样训练 θ。</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329191853435.png" style="zoom:67%;"></p>
+<p>在 PPO 的论文里面还有一个自适应KL散度（adaptive KL
+divergence）。这里会遇到一个问题就，即 β
+要设置为多少。这个问题与正则化一样，正则化前面也要乘一个权重，所以 KL
+散度前面也要乘一个权重，但 β 要设置为多少呢？</p>
+<p>我们有一个动态调整 β 的方法。在这个方法里面，我们先设一个可以接受的
+KL 散度的最大值。假设优化完式(5.7)以后，KL
+散度的值太大，这就代表后面惩罚的项 <span class="math inline">\(\beta
+KL(\theta,\theta^k)\)</span>​ 没有发挥作用，我们就把 β
+增大。另外，我们设一个 KL 散度的最小值。如果优化完式(5.7)以后，KL
+散度比最小值还要小，就代表后面这一项的效果太强了，我们怕他只优化后一项，使
+θ 与 <span class="math inline">\(θ^k\)</span>
+一样，这不是我们想要的，所以我们要减小β。β
+是可以动态调整的，因此我们称之为<strong>自适应KL惩罚（adaptive KL
+penalty）</strong>。我们可以总结一下自适应KL惩罚：</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329192311236.png" style="zoom:67%;"></p>
+<p>近端策略优化惩罚可表示为</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329192438183.png" style="zoom:80%;"></p>
+<h3 id="近端策略优化裁剪">2.2 近端策略优化裁剪</h3>
+<p>如果我们觉得计算 KL 散度很复杂，那么还有一个 PPO2算法，PPO2
+即近端策略优化裁剪。近端策略优化裁剪的目标函数里面没有 KL
+散度，其要最大化的目标函数为</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329192650359.png" style="zoom:80%;"></p>
+<p>其中，</p>
+<ul>
+<li>操作符（operator）min 是在第一项与第二项里面选择比较小的项。</li>
+<li>第二项前面有一个裁剪（clip）函数，裁剪函数是指，在括号里面有3项，如果第一项小于第二项，那就输出
+1−ε；第一项如果大于第三项，那就输出 1+ε。</li>
+<li>ε 是一个超参数，是我们要调整的，可以设置成 0.1 或 0.2 。</li>
+</ul>
+<p>假设设置 ε=0.2，我们可得 <span class="math inline">\(clip(\frac{p_\theta(a_t|s_t)}{p_{\theta^k}(a_t|s_t)},0.8,1.2)\)</span>
+，如果 <span class="math inline">\(\frac{p_\theta(a_t|s_t)}{p_{\theta^k}(a_t|s_t)}\)</span>
+算出来小于 0.8，那就输出 0.8；如果算出来大于 1.2，那就输出1.2。</p>
+<p>图 5.2 的横轴代表 <span class="math inline">\(\frac{p_\theta(a_t|s_t)}{p_{\theta^k}(a_t|s_t)}\)</span>
+，纵轴代表裁剪函数的输出。</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329193152453.png" style="zoom:67%;"></p>
+<p><strong>这样的好处就是，我们不会让 <span class="math inline">\(p_\theta(a_t|s_t)\)</span> 与 <span class="math inline">\(p_{\theta^k}(a_t|s_t)\)</span>
+差距太大</strong>。要实现这个其实很简单。</p>
+<p>图 5.4 所示为 PPO
+与其他算法的比较。优势演员-评论员和优势演员-评论员+信任区域（trust
+region）算法是基于演员-评论员的方法。PPO 算法是用紫色线表示，图 5.4
+中每张子图表示某一个强化学习的任务，在多数情况中，PPO
+都是不错的，即使不是最好的，也是第二好的。</p>
+<p><img src="/2026/03/28/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05/image-20260329193651069.png" style="zoom:80%;"></p>
+<blockquote>
+<p>为什么需要 kl散度 或者 clip裁剪 来控制原本的PPO呢?</p>
+<p>PPO（不论 clip 还是 penalty）本质上就是：</p>
+<ol type="1">
+<li>不再追求无偏（unbiased）</li>
+<li>明确引入偏差（bias）</li>
+<li>换取显著更小的方差（variance），从而让训练“真的能收敛”。</li>
+</ol>
+</blockquote>
+<blockquote>
+<p>clip 和 penalty 所做的事情没有本质差别，</p>
+<ul>
+<li>阻止 p/q 爆炸</li>
+<li>限制单样本的最大影响</li>
+<li>用偏差换方差与稳定性</li>
+</ul>
+<p>只是：</p>
+<ul>
+<li><strong>clip：工程更简单，超参数更少</strong></li>
+<li>penalty：数学更平滑，但 β 难调</li>
+</ul>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E7%AC%AC5%E8%8A%82/" rel="tag"># 第5节</a>
+              <a href="/tags/%E8%98%91%E8%8F%87%E4%B9%A6/" rel="tag"># 蘑菇书</a>
+              <a href="/tags/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0/" rel="tag"># 强化学习</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/03/26/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A04-1/" rel="prev" title="强化学习 4.策略梯度算法（实验部分）">
+                  <i class="fa fa-angle-left"></i> 强化学习 4.策略梯度算法（实验部分）
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
