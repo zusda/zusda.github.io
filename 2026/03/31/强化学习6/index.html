@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="强化学习 6.深度Q网络 (DQN)">
+<meta property="og:url" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401044541695.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401141640892.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401151407626.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401151821351.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401152758636.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401153349610.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401164714172.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401164827205.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401164948838.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401170240366.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401170741118.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401220046660.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401220309454.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401221034288.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401221259348.png">
+<meta property="og:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260402020103329.png">
+<meta property="article:published_time" content="2026-03-30T19:18:28.000Z">
+<meta property="article:modified_time" content="2026-04-02T06:43:26.557Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="第6节">
+<meta property="article:tag" content="蘑菇书">
+<meta property="article:tag" content="强化学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401044541695.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/","path":"2026/03/31/强化学习6/","title":"强化学习 6.深度Q网络 (DQN)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>强化学习 6.深度Q网络 (DQN) | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E4%BB%B7%E5%80%BC%E5%87%BD%E6%95%B0"><span class="nav-number">2.</span> <span class="nav-text">1. 状态价值函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E4%BD%9C%E4%BB%B7%E5%80%BC%E5%87%BD%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">2. 动作价值函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dqn%E8%AE%AD%E7%BB%83%E4%B8%AD%E7%9A%84%E6%8A%80%E5%B7%A7"><span class="nav-number">4.</span> <span class="nav-text">3. DQN训练中的技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87%E7%BD%91%E7%BB%9C"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 目标网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A2%E7%B4%A2"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 探索</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%8F%E9%AA%8C%E5%9B%9E%E6%94%BE"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 经验回放</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B1%E5%BA%A6q%E7%BD%91%E7%BB%9Cdqn"><span class="nav-number">5.</span> <span class="nav-text">4. 深度Q网络（DQN）</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">64</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="强化学习 6.深度Q网络 (DQN) | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          强化学习 6.深度Q网络 (DQN)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-03-31 03:18:28" itemprop="dateCreated datePublished" datetime="2026-03-31T03:18:28+08:00">2026-03-31</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-04-02 14:43:26" itemprop="dateModified" datetime="2026-04-02T14:43:26+08:00">2026-04-02</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列计划是个人在《动手学深度学习》和《磨菇书》两本书的学习中的个人笔记，文章也会以课本中的章节分开，即每个章节一片笔记。我会尽量的把主要内容以及遇到的难点进行记录与解决，如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《蘑菇书》原文（课本）：https://datawhalechina.github.io/easy-rl/#/</p>
+<p>（由于有时候公式太多，可能会直接贴图片）</p>
+<p>蘑菇书的文章结构不会跟之前《动手学深度学习》按照原文章节进行，个人会适当调节。</p>
+<hr>
+<p><strong>深度Q网络</strong>（deep
+Q-network，DQN）是指<strong>基于深度学习的Q学习算法</strong>，主要结合了价值函数近似与神经网络技术，并采用目标网络和经历回放的方法进行网络的训练。</p>
+<p>在 Q学习 中，我们使用表格来存储每个状态 s 下采取动作 a
+获得的奖励，即状态-动作值函数
+Q(s,a)。然而，这种方法在状态量巨大甚至是连续的任务中，会遇到维度灾难问题，往往是不可行的。</p>
+<p>因此，深度Q网络 采用了<strong>价值函数近似的表示方法</strong>。</p>
+<blockquote>
+<p>我们之前两种方法学的都是策略函数（输入状态s，输出动作a），我们这章节学的是价值函数（<strong>输入状态s，输出价值v</strong>）。</p>
+</blockquote>
+<h2 id="状态价值函数">1. 状态价值函数</h2>
+<p>深度Q网络
+是基于价值的算法，在基于价值的算法里面，我们<strong>学习的不是策略，而是评论员（critic）</strong>。</p>
+<p>评论员的任务是评价现在的动作有多好或有多不好。假设有一个演员，其要学习一个策略来得到尽量高的回报。评论员就是评价演员的策略
+π 好还是不好，即策略评估。</p>
+<p>例如，有一种评论员称为状态价值函数 <span class="math inline">\(V_π\)</span> 。状态价值函数是指，假设演员的策略是
+π，用 π 与环境交互，假设 π 看到了某一个状态 s，例如在玩雅达利游戏，状态
+s 是某一个画面，π
+看到某一个画面，接下来一直到游戏结束，期望的累积奖励有多大。</p>
+<p>如图 6.1a 所示， <span class="math inline">\(V_π\)</span>
+是一个函数，<strong>输入一个状态，它会输出一个标量</strong>。这个标量代表演员的策略π
+看到状态 s 的时候，预期到游戏结束的时候，它可以获得多大的奖励。</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401044541695.png" style="zoom:80%;"></p>
+<p>这里需要强调，评论员无法凭空评价一个状态的好坏，它所评价的是在给定某一个状态的时候，如果接下来交互的演员的策略是
+π，我们会得到多少奖励，这个奖励就是我们评价得出的值。</p>
+<p>因为就算是同样的状态，接下来的 π
+不一样，得到的奖励也是不一样的。所以<strong>评论员的输出值取决于状态和演员</strong>。评论员其实都要绑定一个演员，它是在<strong>衡量某一个演员的好坏，而不是衡量一个状态的好坏</strong>。这里要强调一下，评论员的输出是与演员有关的，状态的价值其实取决于演员，<strong>当演员改变的时候，状态价值函数的输出其实也是会跟着改变的</strong>。</p>
+<p>怎么衡量状态价值函数 <span class="math inline">\(V_\pi\)</span>
+呢？有两种不同的方法：<strong>基于蒙特卡洛的方法</strong>和<strong>基于时序差分的方法</strong>。</p>
+<p><strong>基于蒙特卡洛的方法</strong>就是让演员与环境交互，我们要看演员好不好，就让演员与环境交互，让评论员评价。评论员就统计，演员如果看到状态
+<span class="math inline">\(s_a\)</span>
+，接下来的累积奖励有多大；如果它看到状态 <span class="math inline">\(s_b\)</span> ，接下来的累积奖励有多大。</p>
+<p>但是实际上，我们不可能看到所有的状态。如果我们在玩雅达利游戏，状态是图像，那么无法看到所有的状态。所以实际上
+<span class="math inline">\(V_π(s)\)</span>
+是一个网络。对一个网络来说，就算输入状态是从来都没有看过的，它也可以想办法估测一个值。</p>
+<p>怎么训练这个网络呢？如图 6.2 所示，</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401141640892.png" style="zoom:67%;"></p>
+<p>如果在状态 <span class="math inline">\(s_a\)</span>
+，接下来的累积奖励就是 <span class="math inline">\(G_a\)</span>
+。也就是对这个价值函数，如果输入是状态 <span class="math inline">\(s_a\)</span> ，正确的输出应该是 <span class="math inline">\(G_a\)</span> ；</p>
+<p>如果输入状态是 <span class="math inline">\(s_b\)</span>
+，正确的输出应该是 <span class="math inline">\(G_b\)</span>
+。所以在训练的时候， 它就是一个回归问题（regression problem）。</p>
+<p>网络的输出就是一个值，我们希望在输入 <span class="math inline">\(s_a\)</span> 的时候，输出的值与 <span class="math inline">\(G_a\)</span> 越接近越好；输入 <span class="math inline">\(s_b\)</span> 的时候，输出的值与 <span class="math inline">\(G_b\)</span>
+越接近越好。接下来继续训练网络，这是基于蒙特卡洛的方法。</p>
+<p>第二个方法是时序差分的方法，即<strong>基于时序差分的方法</strong>。在基于蒙特卡洛的方法中，每次我们都要计算累积奖励，也就是从某一个状态
+<span class="math inline">\(s_a\)</span>
+一直到游戏结束的时候，得到的所有奖励的总和。如果我们要使用基于蒙特卡洛的方法，我们必须至少玩到游戏结束。但有些游戏时间非常长，我们要玩到游戏结束才能够更新网络，这花的时间太多了，因此我们会采用基于时序差分的方法。</p>
+<p>基于时序差分的方法不需要玩到游戏结束，只需要在游戏的某一个状态 <span class="math inline">\(s_t\)</span> 的时候，采取动作 <span class="math inline">\(a_t\)</span> 得到奖励 <span class="math inline">\(r_t\)</span> ，接下来进入状态 <span class="math inline">\(s_{t+1}\)</span>
+，就可以使用时序差分的方法。我们可以通过式(6.1)来使用时序差分的方法。
+<span class="math display">\[
+V_\pi(s_t)=V_\pi(s_{t+1})+r_t \tag{6.1}
+\]</span> 假设我们现在用的是某一个策略π，在状态 <span class="math inline">\(s_t\)</span> 时，它会采取动作 <span class="math inline">\(a_t\)</span> ，得到奖励 <span class="math inline">\(r_t\)</span> ，接下来进入 <span class="math inline">\(s_{t+1}\)</span> 。状态 <span class="math inline">\(s_{t+1}\)</span> 的值与状态 <span class="math inline">\(s_t\)</span> 的值，它们的中间差了一项 <span class="math inline">\(r_t\)</span> ，这是因为我们把 <span class="math inline">\(s_{t+1}\)</span> 的值加上得到的奖励 <span class="math inline">\(r_t\)</span> 就可以 得到 <span class="math inline">\(s_t\)</span> 的值。</p>
+<p>有了式(6.1)，在训练的时候，我们并不是直接估测 <span class="math inline">\(V_π\)</span> ，而是希望得到的结果 <span class="math inline">\(V_π\)</span> 可以满足式(6.1)。</p>
+<p>我们是这样训练的，如图 6.3 所示，我们把 <span class="math inline">\(s_t\)</span> 输入网络，因为把 <span class="math inline">\(s_t\)</span> 输入网络会得到 <span class="math inline">\(V_\pi(s_t)\)</span> ，把 <span class="math inline">\(s_{t+1}\)</span> 输入网络会得到 <span class="math inline">\(V_\pi(s_{t+1})\)</span> ， <span class="math inline">\(V_\pi(s_t)\)</span> 减 <span class="math inline">\(V_\pi(s_{t+1})\)</span> 的值应该是 <span class="math inline">\(r_t\)</span> 。我们希望它们相减的损失与 <span class="math inline">\(r_t\)</span> 接近，训练下去，更新 <span class="math inline">\(V_\pi\)</span> 的参数，我们就可以把 <span class="math inline">\(V_\pi\)</span> 函数学习出来。</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401151407626.png" style="zoom:80%;"></p>
+<p>蒙特卡洛方法与时序差分方法有什么差别呢？如图 6.4
+所示，<strong>蒙特卡洛方法最大的问题就是方差很大</strong>。因为我们在玩游戏的时候，游戏本身是有随机性的，所以我们可以把
+<span class="math inline">\(G_a\)</span>
+看成一个随机变量。因为我们每次到 <span class="math inline">\(s_a\)</span> 的时候，最后得到的 <span class="math inline">\(G_a\)</span> 其实是不一样的。我们看到同样的状态
+<span class="math inline">\(s_a\)</span>
+，最后到游戏结束的时候，因为游戏本身是有随机性的，玩游戏的模型可能也有随机性，所以我们每次得到的
+<span class="math inline">\(G_a\)</span>
+是不一样的，<strong>每一次得到的 <span class="math inline">\(G_a\)</span>
+的差别其实会很大</strong>。为什么会很大呢？因为 <span class="math inline">\(G_a\)</span>
+是很多个不同的步骤的奖励的和。假设我们每一个步骤都会得到一个奖励， <span class="math inline">\(G_a\)</span> 是从状态 <span class="math inline">\(s_a\)</span>
+开始一直到游戏结束，每一个步骤的奖励的和。</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401151821351.png" style="zoom:67%;"></p>
+<p>通过式(6.2)，我们知道 <span class="math inline">\(G_a\)</span>
+的方差相较于某一个状态的奖励，它是比较大的。 <span class="math display">\[
+Var[kX]=k^2Var[X] \tag{6.2}
+\]</span> 其中，Var 是指方差（variance）。</p>
+<p>如果用时序差分的方法，我们要去最小化 <span class="math display">\[
+V_\pi(s_t) \leftrightarrow V_\pi(s_{t+1})+r_t \tag{6.3}
+\]</span> 其中， <strong><span class="math inline">\(r\)</span>
+具有随机性。因为即使我们在 <span class="math inline">\(s_t\)</span>
+采取同一个动作，得到的奖励也不一定是一样的，所以 <span class="math inline">\(r\)</span> 是一个随机变量。但 r 的方差比 <span class="math inline">\(G_a\)</span> 要小</strong>，因为 <span class="math inline">\(G_a\)</span> 是很多 r 的加和，时序差分只是某一个 r
+而已。 <span class="math inline">\(G_a\)</span> 的方差会比较大，r
+的方差会比较小。但是这里我们会遇到的一个问题是 <span class="math inline">\(V_π\)</span> 的估计不一定准确。假设 <span class="math inline">\(V_π\)</span>
+的估计不准确，我们使用式(6.3)学习出来的结果也会是不准确的。所以蒙特卡洛方法与时序差分方法各有优劣。其实时序差分方法是比较常用的，蒙特卡洛方法其实是比较少用的。</p>
+<p>图 6.5
+所示为时序差分方法与蒙特卡洛方法的差别。假设有某一个评论员，它去观察某一个策略
+π 与环境交互 8 个回合的结果。有一个策略 π 与环境交互了8 次，得到了 8
+次玩游戏的结果。接下来这个评论员去估测状态的值。</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401152758636.png" style="zoom:80%;"></p>
+<p>我们先计算 <span class="math inline">\(s_b\)</span> 的值。 状态 <span class="math inline">\(s_b\)</span> 在 8 场游戏里都存在，其中有 6
+场得到奖励 1，有 2 场得到奖励
+0。所以如果我们要计算期望值，只算智能体看到状态 <span class="math inline">\(s_b\)</span>
+以后得到的奖励。智能体一直玩到游戏结束的时候得到的累积奖励期望值是
+3/4，计算过程为</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401153349610.png" style="zoom:80%;"></p>
+<p>但 <span class="math inline">\(s_a\)</span>
+期望的奖励到底应该是多少呢？这里其实有两个可能的答案：0 和
+3/4。为什么有两个可能的答案呢？这取决于我们用蒙特卡洛方法还是时序差分方法。用
+蒙特卡洛方法与用 时序差分方法 算出来的结果是不一样的。</p>
+<p>假如我们用蒙特卡洛方法， <span class="math inline">\(s_a\)</span>
+就出现一次，看到状态 <span class="math inline">\(s_a\)</span>
+，接下来累积奖励就是 0，所以 <span class="math inline">\(s_a\)</span>
+期望奖励就是 0。</p>
+<p>但时序差分方法在计算的时候，需要更新 <span class="math display">\[
+V_\pi(s_a)=V_\pi(s_b)+r_t
+\]</span> 因为我们在状态 <span class="math inline">\(s_a\)</span>
+得到奖励 r=0 以后，进入状态 <span class="math inline">\(s_b\)</span>，所以状态 <span class="math inline">\(s_a\)</span> 的奖励等于状态 <span class="math inline">\(s_b\)</span> 的奖励加上从状态 <span class="math inline">\(s_a\)</span> 进入状态 <span class="math inline">\(s_b\)</span> 的时候可能得到的奖励 r。而得到的奖励
+r 的值是 0， <span class="math inline">\(s_b\)</span> 期望奖励是
+3/4，那么 <span class="math inline">\(s_a\)</span> 的奖励应该是
+3/4。</p>
+<p>用蒙特卡洛方法与时序差分方法估出来的结果很有可能是不一样的。<strong>就算评论员观察到一样的训练数据，它最后估出来的结果也不一定是一样的</strong>。为什么会这样呢？哪一个结果比较对呢？其实都对。因为在第一个轨迹中，
+<span class="math inline">\(s_a\)</span> 得到奖励 0 以后，再进入 <span class="math inline">\(s_b\)</span> 也得到奖励 0。这里有两个可能。</p>
+<ol type="1">
+<li><span class="math inline">\(s_a\)</span>
+是一个标志性的状态，只要看到 <span class="math inline">\(s_a\)</span>
+以后， <span class="math inline">\(s_b\)</span> 就不会获得奖励， <span class="math inline">\(s_a\)</span> 可能影响了 <span class="math inline">\(s_b\)</span>。如果是使用蒙特卡洛方法，它会把 <span class="math inline">\(s_a\)</span> 影响 <span class="math inline">\(s_b\)</span> 这件事考虑进去。所以看到 <span class="math inline">\(s_a\)</span> 以后，接下来 <span class="math inline">\(s_b\)</span> 就得不到奖励， <span class="math inline">\(s_b\)</span> 期望的奖励是 0。</li>
+<li>看到 <span class="math inline">\(s_a\)</span> 以后， <span class="math inline">\(s_b\)</span> 的奖励是 0 这件事只是巧合，并不是
+<span class="math inline">\(s_a\)</span> 造成的，而是因为 <span class="math inline">\(s_b\)</span> 有时候就是会得到奖励
+0，这只是单纯“运气”的问题。其实平常 <span class="math inline">\(s_b\)</span> 会得到的奖励期望值是 3/4，与 <span class="math inline">\(s_a\)</span> 是完全没有关系的。所以假设 <span class="math inline">\(s_a\)</span> 之后会进入 <span class="math inline">\(s_b\)</span>，得到的奖励按照时序差分方法来算应该是
+3/4。</li>
+</ol>
+<p>不同的方法考虑了不同的假设，所以运算结果不同。</p>
+<h2 id="动作价值函数">2. 动作价值函数</h2>
+<p>还有另外一种评论员称为<strong>Q函数</strong>，它又被称为动作价值函数。<strong>状态价值函数</strong>的输入是一个状态，它根据状态计算出这个状态以后的期望的累积奖励（expected
+accumulated
+reward）是多少。<strong>动作价值函数</strong>的输入是一个状态-动作对，其指在某一个状态采取某一个动作，假设我们都使用策略
+π ，得到的累积奖励的期望值有多大。</p>
+<p>Q函数有一个需要注意的问题是，策略π 在看到状态 s
+的时候，它采取的动作不一定是 a。</p>
+<p>Q函数假设<strong>在状态 s 强制采取动作
+a</strong>，而不管我们现在考虑的策略π 会不会采取动作
+a，这并不重要。在状态 s 强制采取动作 a。接下来都用策略 π
+继续玩下去，就只有在状态 s，我们才强制一定要采取动作
+a，<strong>接下来就进入自动模式，让策略 π
+继续玩下去，得到的期望奖励</strong>才是 <span class="math inline">\(Q_π(s,a)\)</span> 。</p>
+<p>Q函数有两种写法：</p>
+<ol type="1">
+<li>如图 6.6a
+所示，输入是状态与动作，输出就是一个标量。这种Q函数既适用于连续动作（动作是无法穷举的），又适用于离散动作。</li>
+<li>如图 6.6b
+所示，输入是一个状态，输出就是多个值。这种Q函数只适用于离散动作。假设动作是离散的，比如动作就只有
+3 个可能：往左、往右或是开火。Q函数输出的 3 个值就分别代表 a
+是往左的时候的 Q 值，a 是往右的时候的 Q 值，还有 a 是开火的时候的 Q
+值。</li>
+</ol>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401164714172.png" style="zoom:80%;"></p>
+<p>如果我们去估计Q函数，看到的结果可能如图 6.7 所示。假设我们有 3
+个动作：原地不动、向上、向下。</p>
+<p>假设在第一个状态，不管采取哪个动作，最后到游戏结束的时候，得到的期望奖励都差不多。因为乒乓球在这个地方时，就算我们向下，接下来我们应该还可以接到乒乓球，所以不管采取哪个动作，都相差不了太多。</p>
+<p>假设在第二个状态，乒乓球已经反弹到很接近边缘的地方，这个时候我们采取向上的动作，才能接到乒乓球，才能得到正的奖励。如果我们站在原地不动或向下，接下来都会错过这个乒乓球，得到的奖励就会是负的。</p>
+<p>假设在第三个状态，乒乓球离我们的球拍很近了，所以就要采取向上的动作。</p>
+<p>假设在第四个状态，乒乓球被反弹回去，这时候采取哪个动作都差不多。</p>
+<p>这是动作价值函数的例子。</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401164827205.png" style="zoom:80%;"></p>
+<p>虽然我们学习的Q函数只能用来评估某一个策略 π 的好坏，但只要有了
+Q函数，我们就可以进行强化学习，就可以决定要采取哪一个动作，就可以进行策略改进。如图
+6.8
+所示，假设我们有一个初始的演员，也许一开始很差，随机的也没有关系。初始的演员称为
+π，π 与环境交互，会收集数据。</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401164948838.png" style="zoom:80%;"></p>
+<p>接下来我们学习策略 π 的 Q 值，去衡量一下 π
+在某一个状态强制采取某一个动作，接下来会得到的期望奖励，用时序差分方法或蒙特卡洛方法都是可以的。</p>
+<p>我们学习出一个Q函数以后，就可以找到一个新的策略 <span class="math inline">\(π&#39;\)</span> ，策略 <span class="math inline">\(π&#39;\)</span> 会比原来的策略
+要好（稍后会定义什么是好）。</p>
+<p>所以假设我们有一个Q函数和某一个策略 π，根据策略 π 学习出策略 π
+的Q函数，接下来可以找到一个新的策略 <span class="math inline">\(π&#39;\)</span> ，它会比 π 要好。我们用 <span class="math inline">\(π&#39;\)</span> 取代 π，再去学习它的 Q
+函数，得到新的Q函数以后，再去寻找一个更好的策略。这样一直循环下去，策略就会越来越好。</p>
+<p>首先要定义的是什么是好。 <span class="math inline">\(\pi&#39;\)</span> 一定会比 π
+要好，什么是好呢？这里的好是指，对所有可能的状态 s 而言，<span class="math inline">\(V_{\pi&#39;}(s)\geq V_{\pi}(s)\)</span>
+。也就是我们到同一个状态 s 的时候，如果用 π
+继续与环境交互，我们得到的奖励一定会小于等于用 <span class="math inline">\(\pi&#39;\)</span>
+与环境交互得到的奖励。所以不管在哪一个状态，我们用 <span class="math inline">\(\pi&#39;\)</span>
+与环境交互，得到的期望奖励一定会比较大。所以 <span class="math inline">\(\pi&#39;\)</span> 是比 π 要好的策略。</p>
+<p>有了Q函数以后，我们把根据式(6.4)决定动作的策略称为 <span class="math inline">\(\pi&#39;\)</span>， <span class="math display">\[
+\pi&#39;(s) = \arg\max_{a}Q_\pi(s,a) \tag{6.4}
+\]</span> <span class="math inline">\(\pi&#39;\)</span> 一定比 π
+好。假设我们已经学习出 π 的Q函数，在某一个状态 s，把所有可能的动作 a
+一一代入 Q 函数，看看哪一个 a 可以让Q函数的值最大，这个动作就是 <span class="math inline">\(\pi&#39;\)</span> 会采取的动作。</p>
+<p>这里要注意，给定状态 s 和策略 π 并不一定会采取动作
+a。<strong>给定某一个状态 s 强制采取动作 a，用 π
+继续交互得到的期望奖励，这才是Q函数的定义</strong>。所以在状态 s
+下不一定会采取动作 a。用 <span class="math inline">\(\pi&#39;\)</span>
+在状态 s 采取动作 a 与用 π 采取的动作不一定是一样的， <span class="math inline">\(\pi&#39;\)</span>
+所采取的动作会让它得到比较大的奖励。所以 <span class="math inline">\(\pi&#39;\)</span>
+是用Q函数推出来的，没有另外一个网络决定 <span class="math inline">\(\pi&#39;\)</span> 怎么与环境交互，有Q函数
+就可以找出 <span class="math inline">\(\pi&#39;\)</span>。但是在这里要解决一个 arg max
+操作的问题，如果 a 是离散的，如a 只有 3
+个选项，将每个动作都代入Q函数，看哪个动作的 Q 值最大，这没有问题。但如果
+a 是连续的，我们要解决 arg max 操作问题，就不可行。</p>
+<h2 id="dqn训练中的技巧">3. DQN训练中的技巧</h2>
+<h3 id="目标网络">3.1 目标网络</h3>
+<p>接下来讲一些在 深度Q网络
+里一定会用到的技巧。第一个技巧是<strong>目标网络（target
+network）</strong>。我们在学习Q函数的时候，也会用到时序差分方法的概念。我们现在收集到一个数据，比如在状态
+<span class="math inline">\(s_t\)</span> 采取动作 <span class="math inline">\(a_t\)</span> 以后，得到奖励 <span class="math inline">\(r_t\)</span> ，进入状态 <span class="math inline">\(s_{t+1}\)</span> 。根据Q函数，我们可知 <span class="math display">\[
+Q_\pi(s_t,a_t)=r_t+Q_\pi(s_{t+1},\pi(s_{t+1}))
+\]</span> 所以我们在学习的时候，Q 函数输入 <span class="math inline">\(s_t\)</span> 、 <span class="math inline">\(a_t\)</span> 得到的值，与输入 <span class="math inline">\(s_{t+1}\)</span> 、<span class="math inline">\(\pi(s_{t+1})\)</span>
+得到的值之间，我们希望它们相差 <span class="math inline">\(r_t\)</span>
+， 这与时序差分方法的概念是一样的。</p>
+<p>但是实际上这样的输入并不好学习，假设这是一个回归问题，如图 6.9
+所示，</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401170240366.png" style="zoom:67%;"></p>
+<p><span class="math inline">\(Q_\pi(s_t,a_t)\)</span> 是网络的输出，
+<span class="math inline">\(r_t+Q_\pi(s_{t+1},\pi(s_{t+1}))\)</span>
+是目标，目标是会变动的。当然如果我们要实现这样的训练，其实也没有问题，就是在做反向传播的时候，
+<span class="math inline">\(Q_π\)</span>
+的参数会被更新，我们会把两个更新的结果加在一起（因为它们是同一个模型
+<span class="math inline">\(Q_π\)</span> ，
+所以两个更新的结果会加在一起)。</p>
+<p>但这样会导致训练变得不太稳定，因为假设我们把 <span class="math inline">\(Q_\pi(s_t,a_t)\)</span> 当作模型的输出， 把 <span class="math inline">\(r_t+Q_\pi(s_{t+1},\pi(s_{t+1}))\)</span>
+当作目标，我们<strong>要去拟合的目标是一直在变动的</strong>，这是不太好训练的。</p>
+<blockquote>
+<p>更新后把右边网络的参数覆盖，目标值就变了。就好像我们本来在做一个回归问题，训练后把这个回归问题的损失降下去以后，接下来我们把左边网络的参数复制到右边网络，目标值就变了，接下来就要重新训练。</p>
+</blockquote>
+<p>所以我们会把其中一个 Q 网络，通常是<strong>把图 6.9 右边的 Q
+网络固定住</strong>。在训练的时候，我们只更新左边的 Q
+网络的参数，而右边的 Q 网络的参数会被固定。因为右边的 Q
+网络负责产生目标，所以被称为目标网络。因为目标网络是固定的，所以现在得到的目标
+<span class="math inline">\(r_t+Q_\pi(s_{t+1},\pi(s_{t+1}))\)</span>
+的值也是固定的。我们只调整左边Q网络的参数，它就变成一个回归问题。我们希望模型输出的值与目标越接近越好，这样会最小化它的均方误差（mean
+square error）。</p>
+<p>在实现的时候，我们会<strong>把左边的 Q 网络更新多次，再用更新过的 Q
+网络替换目标网络</strong>。但这两个网络不要一起更新，一起更新，结果会很容易不好。一开始这两个网络是一样的，在训练的时候，我们会把右边的
+Q
+网络固定住，在做梯度下降的时候，只调整左边Q网络的参数。我们<strong>可能更新
+100
+次以后才把参数复制到右边的网络中，把右边网络的参数覆盖，目标值就变了</strong>。就好像我们本来在做一个回归问题，训练后把这个回归问题的损失降下去以后，接下来我们把左边网络的参数复制到右边网络，目标值就变了，接下来就要重新训练。</p>
+<p>如图 6.10a
+所示，我们可以通过猫追老鼠的例子来直观地理解固定目标网络的目的。猫是 Q
+估计，老鼠是 Q 目标。一开始，猫离老鼠很远，所以我们想让猫追上老鼠。如图
+6.10b 所示，因为 Q 目标也是与模型参数相关的，所以每次优化后，Q
+目标也会动。这就导致一个问题，猫和老鼠都在动。如图 6.10c
+所示，猫和老鼠会在优化空间里面到处乱动，这会产生非常奇怪的优化轨迹，使得训练过程十分不稳定。所以我们可以固定
+Q 网络，让老鼠动得不那么频繁，<strong>可能让它每 5
+步动一次，猫则是每一步都在动。</strong>如果老鼠每 5
+次动一步，猫就有足够的时间来接近老鼠，它们之间的距离会随着优化过程越来越小，最后它们就可以拟合，拟合后就可以得到一个最好的Q
+网络。</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401170741118.png" style="zoom: 80%;"></p>
+<h3 id="探索">3.2 探索</h3>
+<p>第二个技巧是探索。当我们使用 Q 函数的时候，策略完全取决于 Q
+函数。给定某一个状态，我们就穷举所有的动作，采取让Q值最大的动作，即
+<span class="math display">\[
+\arg\max_{a}Q_\pi(s,a)
+\]</span> <strong>使用Q函数来决定动作与使用策略梯度不一样</strong>，</p>
+<p>策略梯度的输出是随机的，它会输出一个动作的分布，我们根据这个动作的分布去采样，所以<strong>在策略梯度里面，我们每次采取的动作是不一样的，是有随机性的</strong>。</p>
+<p>像<strong>Q函数中，如果我们采取的动作总是固定的</strong>，会遇到的问题就是这不是一个好的收集数据的方式。假设我们要估测某一个状态，可以采取动作
+<span class="math inline">\(a_1、a_2、a_3\)</span>
+。我们要估测在某一个状态采取某一个动作会得到的 Q
+值，一定要在那一个状态采取过那一个动作，才能估测出它的值。<strong>如果没有在那个状态采取过那个动作，我们其实是估测不出它的值的</strong>。如果Q函数是一个网络，这个问题可能没有那么严重。但是一般而言，假设Q函数是一个表格，对于没有见过的状态-动作对，它是估不出值的。如果
+Q
+函数是网络，也会有类似的问题，只是没有那么严重。所以假设我们在某一个状态，动作
+<span class="math inline">\(a_1、a_2、a_3\)</span>
+都没有采取过，估出来的 <span class="math inline">\(Q(s,a_1)、Q(s,a_2)、Q(s,a_3)\)</span>
+的值可能都是一样的，都是一个初始值，比如 0，即 <span class="math display">\[
+\begin{aligned}
+Q(s,a_1)&amp;=0 \\
+Q(s,a_2)&amp;=0 \\
+Q(s,a_3)&amp;=0 \\
+\end{aligned}
+\]</span> 但是如图 6.11 所示，假设我们在状态 s 采取动作 <span class="math inline">\(a_2\)</span> ，它得到的值是正的奖励，<span class="math inline">\(Q(s,a_2)\)</span> 就会比其他动作的Q值要大。</p>
+<p>在采取动作的时候，谁的 Q 值 最大就采取谁，所以之后永远都只会采取
+<span class="math inline">\(a_2\)</span>
+，其他的动作就再也不会被采取了，这就会有问题。比如我们去一个餐厅吃饭。假设我们点了某一样菜，比如椒麻鸡，我们觉得还可以。接下来我们每次去就都会点椒麻鸡，再也不点别的菜了，那我们就不知道别的菜是不是会比椒麻鸡好吃，这是一样的问题。</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401220046660.png" style="zoom:80%;"></p>
+<p>如果我们没有好的探索，在训练的时候就会遇到这种问题。例如， 假设我们用
+深度Q网络 来玩 slither.io 网页游戏。
+我们有一条蛇，它在环境里面走来走去，吃到星星，就加分。假设游戏一开始，蛇往上走，然后吃到星星，就可以得到分数，它就知道往上走可以得到奖励。接下来它就再也不会采取往上走以外的动作了，以后就会变成每次游戏一开始，它就往上走，然后游戏结束。所以需要有探索的机制，让智能体知道，虽然根据之前采样的结果，a2
+好像是不错的，但我们至少偶尔也试一下 <span class="math inline">\(a_1\)</span> 与 <span class="math inline">\(a_3\)</span> ，说不定它们更好。</p>
+<p>这个问题就是探索-利用窘境（exploration-exploitation
+dilemma）问题，有两个方法可以解决这个问题：<strong>ε-贪心</strong>和玻尔兹曼探索（Boltzmann
+exploration）。</p>
+<p>ε-贪心是指我们有 1−ε 的概率会按照Q函数来决定动作，可写为</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401220309454.png" style="zoom:80%;"></p>
+<p>通常将 ε 设为一个很小的值， 1−ε 可能是 0.9，也就是 0.9
+的概率会按照Q函数来决定动作，但是我们有 0.1 的概率是随机的。通常在实现上
+ε
+会随着时间递减。在最开始的时候，因为不知道哪个动作是比较好的，所以我们会花比较大的力气探索。接下来，随着训练的次数越来越多，我们已经比较确定哪个动作是比较好的。我们就会减少探索，会把
+ε
+的值变小，主要根据Q函数来决定动作，比较少随机决定动作，这就是ε-贪心。</p>
+<h3 id="经验回放">3.3 经验回放</h3>
+<p>第三个技巧是经验回放（experience replay）。如图 6.12
+所示，经验回放会构建一个<strong>回放缓冲区</strong>（replay
+buffer），回放缓冲区又被称为回放内存（replay memory）。</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401221034288.png" style="zoom: 80%;"></p>
+<p><strong>回放缓冲区</strong>是指<strong>现在有某一个策略π
+与环境交互，它会去收集数据</strong>，我们把所有的数据放到一个数据缓冲区（buffer）里面，数据缓冲区里面存储了很多数据。比如数据缓冲区可以存储
+5 万笔数据，每一笔数据就是经验，我们之前在某一个状态 <span class="math inline">\(s_t\)</span> ，采取某一个动作 <span class="math inline">\(a_t\)</span> ，得到了奖励 <span class="math inline">\(r_t\)</span> ，进入状态 <span class="math inline">\(s_{t+1}\)</span> 。</p>
+<p>我们用 π 去与环境交互多次，把收集到的数据放到回放缓冲区里面。
+<strong>回放缓冲区里面的经验可能来自不同的策略</strong>，我们每次用 π
+与环境交互的时候，可能只交互 10000 次，接下来我们就更新 π
+了。但是回放缓冲区里面可以放 5 万笔数据，所以 5
+万笔数据可能来自不同的策略。<strong>回放缓冲区只有在它装满的时候，才会把旧的数据丢掉</strong>。所以回放缓冲区里面其实装了很多不同的策略的经验。</p>
+<p>如图 6.13 所示，有了回放缓冲区以后，我们怎么训练 Q 模型、怎么估 Q
+函数呢？</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260401221259348.png" style="zoom:80%;"></p>
+<p>我们会迭代地训练 Q
+函数，在<strong>每次迭代里面，从回放缓冲区中随机挑一个批量（batch）出来</strong>，即<strong>与一般的网络训练一样</strong>，从训练集里面挑一个批量出来。我们采样该批量出来，里面有一些经验，我们根据这些经验去更新Q函数。这与时序差分学习要有一个目标网络是一样的。我们采样一个批量的数据，得到一些经验，再去更新
+Q 函数。</p>
+<p><strong>如果某个算法使用了经验回放这个技巧，该算法就变成了一个异策略的算法</strong>。因为本来
+Q 是要观察
+π的经验的，但实际上存储在回放缓冲区里面的这些经验不是通通来自于
+π，有些是过去其他的策略所留下来的经验。</p>
+<p>因为我们不会用某一个 π 就把整个回放缓冲区装满，拿去测Q函数，π
+只是采样一些数据放到回放缓冲区里面，接下来就让 Q 去训练。所以 Q
+在采样的时候， 它会采样到过去的一些数据。</p>
+<p>这么做有两个好处。</p>
+<ol type="1">
+<li>在进行强化学习的时候，
+往往最花时间的步骤是与环境交互，训练网络反而是比较快的。因为我们用 GPU
+训练其实很快，真正花时间的往往是与环境交互。用回放缓冲区可以减少与环境交互的次数，因为在做训练的时候，经验不需要通通来自于某一个策略。一些过去的策略所得到的经验可以放在回放缓冲区里面被使用很多次，被反复的再利用，这样可以比较高效地采样经验。</li>
+<li>在训练网络的时候，其实我们希望一个批量里面的数据越多样（diverse）越好。如果批量里面的数据都是同样性质的，我们训练下去，训练结果是容易不好的。如果批量里面都是一样的数据，训练的时候，性能会比较差。我们希望批量里的数据越多样越好。如果回放缓冲区里面的经验通通来自于不同的策略，我们采样到的一个批量里面的数据会是比较多样的。</li>
+</ol>
+<blockquote>
+<p>Q：我们观察 π 的值，发现里面混杂了一些不是 π
+的经验，这有没有关系？</p>
+<p>A：没关系。这并不是因为过去的策略与现在的策略很像，
+就算过去的策略与现在的策略不是很像，也是没有关系的。主要的原因是我们并不是去采样一个轨迹，我们只采样了一笔经验，所以与是不是异策略这件事是没有关系的。就算是异策略，就算是这些经验不是来自于
+π，我们还是可以用这些经验来估测 <span class="math inline">\(Q_π(s,a)\)</span> 。</p>
+</blockquote>
+<blockquote>
+<p>DQN 学的是最优 Q
+函数（和策略无关。每个Q(s,a)的值都是最优的）。因此DQN 是
+off-policy（离策略学习）。不管你数据是怎么来的，只要是环境的真实转移获得的
+<span class="math inline">\((s,a,r,s&#39;)\)</span> ，就可以用于更新：
+<span class="math display">\[
+Q(s,a)\leftarrow r+\gamma\max_{a&#39;}Q(s&#39;,a&#39;)
+\]</span>
+因此数据不需要来自当前策略。哪怕数据来自旧策略、随机策略、很差的策略，都没关系，因为：我们是在逼近
+Q*，而不是某个 π 的 Q</p>
+<p>举个例子，我们现在有一个经验 <span class="math inline">\((s,a,r,s&#39;)\)</span> ，首先我们算出目标： <span class="math display">\[
+y=r+\gamma\max_{a&#39;}Q(s&#39;,a&#39;)
+\]</span> 然后我们去拟合Q(s,a)与目标y，即 <span class="math display">\[
+loss=(Q(s,a)-y)^2
+\]</span></p>
+</blockquote>
+<blockquote>
+<p>在off-policy的算法中，我们的目标与策略无关。不同策略只会影响
+<strong>你是否会采样到这个 s,a</strong></p>
+<p>如果环境是确定性的（deterministic）：相同的 <span class="math inline">\(s,a \rightarrow s&#39;\)</span> ，reward
+是一样的。即不管你用的什么策略，Q(s,a)与目标<span class="math inline">\(y\)</span>之间的差值<span class="math inline">\(r\)</span>都是固定的。</p>
+<p>如果环境是随机的（stochastic）：相同的 <span class="math inline">\(s,a \rightarrow s&#39;\)</span> ，reward
+不一定一样。即我们学习的目标值是不确定的。但这时候，DQN
+的学习目标不再是某一次的y，而是y的期望值</p>
+</blockquote>
+<h2 id="深度q网络dqn">4. 深度Q网络（DQN）</h2>
+<p>图 6.14 所示为一般的深度Q网络算法。</p>
+<p><img src="/2026/03/31/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A06/image-20260402020103329.png" style="zoom: 70%;"></p>
+<p>深度Q网络 算法是这样的，我们初始化两个网络( <span class="math inline">\(Q 和 \hat{Q}\)</span> )， <span class="math inline">\(\hat{Q}\)</span> 等于 Q。一开始目标网络 <span class="math inline">\(\hat{Q}\)</span> 与原来的 Q 网络是一样的。</p>
+<p>在每一个回合中，我们用演员与环境交互，在每一次交互的过程中，都会得到一个状态
+<span class="math inline">\(s_t\)</span>，会采取某一个动作 <span class="math inline">\(a_t\)</span> 。 怎么知道采取哪一个动作 <span class="math inline">\(a_t\)</span>
+呢？我们就根据现在的Q函数，但是要有探索的机制。比如我们用玻尔兹曼探索或是ε-贪心探索，接下来得到奖励
+<span class="math inline">\(r_t\)</span>，进入状态 <span class="math inline">\(s_{t+1}\)</span> 。所以现在收集到一笔数据(<span class="math inline">\(s_t、a_t
+、r_t、s_{t+1}\)</span>)，我们将其放到回放缓冲区里面。
+如果回放缓冲区满了， 我们就把一些旧的数据丢掉。</p>
+<p>接下来我们就从回放缓冲区里面去采样数据，采样到的是 (<span class="math inline">\(s_i、a_i、r_i、s_{i+1}\)</span>)。这笔数据与刚放进去的不一定是同一笔，我们可能抽到旧的。要注意的是，我们采样出来不是一笔数据，采样出来的是一个批量的数据，采样一些经验出来。</p>
+<p>接下来就是计算目标。假设我们采样出一笔数据，根据这笔数据去计算目标。目标要用目标网络
+<span class="math inline">\(\hat{Q}\)</span> 来计算。</p>
+<p>目标是： <span class="math display">\[
+y=r_i+\gamma\max_{a}Q(s_{i+1},a)
+\]</span> 其中，a 是让 <span class="math inline">\(\hat{Q}\)</span>
+值最大的动作。因为我们在状态 <span class="math inline">\(s_{t+1}\)</span> 会采取的动作 a 就是可以让 <span class="math inline">\(\hat{Q}\)</span>
+值最大的那一个动作。接下来我们要更新 Q
+值，就把它当作一个回归问题。我们希望 <span class="math inline">\(Q(s_i,a_i)\)</span> 与目标越接近越好。</p>
+<p>假设已经更新了一定的次数，比如 C 次，设 C=100， 那我们就把 <span class="math inline">\(\hat{Q}\)</span> 设成 Q，这就是 <strong>深度Q网络
+算法</strong>。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E7%AC%AC6%E8%8A%82/" rel="tag"># 第6节</a>
+              <a href="/tags/%E8%98%91%E8%8F%87%E4%B9%A6/" rel="tag"># 蘑菇书</a>
+              <a href="/tags/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0/" rel="tag"># 强化学习</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/03/30/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A05-1/" rel="prev" title="强化学习 5.PPO 算法（实验部分）">
+                  <i class="fa fa-angle-left"></i> 强化学习 5.PPO 算法（实验部分）
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
