@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 从零开始学习ai文章系列已完成《动手学深度学习》和《磨菇书》两本书的学习，新开的LLM系列课本只要来自《Happy-LLM》，但是内容和排版等个人重新进行整理，因此不会按照原来课本中的章节来写。如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的LLM 1.Attention机制">
+<meta property="og:url" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列已完成《动手学深度学习》和《磨菇书》两本书的学习，新开的LLM系列课本只要来自《Happy-LLM》，但是内容和排版等个人重新进行整理，因此不会按照原来课本中的章节来写。如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260526160903516.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260526162027899.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260526165111593.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260526165417670.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260526173802682.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527001334399.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527093441132.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527134230933.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527134440616.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527134611523.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527135101857.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527134942223.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527135205177.png">
+<meta property="article:published_time" content="2026-05-26T07:49:51.000Z">
+<meta property="article:modified_time" content="2026-05-27T09:56:33.930Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="从零开始的LLM">
+<meta property="article:tag" content="第1节">
+<meta property="article:tag" content="LLM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260526160903516.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/","path":"2026/05/26/从零开始的LLM-1/","title":"从零开始的LLM 1.Attention机制"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>从零开始的LLM 1.Attention机制 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E7%BB%93%E6%9E%84graph-structure"><span class="nav-number">2.</span> <span class="nav-text">1. 图结构（Graph Structure）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#attention%E6%9C%BA%E5%88%B6"><span class="nav-number">3.</span> <span class="nav-text">2. attention机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cross-attention"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 Cross-Attention</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#attention%E8%AE%A1%E7%AE%97%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">3. attention计算流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%85%A5"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 输入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E5%8F%98%E6%8D%A2%E5%BE%97%E5%88%B0-q-k-v"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 线性变换得到 Q, K, V</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%86%E5%88%86%E5%A4%9A%E5%A4%B4multi-head"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 拆分多头（Multi-Head）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%8F%E4%B8%AA-head-%E8%AE%A1%E7%AE%97-attention"><span class="nav-number">4.4.</span> <span class="nav-text">3.4 每个 Head 计算 Attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%BC%E6%8E%A5%E5%A4%9A%E5%A4%B4%E7%BB%93%E6%9E%9C"><span class="nav-number">4.5.</span> <span class="nav-text">3.5 拼接多头结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E7%BA%BF%E6%80%A7%E5%B1%82"><span class="nav-number">4.6.</span> <span class="nav-text">3.6 输出线性层</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81positional-encoding"><span class="nav-number">5.</span> <span class="nav-text">4. 位置编码（Positional
+Encoding）</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="从零开始的LLM 1.Attention机制 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从零开始的LLM 1.Attention机制
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-05-26 15:49:51" itemprop="dateCreated datePublished" datetime="2026-05-26T15:49:51+08:00">2026-05-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-05-27 17:56:33" itemprop="dateModified" datetime="2026-05-27T17:56:33+08:00">2026-05-27</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列已完成《动手学深度学习》和《磨菇书》两本书的学习，新开的LLM系列课本只要来自《Happy-LLM》，但是内容和排版等个人重新进行整理，因此不会按照原来课本中的章节来写。如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《Happy-LLM》原文（课本）：https://datawhalechina.github.io/happy-llm/#/</p>
+<hr>
+<h2 id="图结构graph-structure">1. 图结构（Graph Structure）</h2>
+<p>在介绍 Attention 机制之前，我们先来认识图结构的基本概念。</p>
+<p>图结构由两个核心元素构成：<strong>节点（Node）</strong> 和
+<strong>边（Edge）</strong>。节点代表实体或信息单元，边则表示节点之间的关系或连接。边是有方向的——例如节点
+A 指向节点 B，记作 A → B，表示信息或影响从 A 流向
+B。每条边还带有一个数值，称为<strong>权重（Weight）</strong>，用来表示两个节点之间关系的强弱程度。</p>
+<p>以 "我爱你" 字符串中，每个字为一个节点为例：</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260526160903516.png"></p>
+<p>节点之间两两相连，每条有向边都带有一个数值权重。但这些数字本身没有任何含义——<strong>意义是人赋予的</strong>。</p>
+<p>图只是图。节点是节点，边是边，权重是权重。</p>
+<p>当我们观察到某幅图中，「我」→「爱」的权重接近 1，其余边的权重都趋近于
+0 时，我们可以说：这幅图描述的是<strong>主谓关系</strong>。</p>
+<p>当「爱」→「你」的权重接近 1，其余边趋近于 0
+时，我们可以说：这幅图描述的是<strong>动宾关系</strong>。</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260526162027899.png"></p>
+<p>我们所说的
+Attention，本质上就是一种<strong>图结构的学习</strong>。</p>
+<p>它并不预设任何语法规则，而是自动为节点之间的每条边学习出一套权重分布——构建出多张图，每张图的权重分布各不相同。</p>
+<p>这些权重究竟代表什么？<strong>只有 Attention 自己知道。</strong></p>
+<p>我们能做的，只是事后拿着某张权重图，凭借自己的语言直觉去猜测：这张图大概捕捉了主谓关系，那张图大概捕捉了修饰关系……但这终究是人的解读，不是模型的"意图"。</p>
+<p>模型从不声明自己在做什么。它只是学到了一组权重，让最终的预测结果变得更准确。至于那些权重背后藏着什么语义，是我们强加的理解，而非模型内在的知识。</p>
+<p>这里有一个更深的含义值得关注：Attention
+构建的不是一张图，而是<strong>多张图同时并存</strong>（即多头注意力，Multi-Head
+Attention）。每个头独立学习一套权重分布，有的头可能学到了主谓关系，有的头可能学到了指代关系，有的头学到的东西我们完全无法命名。它们共同作用，才构成了模型对语言的"理解"。</p>
+<h2 id="attention机制">2. attention机制</h2>
+<p>注意力机制有三个核心变量：<strong>Query（查询）、Key（键）、Value（值）</strong>。根据这三者的来源，Attention
+分为两种类型：<strong>Cross-Attention</strong> 和
+<strong>Self-Attention</strong>。</p>
+<h3 id="cross-attention">2.1 Cross-Attention</h3>
+<p>Query 来自一个输入，Key 与 Value 来自另一个输入。</p>
+<p>以新闻阅读为例：假设你面前有一篇报道，你想知道这件事发生在什么时候。你脑中浮现出一个问题——"时间是什么？"——这就是
+<strong>Query</strong>，它来自你的意图，而非新闻本身。新闻中的每一个词，就是
+<strong>Key</strong>。Query 与每个 Key 逐一比对，一旦某个 Key
+高度吻合（比如"昨日"、"3月5日"），这个词所携带的信息就会被提取出来——这就是
+<strong>Value</strong>。</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260526165111593.png"></p>
+<blockquote>
+<p>可以理解为 Q节点是边的起始端，K节点是边的终止端，即节点间关系为
+Q-&gt;K。</p>
+</blockquote>
+<p>如图所示，Query "时间是什么" 与新闻中每个词的 Key
+逐一比对后，"昨日"和"3月5日"获得了最高的注意力权重——它们的 Value
+将被重点提取。</p>
+<p><strong>2.2 Self-Attention</strong></p>
+<p>Query、Key、Value
+均来自同一个输入。每个词既是"提问者"，也是"被查询者"——每个节点都会去关注序列中的所有其他节点，形成我们之前介绍的<strong>全连接图结构</strong>。</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260526165417670.png"></p>
+<p>横纵轴都是同一个序列"我爱你"，这正是 Self-Attention 和
+Cross-Attention 最直观的区别。</p>
+<p>从这张图里可以读出几个有意思的信息：</p>
+<ul>
+<li><strong>「我」作为
+Query</strong>，对"爱"的权重最高（0.90）——"我"在理解自身时，最依赖紧跟其后的动词。</li>
+<li><strong>「爱」作为 Query</strong>，对"我"和"你"的权重相当（各
+0.45）——谓语同时关注主语和宾语，符合直觉。</li>
+<li><strong>「你」作为
+Query</strong>，对"爱"的权重最高（0.80）——宾语回望动词，确认自己在句中的语义角色。</li>
+</ul>
+<p>每一行的权重之和为 1，这是 Softmax 归一化的结果</p>
+<h2 id="attention计算流程">3. attention计算流程</h2>
+<p>这里我以self-attention为例，说明attention的计算流程（实际上cross-attention也是一样的，但是2个输入X不太方便写）</p>
+<h3 id="输入">3.1 输入</h3>
+<p><span class="math display">\[
+X∈\mathbb{R}^{B\times N\times D}
+\]</span></p>
+<p>其中</p>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B</td>
+<td>Batch size，一次并行处理的样本数</td>
+</tr>
+<tr>
+<td>N</td>
+<td>Token 数量，即序列长度</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Embedding 维度，每个 token 的向量维度</td>
+</tr>
+</tbody>
+</table>
+<p>X 并不是原始文本，而是文本经过两步处理后得到的向量表达：</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260526173802682.png" style="zoom:67%;"></p>
+<p><strong>第一步：Tokenizer</strong></p>
+<p>原始文本被切分为一个个 token，并映射为对应的 token
+ID。例如"我爱大象"中，"大象"可能被映射为 ID <code>114514</code>。</p>
+<p><strong>第二步：Embedding 层</strong></p>
+<p>每个 token ID 经过 Embedding 层，转换为一个 D 维的稠密向量。例如
+<code>114514</code> → [0.2, 1.7, −0.5, …]（共 D 个值）。</p>
+<p>将序列中所有 token 的向量拼在一起，就得到了形状为 N×DN D N×D
+的矩阵；加上批次维度 BB B，最终输入 X 的形状为 B×N×D。</p>
+<blockquote>
+<p><strong>Tokenizer 与 Embedding</strong></p>
+<p>Tokenizer 做的事情很单纯：将原始文本切分并映射为 token
+ID，仅此而已，没有任何"理解"可言。</p>
+<p>Embedding
+层则不同——它是一个可学习的网络结构，本质上是一张巨大的查找表（形状为
+V×D，V 为词表大小），负责将离散的 token ID
+转换为连续的向量。你可以把这个向量空间理解为一个新的世界，Embedding
+的作用就是为每个 token 在这个世界里分配一个坐标。</p>
+<p>比如"猫"单独出现时，它在向量空间中对应某个坐标
+a；而"猫在追狗"里的"猫"，描述的是一个具体的行为主体，语义更丰富，对应另一个坐标
+b。（注：纯 Embedding 层本身是静态的，即只能获得类似a的向量
+；让同一个词在不同上下文中获得不同表达，是 Attention
+的职责，即获得类似b的向量。这里用两个坐标只是为了说明向量空间能够表达语义差异的潜力。）</p>
+<p>如果觉得抽象，可以这样类比：电脑里所有东西归根结底都是 0 和
+1，但我们通过不同的结构和规则，赋予了它们图像、声音、文字等不同的意义。向量空间也是同理——D
+维坐标本身只是一串数字，但经过训练后，这串数字承载了语义。</p>
+</blockquote>
+<blockquote>
+<p>Embedding
+层没有独立的训练目标，它和整个模型一起，通过<strong>反向传播</strong>端到端地学习。</p>
+<p>以语言模型为例，训练目标是"预测下一个词"。模型拿到"我爱__"，需要预测出"你"。如果预测错了，损失函数会产生一个误差信号，这个信号一路反向传播，一直传回
+Embedding 层，更新"我"和"爱"对应的向量坐标。</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527001334399.png"></p>
+<p>训练过程中，模型反复经历"预测→出错→更新"的循环。慢慢地，语义相近的词（比如"猫"和"狗"）会在向量空间中聚拢到一起，语义相反的词（比如"爱"和"恨"）也会呈现出有规律的相对位置关系。这些都不是人为规定的，而是模型从大量文本中自己归纳出来的。</p>
+<p>这也解释了为什么 Embedding
+如此强大：它把人类语言这种离散的、符号化的系统，压缩进了一个连续的几何空间——在这个空间里，语义可以用距离和方向来度量，这为后续
+Attention 的计算奠定了基础。</p>
+</blockquote>
+<h3 id="线性变换得到-q-k-v">3.2 线性变换得到 Q, K, V</h3>
+<p><strong>权重矩阵</strong>（可学习参数，随模型一起训练） <span class="math display">\[
+W_Q,W_K,W_V∈\mathbb{R}^{D\times D}
+\]</span> 计算 <span class="math display">\[
+\begin{align*}
+Q &amp;=X\cdot W_Q \\
+K &amp;=X\cdot W_K \\
+V &amp;=X\cdot W_V \\
+\end{align*}
+\]</span> 维度结果如下 <span class="math display">\[
+Q,K,V \in \mathbb{R}^{B \times N \times D}
+\]</span> 形状没有变化，但含义完全不同——X 是原始语义坐标，而 Q、K、V
+是针对各自用途重新投影后的表达。</p>
+<p>我们已经有了输入 <span class="math inline">\(X \in \mathbb{R}^{B
+\times N \times D}\)</span> ，它是每个 token
+在向量空间中的坐标。但我们不能直接拿 X 去做 Attention 计算——因为每个
+token
+在不同场合扮演不同的角色：有时它是"提问者"，有时是"被查询者"，有时是"信息提供者"。同一个向量无法同时胜任三种角色。</p>
+<p>因此，我们用三个独立的权重矩阵，将 XX X
+分别投影到三个不同的子空间，得到各司其职的 Q、K、V：</p>
+<ul>
+<li>Q（Query）：<strong>我想关注什么？</strong> 每个 token
+作为提问者时的表达。</li>
+<li>K（Key）：<strong>我能提供什么线索？</strong> 每个 token
+作为被查询者时亮出的标签。</li>
+<li>V（Value）：<strong>我实际携带的信息是什么？</strong>
+一旦被选中，真正输出的内容。</li>
+</ul>
+<blockquote>
+<p><strong>为什么不直接用 XX X 本身作为 Q、K、V？</strong></p>
+<p>因为 X 是 Embedding 给出的原始坐标，它只有一种表达。而 Q、K、V
+需要分别回答三个完全不同的问题——"我该关注谁"、"我能被谁关注"、"我能贡献什么"——这三件事对同一个
+token
+而言往往需要不同的侧重。引入三个独立的权重矩阵，就是给模型足够的自由度，让它自己学会如何为每种用途找到最合适的投影方向。</p>
+</blockquote>
+<h3 id="拆分多头multi-head">3.3 拆分多头（Multi-Head）</h3>
+<p>回顾之前的结论：Attention
+学到的权重分布代表某种语义关系，但具体是什么关系只有模型自己知道。一张权重图只能捕捉一种关系——主谓、动宾、指代、修饰……这些关系同时存在于一句话中，单张图顾此失彼。</p>
+<p>Multi-Head 的思路很直接：<strong>与其用一个 D 维的大空间做一次
+Attention，不如把它拆成 H 个 d 维的小空间，并行做 H 次
+Attention</strong>。每个头独立学习一套权重分布，捕捉不同类型的语义关系。</p>
+<p>设：</p>
+<p>• 头数：H</p>
+<p>• 每个头的维度：<span class="math inline">\(d=D/H\)</span></p>
+<p><strong>拆分维度</strong></p>
+<p>将 Q、K、V 从 D 维拆分为 H 个 d 维： <span class="math display">\[
+Q,K,V \in \mathbb{R}^{B \times N\times H \times d}
+\]</span> <strong>转置维度顺序</strong></p>
+<p>将第 2、3 维（N 与 H）对调，让每个 head 能独立拿到完整的序列： <span class="math display">\[
+Q,K,V \in \mathbb{R}^{B \times H\times N \times d}
+\]</span></p>
+<h3 id="每个-head-计算-attention">3.4 每个 Head 计算 Attention</h3>
+<p>有了 <span class="math inline">\(Q,K,V \in \mathbb{R}^{B \times
+H\times N \times d}\)</span> ，每个 head 独立执行以下四步：</p>
+<p>第一步：点积，度量相关性 <span class="math display">\[
+Q\cdot K^{\mathrm{T}}
+\]</span> 对最后两维做矩阵乘法：$(N, d) (d, N) (N, N) $ ，完整结果：
+<span class="math display">\[
+Q\cdot K^{\mathrm{T}} \in \mathbb{R}^{B \times H\times N \times N}
+\]</span>
+<strong>这一步的结果，就是我们在图结构中所说的边。</strong></p>
+<p>输出矩阵的形状是 <span class="math inline">\(N \times N\)</span> 。
+行是 Query（提问的节点），列是 Key（被查询的节点）。第 <span class="math inline">\((i,j)\)</span> 个位置的数值，就是节点 <span class="math inline">\(i\)</span> 指向节点 <span class="math inline">\(j\)</span> 这条有向边的原始权重，代表"第 <span class="math inline">\(i\)</span> 个 token 对第 <span class="math inline">\(j\)</span> 个 token 有多感兴趣"。</p>
+<p>回想我们最初画的"我爱你"全连接图——每个节点两两相连，每条边都有一个权重。<span class="math inline">\(Q \cdot K^T\)</span>
+做的，正是一次性计算出图中<strong>所有边的权重</strong>，填满这张 N×N
+的表。</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527093441132.png" style="zoom: 80%;"></p>
+<p>此时的权重还是原始的点积分数，尚未归一化——后续的缩放和 Softmax
+才会将它们转化为我们在热力图中看到的概率分布。</p>
+<p>第二步：缩放，稳定数值 <span class="math display">\[
+\frac{Q\cdot K^{\mathrm{T}}}{\sqrt{d}}
+\]</span> 点积的结果会随维度 d 增大而数值膨胀——d
+越大，向量内积的量级越大，导致 Softmax
+输入过大，梯度趋近于零，训练变得困难。除以 <span class="math inline">\(\sqrt{d}\)</span> 将数值拉回合理范围，与 d
+的大小无关。</p>
+<p>第三步：Softmax，归一化为概率分布 <span class="math display">\[
+Softmax(\frac{Q\cdot K^{\mathrm{T}}}{\sqrt{d}})
+\]</span> 对最后一维（即每一行）做 Softmax，将原始分数压缩到 (0,1)
+区间，且每行之和为 1。此时得到的就是注意力权重矩阵——对应我们在第 2
+章看到的热力图，每个数值代表"第 i 个 token 应该分配多少注意力给第 j 个
+token"。</p>
+<p>第四步：加权求和，提取 Value <span class="math display">\[
+Softmax(\frac{Q\cdot K^{\mathrm{T}}}{\sqrt{d}})\cdot V
+\]</span> 用注意力权重对 V 做加权求和：$(N, N) (N, d) (N, d) $
+，完整结果： <span class="math display">\[
+Attention(Q,K,V)\in \mathbb{R}^{B \times H\times N \times d}
+\]</span> 每个 token 的输出，是整个序列所有 token 的 Value
+的加权组合——权重越高的 token 贡献越多。输出维度与输入一致，仍为
+(B,H,N,d)。</p>
+<p>四步合并，即标准的 Attention 公式： <span class="math display">\[
+Attention(Q,K,V)=Softmax(\frac{Q\cdot K^{\mathrm{T}}}{\sqrt{d}})\cdot V
+\]</span> 输出维度和输入一致，但含义已经完全不同：输入时每个 token
+只有自己的信息，输出时每个 token 已经融合了整个序列中其他所有 token
+的信息——融合的比例，正是由注意力权重决定的。这就是 Attention
+的本质：<strong>一次有选择的信息聚合</strong>。</p>
+<blockquote>
+<p>我们可以借用向量空间的概念来理解。</p>
+<p>回想之前说的：<strong>向量空间</strong>是一个<strong>新的世界</strong>，每个词都有自己的坐标。Embedding
+给出的是词典意义上的坐标——"猫"就是那只猫，不管它出现在哪里，坐标都一样。</p>
+<p>但语言里的词从来不是孤立存在的。"猫追狗"里的"猫"和"猫很可爱"里的"猫"，虽然是同一个字，承载的语义却完全不同——前者是一个正在行动的主体，后者只是一个被描述的对象。</p>
+<p>Attention 做的事情，就是<strong>把上下文揉进坐标里</strong>。</p>
+<p>经过 Attention
+之后，"猫追狗"里"猫"的坐标，已经从词典意义上的"猫"，悄悄漂移到了向量空间中一个新的位置——这个新位置离"猫"很近，但也带着"追"的动势、"狗"的存在。你可以想象它在向量空间里向着"追狗的猫"这个方向移动了一步。</p>
+<p>"狗"的坐标同理，漂移向了"被追的狗"。"追"的坐标则同时受到"猫"和"狗"的牵引，落在了"猫对狗施加的追逐"这个语义位置上。</p>
+<p>所以，Attention
+的输出不是三个孤立的词，而是<strong>三个描述同一件事的坐标</strong>。(注意：一个token是一个坐标)</p>
+<p>输入时，向量空间里住着三个居民："猫"、"追"、"狗"——它们各自待在自己的位置，互不相知。</p>
+<p>输出时，这三个坐标都发生了漂移。但它们漂移的目的地并不是三个新的孤立的词，而是同一件事情的三个侧面：</p>
+<ul>
+<li>"猫"的坐标漂移到了"猫追狗"这件事里猫所处的位置</li>
+<li>"追"的坐标漂移到了"猫追狗"这件事里追这个动作所处的位置</li>
+<li>"狗"的坐标漂移到了"猫追狗"这件事里狗所处的位置</li>
+</ul>
+<p>三个坐标，描述的是同一件事，只是视角不同。</p>
+<p>换句话说，Attention
+把三个词的独立坐标，变成了<strong>对"猫追狗"这个事件</strong>的<strong>三个向量表达</strong>。这个事件现在有了坐标，可以被后续的网络层继续处理、理解、推理。</p>
+</blockquote>
+<h3 id="拼接多头结果">3.5 拼接多头结果</h3>
+<p>每个 head 独立完成 Attention 计算后，得到输出 $Attention(Q,K,V)^{B H
+N d} $。现在需要把它们合并回去。</p>
+<p><strong>第一步：转置还原</strong></p>
+<p>将维度顺序从 <span class="math inline">\(B×H×N×d\)</span> 换回 <span class="math inline">\(B×N×H×d\)</span> ——和 3.3 节的转置互为逆操作。</p>
+<p><strong>第二步：拼接</strong></p>
+<p>将 H 个 head 的结果沿最后一维拼接，<span class="math inline">\(H×d=D\)</span>： <span class="math display">\[
+B×N×H×d→B×N×D
+\]</span> 即： <span class="math display">\[
+Concat(heads)\in \mathbb{R}^{B \times N \times D}
+\]</span></p>
+<p>至此，每个 token 的向量重新回到了 D 维——但现在这个向量是 H 个 head
+各自视角的拼合，同时携带了多种语义关系的信息。</p>
+<h3 id="输出线性层">3.6 输出线性层</h3>
+<p>拼接之后，还有最后一步线性变换。 <span class="math display">\[
+Output=Concat(heads)⋅W_O
+\]</span> 其中 <span class="math inline">\(W_O \in \mathbb{R}^{D \times
+D}\)</span> 是可学习的权重矩阵。</p>
+<p>这一步的作用是<strong>对多头的拼接结果做一次融合投影</strong>——H 个
+head 的输出直接拼在一起，彼此之间还是独立的；乘以 <span class="math inline">\(W_O\)</span> 之后，不同 head
+捕捉到的语义关系才真正被混合、整合成一个统一的表达。</p>
+<p>最终输出 <span class="math display">\[
+Output=\in \mathbb{R}^{B \times N \times D}
+\]</span></p>
+<p>形状与最初的输入 X
+完全一致。从输入到输出，维度没有变化，但<strong>每个 token
+的向量已经从孤立的词义坐标，变成了充分感知上下文之后的语义表达</strong>——这正是整个
+Attention 计算流程的意义所在。</p>
+<h2 id="位置编码positional-encoding">4. 位置编码（Positional
+Encoding）</h2>
+<p>理解了 Attention
+的计算之后，我们需要补上一个前面章节刻意跳过的细节——<strong>位置编码</strong>。</p>
+<p>回想 <span class="math inline">\(Q \cdot K^T\)</span>
+的计算过程：它学习的是节点与节点之间的关系，但这张图里没有任何"顺序"的概念。"猫追狗"和"狗追猫"送进
+Attention，得到的权重矩阵是完全一样的——因为两句话的词相同，只是位置不同，而
+Attention 对位置视而不见。</p>
+<p>这显然是个问题。语言的意义很大程度上依赖顺序。为此，Transformer
+<strong>在 Embedding 之后、进入 Attention 之前</strong>，给每个 token
+的向量叠加一个<strong>位置编码</strong>，把序列中的位置信息注入进去。</p>
+<p><strong>4.1 Sinusoidal 位置编码</strong></p>
+<p>原始 Transformer 使用正余弦函数进行位置编码，公式如下：</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527134230933.png" style="zoom: 80%;"></p>
+<p>其中：</p>
+<ul>
+<li>pos：token 在序列中的位置（从 0 开始）</li>
+<li>i：向量的维度索引（0≤i&lt;D/2）</li>
+<li>D：Embedding 维度</li>
+</ul>
+<p>偶数维度用 sin，奇数维度用 cos。不同维度使用不同频率的波，频率随维度
+i
+增大而降低——低维度捕捉细粒度的位置差异，高维度捕捉粗粒度的长程位置关系。</p>
+<p>这样设计的好处是：<strong>任意两个位置之间的相对距离，可以通过线性变换表达出来</strong>——模型不仅知道每个
+token 在哪，还<strong>能推断两个 token 之间相差多远</strong>。</p>
+<p><strong>4.2 计算示例</strong></p>
+<p>以"I like to code"为例，设 D=4，词向量矩阵 X 为：</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527134440616.png" style="zoom:80%;"></p>
+<p>计算各位置的位置编码（D=4，故 i∈{0,1}）：</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527134611523.png" style="zoom:80%;"></p>
+<p>比如pos=1（"like"），对应四个维度：</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527135101857.png" style="zoom:80%;"></p>
+<p>同理，代入 pos=0,1,2,3，得到位置编码矩阵 PE：</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527134942223.png" style="zoom:80%;"></p>
+<p>然后将位置编码直接<strong>加到</strong>词向量上： <span class="math display">\[
+X&#39;=X+PE
+\]</span>
+<img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527135205177.png" style="zoom:80%;"></p>
+<p>X' 就是最终送入 Attention 的输入——每个 token
+的语义信息与位置信息已经融为一体。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM/" rel="tag"># 从零开始的LLM</a>
+              <a href="/tags/%E7%AC%AC1%E8%8A%82/" rel="tag"># 第1节</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/05/01/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A011/" rel="prev" title="强化学习 11. 模仿学习(原理与实验)">
+                  <i class="fa fa-angle-left"></i> 强化学习 11. 模仿学习(原理与实验)
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2026/05/27/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-2/" rel="next" title="从零开始的LLM-2">
+                  从零开始的LLM-2 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
