@@ -66,13 +66,17 @@
 <meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527135101857.png">
 <meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527134942223.png">
 <meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527135205177.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527185418971.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260530110012974.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260531094403646.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260531100744666.png">
 <meta property="article:published_time" content="2026-05-26T07:49:51.000Z">
-<meta property="article:modified_time" content="2026-05-27T09:56:33.930Z">
+<meta property="article:modified_time" content="2026-05-31T02:09:10.961Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ai">
 <meta property="article:tag" content="从零开始的LLM">
-<meta property="article:tag" content="第1节">
 <meta property="article:tag" content="LLM">
+<meta property="article:tag" content="第1节">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260526160903516.png">
 
@@ -188,7 +192,9 @@
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
             <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E7%BB%93%E6%9E%84graph-structure"><span class="nav-number">2.</span> <span class="nav-text">1. 图结构（Graph Structure）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#attention%E6%9C%BA%E5%88%B6"><span class="nav-number">3.</span> <span class="nav-text">2. attention机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cross-attention"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 Cross-Attention</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#attention%E8%AE%A1%E7%AE%97%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">3. attention计算流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%85%A5"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 输入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E5%8F%98%E6%8D%A2%E5%BE%97%E5%88%B0-q-k-v"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 线性变换得到 Q, K, V</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%86%E5%88%86%E5%A4%9A%E5%A4%B4multi-head"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 拆分多头（Multi-Head）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%8F%E4%B8%AA-head-%E8%AE%A1%E7%AE%97-attention"><span class="nav-number">4.4.</span> <span class="nav-text">3.4 每个 Head 计算 Attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%BC%E6%8E%A5%E5%A4%9A%E5%A4%B4%E7%BB%93%E6%9E%9C"><span class="nav-number">4.5.</span> <span class="nav-text">3.5 拼接多头结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E7%BA%BF%E6%80%A7%E5%B1%82"><span class="nav-number">4.6.</span> <span class="nav-text">3.6 输出线性层</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81positional-encoding"><span class="nav-number">5.</span> <span class="nav-text">4. 位置编码（Positional
-Encoding）</span></a></li></ol></div>
+Encoding）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mask-self-attention%E6%8E%A9%E7%A0%81%E8%87%AA%E6%B3%A8%E6%84%8F%E5%8A%9B"><span class="nav-number">6.</span> <span class="nav-text">5. Mask
+Self-Attention（掩码自注意力）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%8E%A9%E7%A0%81"><span class="nav-number">6.1.</span> <span class="nav-text">5.1 为什么需要掩码？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A9%E7%A0%81%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%B9%B6%E8%A1%8C%E9%97%AE%E9%A2%98"><span class="nav-number">6.2.</span> <span class="nav-text">5.2 掩码如何解决并行问题？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A9%E7%A0%81%E7%9F%A9%E9%98%B5%E7%9A%84%E5%BD%A2%E6%80%81"><span class="nav-number">6.3.</span> <span class="nav-text">5.3 掩码矩阵的形态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A9%E7%A0%81%E5%9C%A8%E6%B3%A8%E6%84%8F%E5%8A%9B%E8%AE%A1%E7%AE%97%E4%B8%AD%E7%9A%84%E5%85%B7%E4%BD%93%E4%BD%9C%E7%94%A8"><span class="nav-number">6.4.</span> <span class="nav-text">5.4
+掩码在注意力计算中的具体作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">6.5.</span> <span class="nav-text">5.5 小结</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -275,7 +281,7 @@ Encoding）</span></a></li></ol></div>
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-05-27 17:56:33" itemprop="dateModified" datetime="2026-05-27T17:56:33+08:00">2026-05-27</time>
+      <time title="修改时间：2026-05-31 10:09:10" itemprop="dateModified" datetime="2026-05-31T10:09:10+08:00">2026-05-31</time>
     </span>
 
   
@@ -604,6 +610,113 @@ X&#39;=X+PE
 <img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527135205177.png" style="zoom:80%;"></p>
 <p>X' 就是最终送入 Attention 的输入——每个 token
 的语义信息与位置信息已经融为一体。</p>
+<p><strong>4.3 RoPE（旋转位置编码）</strong></p>
+<p>Sinusoidal
+是位置编码的起点，但现代大模型普遍采用了一种更优雅的方案——<strong>RoPE（Rotary
+Position Embedding，旋转位置编码）</strong>，LLaMA、Claude、GPT-NeoX
+等主流模型均使用这一方案。</p>
+<p>两者最直观的区别在于<strong>作用位置不同</strong>：</p>
+<ul>
+<li>Sinusoidal 在进入第一个 Block 之前，把位置向量直接加到词向量 X
+上，一次性完成，后续不再处理。</li>
+<li>RoPE 则在每一层 Block 内部，在 <span class="math inline">\(Q \cdot
+K^\top\)</span>
+计算之前，把位置信息以<strong>旋转变换</strong>的形式注入 Q 和 K。</li>
+</ul>
+<p>更关键的区别在于<strong>编码的内容不同</strong>：Sinusoidal
+编码的是每个 token 的绝对位置，而 RoPE 编码的是两个 token
+之间的<strong>相对距离</strong>——这使得模型在面对训练时未见过的长序列时，泛化能力更强。</p>
+<p>实现上计算完Q,K后，先对Q,K做旋转位置编码，然后才进行计算。传入的输入X无需做任何处理。</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260527185418971.png" style="zoom:80%;"></p>
+<p>RoPE
+的数学原理涉及复数空间中的旋转矩阵，由于原文第五章才正式提及其原理，因此这里先放着，后续总结到的时候再回来写。</p>
+<p>如果采用旋转编码的话，attention计算流程变为如下</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260530110012974.png" style="zoom:80%;"></p>
+<h2 id="mask-self-attention掩码自注意力">5. Mask
+Self-Attention（掩码自注意力）</h2>
+<p>忘记了这东西，这里补上。由于是LLM的核心结构，因此单独一小节，不合在前面了。</p>
+<hr>
+<p>掩码自注意力，即 Mask
+Self-Attention，是指使用注意力掩码的自注意力机制。掩码的作用是遮蔽一些特定位置的
+token，模型在学习的过程中，会忽略掉被遮蔽的 token。</p>
+<h3 id="为什么需要掩码">5.1 为什么需要掩码？</h3>
+<p>语言模型的训练目标是：给定一段文本序列，不断根据前面的 token
+预测下一个 token。</p>
+<p>例如，待学习的序列是
+<code>【BOS】 I like you 【EOS】</code>，理想的训练过程是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Step 1：输入 【BOS】            → 预测 I</span><br><span class="line">Step 2：输入 【BOS】 I          → 预测 like</span><br><span class="line">Step 3：输入 【BOS】 I like     → 预测 you</span><br><span class="line">Step 4：输入 【BOS】 I like you → 预测 【EOS】</span><br></pre></td></tr></table></figure>
+<p>这个过程有一个关键约束：<strong>每一步预测时，模型只能看到当前位置之前的
+token，不能看到未来的内容</strong>。否则模型直接"抄答案"，学不到任何语言规律。</p>
+<p>然而上述过程是<strong>串行</strong>的——必须<strong>完成 Step 1
+才能进行 Step 2</strong>。这与 Transformer 相较于 RNN
+的核心优势——<strong>并行计算</strong>——直接冲突。如果每条训练语料都需要串行完成上述步骤，计算效率将极为低下。</p>
+<h3 id="掩码如何解决并行问题">5.2 掩码如何解决并行问题？</h3>
+<p>Masked Self-Attention
+的核心思路是：<strong>用一个掩码矩阵，在一次前向传播中同时模拟所有步骤</strong>。</p>
+<p>还是以 <code>【BOS】 I like you 【EOS】</code>
+为例，构造如下并行输入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">样本 1：【BOS】  [M]    [M]    [M]    [M]    → 预测 I</span><br><span class="line">样本 2：【BOS】   I    [M]    [M]    [M]    → 预测 like</span><br><span class="line">样本 3：【BOS】   I    like   [M]    [M]    → 预测 you</span><br><span class="line">样本 4：【BOS】   I    like   you    [M]    → 预测 【EOS】</span><br></pre></td></tr></table></figure>
+<p>这四行可以<strong>同时并行地送入模型</strong>，每行只能看到未被遮蔽的
+token，预测下一个位置——效果与串行完全等价，但只需一次前向传播。</p>
+<h3 id="掩码矩阵的形态">5.3 掩码矩阵的形态</h3>
+<p>观察上述掩码规律，可以发现它本质上是一个<strong>下三角矩阵</strong>（对角线及以下为
+1，以上为 0）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">位置    【BOS】  I   like  you  【EOS】</span><br><span class="line"></span><br><span class="line">【BOS】  　1     0    0     0     0</span><br><span class="line">I      　 1     1    0     0     0</span><br><span class="line">like   　 1     1    1     0     0</span><br><span class="line">you    　 1     1    1     1     0</span><br><span class="line">【EOS】　  1     1    1     1     1</span><br></pre></td></tr></table></figure>
+<p>其中 <strong>1 表示可以关注，0 表示被掩蔽</strong>。矩阵维度为
+<code>(seq_len, seq_len)</code>，实际使用时维度为
+<code>(1, seq_len, seq_len)</code>，通过广播机制适配同一 batch
+中的所有样本。</p>
+<h3 id="掩码在注意力计算中的具体作用">5.4
+掩码在注意力计算中的具体作用</h3>
+<p>还是以 <code>【BOS】 I like you 【EOS】</code> 为例，重点看
+<code>like</code> 这个位置的计算过程。(理解为当前Q为like)</p>
+<p><strong>第一步：计算 QKᵀ 得分矩阵</strong></p>
+<p>每个 token 都有自己的 Q 向量和 K
+向量（由输入向量乘以参数矩阵得到）。将所有 token 的 Q 与所有 token 的 K
+做点积，得到一个 5×5 的得分矩阵，表示"每个 token 对其他所有 token
+的关注程度"：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">         【BOS】   I    like   you  【EOS】</span><br><span class="line">【BOS】  [  5.1   3.2   2.8   4.1   1.9 ]</span><br><span class="line">I       [  4.3   6.1   3.5   2.7   3.1 ]</span><br><span class="line">like    [  3.8   5.2   6.4   4.9   2.3 ]   ← 重点看这一行</span><br><span class="line">you     [  2.1   3.7   5.1   7.2   4.4 ]</span><br><span class="line">【EOS】 [  1.5   2.9   3.3   5.8   6.7 ]</span><br></pre></td></tr></table></figure>
+<p>此时 <code>like</code> 这一行的含义是：like 对 【BOS】的得分是
+3.8，对 I 是 5.2，对自身是 6.4，对 you 是 4.9，对 【EOS】是
+2.3。<strong>没有任何限制，like 能看到整个序列包括后面的 you 和
+【EOS】。</strong></p>
+<p><strong>第二步：施加掩码</strong></p>
+<p>将 <code>like</code> 行中，位置在 <code>like</code>
+之后的得分全部替换为 <code>-∞</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">         【BOS】   I    like    you    【EOS】</span><br><span class="line">like    [  3.8   5.2   6.4   -∞      -∞   ]</span><br></pre></td></tr></table></figure>
+<p><strong>第三步：Softmax</strong></p>
+<p>对这一行做 Softmax，将得分转化为概率。<code>-∞</code> 经过 Softmax
+后变为精确的 <strong>0</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">         【BOS】   I    like    you    【EOS】</span><br><span class="line">原始     [  3.8   5.2   6.4   -∞      -∞   ]</span><br><span class="line">Softmax  [ 0.08  0.21  0.71   0.00   0.00 ]</span><br><span class="line">                                ↑       ↑</span><br><span class="line">                         权重为 0，完全忽略</span><br></pre></td></tr></table></figure>
+<p><code>like</code> 的注意力完全集中在
+<code>【BOS】</code>、<code>I</code>、<code>like</code> 三个位置，you 和
+【EOS】的权重精确为 0，<strong>不贡献任何信息</strong>。</p>
+<h3 id="小结">5.5 小结</h3>
+<p><span class="math inline">\(QK^T\)</span>
+的结果在图结构中，可以理解为一个<strong>有向图</strong>：序列中每个
+token
+作为一个节点，每个节点都向其他所有节点连出一条有向边，代表"我关注你的程度"。未加掩码时，这是一个<strong>全连接的有向图</strong></p>
+<p>加入掩码后，这张图发生了变化——<strong>每个节点只保留连向自己和之前节点的边，连向后续节点的边权重归零，相当于这些边被切断</strong>：</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260531094403646.png"></p>
+<p>此时输出中每个token位置的向量也有了新的意义变化，在self-attention中，由于能够看到后面的词，因此每个token位置的输出向量实际上是浓缩了整个句子中所有token（包括自己）的分析。而在masked
+self-attention中，还是以like这个token的位置举例，他仅能够与前面<code>【BOS】</code>、<code>I</code>和自己<code>like</code>
+三个位置建立联系，因此此位置的token是分析了自己与前面所有token后，所产生的token，也意为下一token（虽然我们也还需要将他映射到词汇表中）</p>
+<p>这一结构变化直接影响了每个 token 位置输出向量的语义含义：</p>
+<p><strong>普通 Self-Attention（无掩码，如 BERT）中，每个 token
+可以看到序列中所有位置，因此其输出向量是对整个句子所有 token</strong>
+信息的聚合——<code>like</code> 的输出向量里同时融合了
+<code>I</code>、<code>you</code>
+乃至整句的语境，代表的是"在完整句子中，<code>like</code>
+所处位置的语义状态"。</p>
+<p><strong>Masked Self-Attention（如 GPT）</strong>中，以
+<code>like</code> 为例，它只能与 <code>【BOS】</code>、<code>I</code>
+和自身建立联系，因此其输出向量是对"<strong>到目前为止已出现的所有
+token</strong>"的信息聚合，代表的是"在看过 <code>【BOS】</code> 和
+<code>I</code> 之后，当前位置是 <code>like</code> 的语境状态"。</p>
+<p>这个输出向量随后经过线性层映射到词表维度，再经 Softmax
+转化为概率分布，才最终得到对下一个 token
+的预测。输出向量本身不是下一个词，而是<strong>预测下一个词所依赖的上下文表示</strong>。</p>
+<p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260531100744666.png"></p>
 
     </div>
 
@@ -615,8 +728,8 @@ X&#39;=X+PE
           <div class="post-tags">
               <a href="/tags/ai/" rel="tag"># ai</a>
               <a href="/tags/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM/" rel="tag"># 从零开始的LLM</a>
-              <a href="/tags/%E7%AC%AC1%E8%8A%82/" rel="tag"># 第1节</a>
               <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/%E7%AC%AC1%E8%8A%82/" rel="tag"># 第1节</a>
           </div>
 
         
