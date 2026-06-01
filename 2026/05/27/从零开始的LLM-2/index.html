@@ -75,12 +75,12 @@
 <meta property="og:image" content="https://zusda.github.io/2026/05/27/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-2/image-20260531012930565.png">
 <meta property="og:image" content="https://zusda.github.io/2026/05/27/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-2/image-20260531090041900.png">
 <meta property="article:published_time" content="2026-05-27T09:54:13.000Z">
-<meta property="article:modified_time" content="2026-05-31T15:11:41.835Z">
+<meta property="article:modified_time" content="2026-06-01T02:46:16.294Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ai">
 <meta property="article:tag" content="从零开始的LLM">
-<meta property="article:tag" content="第2节">
 <meta property="article:tag" content="LLM">
+<meta property="article:tag" content="第2节">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://zusda.github.io/2026/05/27/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-2/image-20260527215727114.png">
 
@@ -195,7 +195,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#transformer"><span class="nav-number">2.</span> <span class="nav-text">1. Transformer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#transformer-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 Transformer 是什么</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#encoder-only"><span class="nav-number">3.</span> <span class="nav-text">2. Encoder-Only</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bert-%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%9E%84"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 BERT 模型架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%AE%AD%E7%BB%83%E4%BB%BB%E5%8A%A1mlm-nsp"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 预训练任务——MLM + NSP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E6%B8%B8%E4%BB%BB%E5%8A%A1%E5%BE%AE%E8%B0%83"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 下游任务微调</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%E5%87%86%E5%A4%87%E8%BE%93%E5%85%A5"><span class="nav-number">3.3.0.1.</span> <span class="nav-text">第一步：准备输入</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%94%B9%E5%8A%A8"><span class="nav-number">3.3.0.2.</span> <span class="nav-text">第二步：模型结构改动</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%E5%87%86%E5%A4%87%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE"><span class="nav-number">3.3.0.3.</span> <span class="nav-text">第三步：准备训练数据</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%E5%BE%AE%E8%B0%83%E8%AE%AD%E7%BB%83"><span class="nav-number">3.3.0.4.</span> <span class="nav-text">第四步：微调训练</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%E6%8E%A8%E7%90%86"><span class="nav-number">3.3.0.5.</span> <span class="nav-text">第五步：推理</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#encoder-decoder"><span class="nav-number">4.</span> <span class="nav-text">3. Encoder-Decoder</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#t5%E6%A8%A1%E5%9E%8B%E4%BB%8B%E7%BB%8D"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 T5模型介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#t5-%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%9E%84"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 T5 模型架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%AE%AD%E7%BB%83%E4%BB%BB%E5%8A%A1"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 预训练任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E6%B8%B8%E4%BB%BB%E5%8A%A1%E5%BE%AE%E8%B0%83-1"><span class="nav-number">4.4.</span> <span class="nav-text">3.4 下游任务微调</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%A7%E4%B8%80%E7%BB%9F%E6%80%9D%E6%83%B3"><span class="nav-number">4.5.</span> <span class="nav-text">3.5 大一统思想</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#decoder-only"><span class="nav-number">5.</span> <span class="nav-text">4. Decoder-Only</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#gpt-%E6%A8%A1%E5%9E%8B%E4%BB%8B%E7%BB%8D"><span class="nav-number">5.1.</span> <span class="nav-text">4.1 GPT 模型介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%AE%AD%E7%BB%83%E4%BB%BB%E5%8A%A1clm"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 预训练任务——CLM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sftsupervised-fine-tuning%E6%9C%89%E7%9B%91%E7%9D%A3%E5%BE%AE%E8%B0%83"><span class="nav-number">5.3.</span> <span class="nav-text">4.3 SFT（Supervised
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#transformer"><span class="nav-number">2.</span> <span class="nav-text">1. Transformer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#transformer-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 Transformer 是什么</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#encoder-only"><span class="nav-number">3.</span> <span class="nav-text">2. Encoder-Only</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bert-%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%9E%84"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 BERT 模型架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%AE%AD%E7%BB%83%E4%BB%BB%E5%8A%A1mlm-nsp"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 预训练任务——MLM + NSP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E6%B8%B8%E4%BB%BB%E5%8A%A1%E5%BE%AE%E8%B0%83"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 下游任务微调</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%E5%87%86%E5%A4%87%E8%BE%93%E5%85%A5"><span class="nav-number">3.3.1.</span> <span class="nav-text">第一步：准备输入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%94%B9%E5%8A%A8"><span class="nav-number">3.3.2.</span> <span class="nav-text">第二步：模型结构改动</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%E5%87%86%E5%A4%87%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE"><span class="nav-number">3.3.3.</span> <span class="nav-text">第三步：准备训练数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%E5%BE%AE%E8%B0%83%E8%AE%AD%E7%BB%83"><span class="nav-number">3.3.4.</span> <span class="nav-text">第四步：微调训练</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%E6%8E%A8%E7%90%86"><span class="nav-number">3.3.5.</span> <span class="nav-text">第五步：推理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#encoder-decoder"><span class="nav-number">4.</span> <span class="nav-text">3. Encoder-Decoder</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#t5%E6%A8%A1%E5%9E%8B%E4%BB%8B%E7%BB%8D"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 T5模型介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#t5-%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%9E%84"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 T5 模型架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%AE%AD%E7%BB%83%E4%BB%BB%E5%8A%A1"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 预训练任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E6%B8%B8%E4%BB%BB%E5%8A%A1%E5%BE%AE%E8%B0%83-1"><span class="nav-number">4.4.</span> <span class="nav-text">3.4 下游任务微调</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%A7%E4%B8%80%E7%BB%9F%E6%80%9D%E6%83%B3"><span class="nav-number">4.5.</span> <span class="nav-text">3.5 大一统思想</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#decoder-only"><span class="nav-number">5.</span> <span class="nav-text">4. Decoder-Only</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#gpt-%E6%A8%A1%E5%9E%8B%E4%BB%8B%E7%BB%8D"><span class="nav-number">5.1.</span> <span class="nav-text">4.1 GPT 模型介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%AE%AD%E7%BB%83%E4%BB%BB%E5%8A%A1clm"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 预训练任务——CLM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sftsupervised-fine-tuning%E6%9C%89%E7%9B%91%E7%9D%A3%E5%BE%AE%E8%B0%83"><span class="nav-number">5.3.</span> <span class="nav-text">4.3 SFT（Supervised
 Fine-Tuning，有监督微调）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rlhf"><span class="nav-number">5.4.</span> <span class="nav-text">4.4 RLHF</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
@@ -209,7 +209,7 @@ Fine-Tuning，有监督微调）</span></a></li><li class="nav-item nav-level-3"
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-count">74</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -283,7 +283,7 @@ Fine-Tuning，有监督微调）</span></a></li><li class="nav-item nav-level-3"
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-05-31 23:11:41" itemprop="dateModified" datetime="2026-05-31T23:11:41+08:00">2026-05-31</time>
+      <time title="修改时间：2026-06-01 10:46:16" itemprop="dateModified" datetime="2026-06-01T10:46:16+08:00">2026-06-01</time>
     </span>
 
   
@@ -549,10 +549,10 @@ Decoder 模块（如 UniLM、BERT2BERT 等变体），而非直接使用。</p>
 <p><strong>2.3.5 举例说明</strong></p>
 <p>以情感分类为例：微调 BERT 判断电影评论的情感</p>
 <p>假设我们的任务是：给定一段电影评论，判断它是<strong>正面</strong>还是<strong>负面</strong>情感</p>
-<h5 id="第一步准备输入">第一步：准备输入</h5>
+<h4 id="第一步准备输入">第一步：准备输入</h4>
 <p>将评论文本按 BERT 格式处理：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[CLS] 这部电影节奏紧凑，演员表演非常自然 [SEP]</span><br></pre></td></tr></table></figure>
-<h5 id="第二步模型结构改动">第二步：模型结构改动</h5>
+<h4 id="第二步模型结构改动">第二步：模型结构改动</h4>
 <p>预训练好的 BERT
 本体完全不动，只在顶部<strong>新增一个极小的分类头</strong>：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[CLS] 的隐层向量（768维）→ Linear(768, 2) → Softmax → [正面, 负面]</span><br></pre></td></tr></table></figure>
@@ -571,7 +571,7 @@ Decoder 模块（如 UniLM、BERT2BERT 等变体），而非直接使用。</p>
 <p>取 <code>[CLS]</code> 是因为任务需要句级表示，而 <code>[CLS]</code>
 恰好被训练成了句级语义的"汇总点"。<strong>用哪个位置的输出，完全由下游任务的性质决定</strong>。</p>
 </blockquote>
-<h5 id="第三步准备训练数据">第三步：准备训练数据</h5>
+<h4 id="第三步准备训练数据">第三步：准备训练数据</h4>
 <p>不需要亿级语料，几千条人工标注的样本就足以微调：</p>
 <table>
 <thead>
@@ -599,14 +599,14 @@ Decoder 模块（如 UniLM、BERT2BERT 等变体），而非直接使用。</p>
 </tr>
 </tbody>
 </table>
-<h5 id="第四步微调训练">第四步：微调训练</h5>
+<h4 id="第四步微调训练">第四步：微调训练</h4>
 <p>用这批标注数据，以极小的学习率（如
 <code>2e-5</code>）对<strong>整个模型</strong>（BERT 本体 + 分类头）进行
 2～4 个 Epoch 的训练。</p>
 <p>此时损失函数是标准的<strong>交叉熵损失</strong>，梯度从分类头一路反传回
 BERT 的每一层，对预训练权重做小幅调整。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">损失 = CrossEntropy(预测概率, 真实标签)</span><br></pre></td></tr></table></figure>
-<h5 id="第五步推理">第五步：推理</h5>
+<h4 id="第五步推理">第五步：推理</h4>
 <p>微调完成后，输入新的评论：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[CLS] 导演的镜头语言太生硬，故事也讲不清楚 [SEP]</span><br></pre></td></tr></table></figure>
 <p>模型输出：</p>
@@ -1245,8 +1245,8 @@ RM。这大幅降低了对齐训练的成本，且在部分任务上效果接近
           <div class="post-tags">
               <a href="/tags/ai/" rel="tag"># ai</a>
               <a href="/tags/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM/" rel="tag"># 从零开始的LLM</a>
-              <a href="/tags/%E7%AC%AC2%E8%8A%82/" rel="tag"># 第2节</a>
               <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/%E7%AC%AC2%E8%8A%82/" rel="tag"># 第2节</a>
           </div>
 
         
@@ -1258,6 +1258,9 @@ RM。这大幅降低了对齐训练的成本，且在部分任务上效果接近
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/" rel="next" title="从零开始的LLM 3. 大模型应用">
+                  从零开始的LLM 3. 大模型应用 <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>

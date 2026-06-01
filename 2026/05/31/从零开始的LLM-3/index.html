@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 从零开始学习ai文章系列已完成《动手学深度学习》和《磨菇书》两本书的学习，新开的LLM系列课本来自《Happy-LLM》，但是内容和排版等个人重新进行整理，因此不会按照原来课本中的章节来写。如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的LLM 3. 大模型应用">
+<meta property="og:url" content="https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列已完成《动手学深度学习》和《磨菇书》两本书的学习，新开的LLM系列课本来自《Happy-LLM》，但是内容和排版等个人重新进行整理，因此不会按照原来课本中的章节来写。如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601090939269.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601091026852.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601091042312.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601091100210.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601092312856.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601094602462.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601094643037.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601102212641.png">
+<meta property="og:image" content="https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601102256539.png">
+<meta property="article:published_time" content="2026-05-31T15:39:37.000Z">
+<meta property="article:modified_time" content="2026-06-01T02:48:17.055Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="从零开始的LLM">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="第3节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601090939269.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/","path":"2026/05/31/从零开始的LLM-3/","title":"从零开始的LLM 3. 大模型应用"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>从零开始的LLM 3. 大模型应用 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#llm-%E7%9A%84%E8%AF%84%E6%B5%8B"><span class="nav-number">2.</span> <span class="nav-text">1. LLM 的评测</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#llm-%E7%9A%84%E8%AF%84%E6%B5%8B%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 LLM 的评测数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E6%B5%81%E7%9A%84%E8%AF%84%E6%B5%8B%E6%A6%9C%E5%8D%95"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 主流的评测榜单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9E%82%E7%9B%B4%E9%A2%86%E5%9F%9F%E4%B8%93%E9%A1%B9%E6%A6%9C%E5%8D%95"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 垂直领域专项榜单</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90retrieval-augmented-generationrag"><span class="nav-number">3.</span> <span class="nav-text">2.
+检索增强生成（Retrieval-Augmented Generation，RAG）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#rag-%E7%AE%80%E4%BB%8B"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 RAG 简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%AD%E5%BB%BA%E4%B8%80%E4%B8%AA-rag-%E6%A1%86%E6%9E%B6"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 搭建一个 RAG 框架</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#step-1rag-%E6%B5%81%E7%A8%8B%E4%BB%8B%E7%BB%8D"><span class="nav-number">3.2.1.</span> <span class="nav-text">Step 1：RAG 流程介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#step-2%E6%96%87%E6%A1%A3%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%88%87%E5%88%86"><span class="nav-number">3.2.2.</span> <span class="nav-text">Step 2：文档加载与切分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#step-3%E5%90%91%E9%87%8F%E5%8C%96"><span class="nav-number">3.2.3.</span> <span class="nav-text">Step 3：向量化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#step-4%E5%90%91%E9%87%8F%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E6%A3%80%E7%B4%A2"><span class="nav-number">3.2.4.</span> <span class="nav-text">Step 4：向量数据库与检索</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#step-5%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%A8%A1%E5%9D%97"><span class="nav-number">3.2.5.</span> <span class="nav-text">Step 5：大模型模块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#step-6tiny-rag-%E5%AE%8C%E6%95%B4%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.2.6.</span> <span class="nav-text">Step 6：Tiny-RAG 完整示例</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#agent"><span class="nav-number">4.</span> <span class="nav-text">3. Agent</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-llm-agent"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 什么是 LLM Agent？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#llm-agent-%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 LLM Agent 的类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%89%8B%E6%9E%84%E9%80%A0%E4%B8%80%E4%B8%AA-tiny-agent"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 动手构造一个 Tiny-Agent</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#step-1%E5%88%9D%E5%A7%8B%E5%8C%96%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%92%8C%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.3.1.</span> <span class="nav-text">Step 1：初始化客户端和模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#step-2%E5%AE%9A%E4%B9%89%E5%B7%A5%E5%85%B7%E5%87%BD%E6%95%B0"><span class="nav-number">4.3.2.</span> <span class="nav-text">Step 2：定义工具函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#step-3%E6%9E%84%E9%80%A0-agent-%E7%B1%BB"><span class="nav-number">4.3.3.</span> <span class="nav-text">Step 3：构造 Agent 类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#step-4%E8%BF%90%E8%A1%8C-agent"><span class="nav-number">4.3.4.</span> <span class="nav-text">Step 4：运行 Agent</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="从零开始的LLM 3. 大模型应用 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从零开始的LLM 3. 大模型应用
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-05-31 23:39:37" itemprop="dateCreated datePublished" datetime="2026-05-31T23:39:37+08:00">2026-05-31</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-06-01 10:48:17" itemprop="dateModified" datetime="2026-06-01T10:48:17+08:00">2026-06-01</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列已完成《动手学深度学习》和《磨菇书》两本书的学习，新开的LLM系列课本来自《Happy-LLM》，但是内容和排版等个人重新进行整理，因此不会按照原来课本中的章节来写。如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>《Happy-LLM》原文（课本）：https://datawhalechina.github.io/happy-llm/#/</p>
+<p>在前面的章节中，我们系统地介绍了大模型的基础知识、训练方法和微调技术。本章将重点探讨大模型在实际应用中的关键技术和框架，涵盖大模型评测、RAG（检索增强生成）以及Agent（智能体）等核心内容，帮助读者深入理解大模型的实际应用场景和实现方法。</p>
+<hr>
+<h2 id="llm-的评测">1. LLM 的评测</h2>
+<h3 id="llm-的评测数据集">1.1 LLM 的评测数据集</h3>
+<p>在大模型的评测过程中，使用标准化的评测集至关重要。目前，主流的大模型评测集主要从以下几个方面进行评估：</p>
+<p><strong>1. 通用评测集</strong></p>
+<ul>
+<li><strong>MMLU（Massive Multitask Language
+Understanding）</strong>：覆盖历史、数学、物理、生物、法律等数十个学科，全面考察模型跨领域的知识储备与语言理解能力。</li>
+</ul>
+<p><strong>2. 工具使用评测集</strong></p>
+<ul>
+<li><strong>BFCL
+V2</strong>：评测模型在复杂工具调用任务中的表现，重点考察多步骤操作的正确性与效率，典型任务包括数据库交互、API
+调用及特定指令执行。</li>
+</ul>
+<p><strong>3. 数学评测集</strong></p>
+<ul>
+<li><strong>GSM8K</strong>：包含小学数学应用题，测试模型的数学推理与逻辑分析能力，涵盖算术运算、简单方程求解、数字推理等任务，同时考验语义理解与数学运算的双重能力。</li>
+<li><strong>MATH</strong>：针对代数、几何、数论等高难度数学问题的评测集，全面测试模型的深度数学推理能力。</li>
+</ul>
+<p><strong>4. 推理评测集</strong></p>
+<ul>
+<li><strong>ARC
+Challenge</strong>：评测模型在科学推理任务中的表现，聚焦常识性与科学性问题解答，适用于科学考试题解答与百科问答系统开发。</li>
+<li><strong>GPQA（Graduate-Level Google-Proof
+Q&amp;A）</strong>：题目难度达到研究生水平，即便借助搜索引擎也难以轻易作答，用于衡量模型在零样本条件下的深度专业知识与推理上限。</li>
+<li><strong>HellaSwag</strong>：评测模型在复杂语境下选择最符合逻辑答案的能力，适用于故事续写、对话生成等需要高阶情境理解的场景。</li>
+</ul>
+<p><strong>5. 长文本理解评测集</strong></p>
+<ul>
+<li><strong>InfiniteBench/En.MC</strong>：评测模型处理超长文本阅读理解的能力，侧重学术文献理解，适用于自动摘要、长篇报道分析等场景。</li>
+<li><strong>NIH/Multi-needle</strong>：在超长上下文中埋入多个关键信息点（"needles"），测试模型的全局信息检索与整合能力，应用于政府报告解读、企业长文档分析等场景。</li>
+</ul>
+<p><strong>6. 多语言评测集</strong></p>
+<ul>
+<li><strong>MGSM（Multilingual Grade School
+Math）</strong>：跨语言评估模型的数学解题能力，考察多语言适应性，适用于国际化数学教育与跨语言技术支持场景。</li>
+</ul>
+<h3 id="主流的评测榜单">1.2 主流的评测榜单</h3>
+<p>大模型的评测不仅限于特定的数据集，许多机构还会根据评测结果发布模型排行榜，为学术界和工业界提供重要参考。以下是三个主流评测榜单：</p>
+<p><strong>Open LLM Leaderboard</strong></p>
+<p>由 Hugging Face
+维护的开放式排行榜，汇集大量开源大模型的评测结果，通过多个标准化测试集综合评估模型性能并持续更新，是开源模型横向对比的核心参考平台。</p>
+<blockquote>
+<p>🔗
+https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard</p>
+</blockquote>
+<p><img src="/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601090939269.png" style="zoom:80%;"></p>
+<p><strong>Chatbot Arena Leaderboard</strong></p>
+<p>由 LMSYS
+提供，采用真实用户与模型匿名对比交互（人类盲测投票）的方式评估对话质量，重点考察自然语言生成、上下文理解与用户满意度，能更真实地反映模型在实际对话场景中的表现。</p>
+<blockquote>
+<p>🔗
+https://huggingface.co/spaces/awacke1/lmsys-chatbot-arena-leaderboard</p>
+</blockquote>
+<p><img src="/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601091026852.png" style="zoom:80%;"></p>
+<p><strong>OpenCompass</strong></p>
+<p>国内权威大模型评测榜单，由上海人工智能实验室联合多家机构共同建设，结合中文语言理解与多语言能力测试，特别关注模型在中文语境下的准确性、鲁棒性与适应性，为国内企业和研究者提供本土化的权威参考。</p>
+<blockquote>
+<p>🔗 https://rank.opencompass.org.cn/home</p>
+</blockquote>
+<p><img src="/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601091042312.png" style="zoom:80%;"></p>
+<h3 id="垂直领域专项榜单">1.3 垂直领域专项榜单</h3>
+<p>除通用榜单外，多家学术机构还针对不同行业场景推出了专项评测榜单：</p>
+<table>
+<colgroup>
+<col style="width: 9%">
+<col style="width: 10%">
+<col style="width: 43%">
+<col style="width: 36%">
+</colgroup>
+<thead>
+<tr>
+<th>榜单</th>
+<th>评测基准</th>
+<th>评测维度</th>
+<th>主办机构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>金融榜</strong></td>
+<td>CFBenchmark</td>
+<td>金融 NLP、预测计算、金融分析与安全检查</td>
+<td>同济大学、上海人工智能实验室、东方财经</td>
+</tr>
+<tr>
+<td><strong>安全榜</strong></td>
+<td>Flames</td>
+<td>公平性、安全性、数据保护、合法性四大维度抗性</td>
+<td>上海人工智能实验室、复旦大学</td>
+</tr>
+<tr>
+<td><strong>通识榜</strong></td>
+<td>BotChat</td>
+<td>日常多轮对话生成，判断模型是否具备类人对话水平</td>
+<td>上海人工智能实验室</td>
+</tr>
+<tr>
+<td><strong>法律榜</strong></td>
+<td>LawBench</td>
+<td>法律问答、文本生成、判例分析等法律理解与推理</td>
+<td>南京大学</td>
+</tr>
+<tr>
+<td><strong>医疗榜</strong></td>
+<td>MedBench</td>
+<td>医学知识问答、安全伦理理解等医疗专业能力</td>
+<td>上海人工智能实验室</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601091100210.png" style="zoom:80%;"></p>
+<h2 id="检索增强生成retrieval-augmented-generationrag">2.
+检索增强生成（Retrieval-Augmented Generation，RAG）</h2>
+<h3 id="rag-简介">2.1 RAG 简介</h3>
+<p>大语言模型（LLM）在生成内容时，虽然具备强大的语言理解和生成能力，但也面临一些固有挑战：</p>
+<ul>
+<li><strong>幻觉问题</strong>：LLM
+有时会生成不准确或误导性的内容，即所谓的"幻觉"。</li>
+<li><strong>知识时效性</strong>：模型的训练数据存在截止日期，面对最新信息时，生成结果的准确性难以保证。</li>
+<li><strong>领域知识局限</strong>：对于特定领域的专业知识，LLM
+的处理深度有限，难以覆盖复杂的垂直场景。</li>
+</ul>
+<p>检索增强生成（RAG）技术正是为解决上述问题而生。<strong>RAG
+在生成答案之前，首先从外部文档数据库中检索相关信息</strong>，并将其融入生成过程，从而指导和优化语言模型的输出。这一机制不仅显著提升了内容生成的准确性与时效性，还使答案具备可追溯性——生成内容建立在真实文档的基础之上，可信度更高。</p>
+<p>RAG
+的核心原理是将<strong>检索</strong>与<strong>生成</strong>解耦并串联：用户提出查询后，系统先通过检索模块找到相关文本片段，再将这些片段作为上下文传递给语言模型，模型据此生成更精准、更可靠的回答。</p>
+<h3 id="搭建一个-rag-框架">2.2 搭建一个 RAG 框架</h3>
+<p>本节将带领大家一步步实现一个简化版的 RAG
+模型——<strong>Tiny-RAG</strong>。它保留了 RAG
+的核心功能（检索与生成），旨在帮助大家深入理解 RAG
+的原理与实现细节。</p>
+<p>完整代码可在 <a target="_blank" rel="noopener" href="https://github.com/datawhalechina/happy-llm/tree/main/docs/chapter7/RAG">Happy-LLM
+Chapter7 RAG</a> 中找到。</p>
+<h4 id="step-1rag-流程介绍">Step 1：RAG 流程介绍</h4>
+<p>Tiny-RAG 由以下五个核心模块构成：</p>
+<table>
+<thead>
+<tr>
+<th>模块</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文档加载与切分模块</td>
+<td>加载文档并切分为文档片段</td>
+</tr>
+<tr>
+<td>向量化模块</td>
+<td>将文档片段编码为向量表示</td>
+</tr>
+<tr>
+<td>向量数据库</td>
+<td>存储文档片段及其对应向量</td>
+</tr>
+<tr>
+<td>检索模块</td>
+<td>根据用户 Query 检索相关文档片段</td>
+</tr>
+<tr>
+<td>大模型模块</td>
+<td>基于检索结果回答用户问题</td>
+</tr>
+</tbody>
+</table>
+<p>RAG 的整体流程分为三个阶段：</p>
+<ol type="1">
+<li><strong>索引</strong>：将文档库分割为较短片段，通过编码器构建向量索引。</li>
+<li><strong>检索</strong>：根据问题与片段的语义相似度，检索最相关的文档片段。</li>
+<li><strong>生成</strong>：以检索到的上下文为条件，生成最终回答。</li>
+</ol>
+<p><img src="/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601092312856.png" style="zoom:80%;"></p>
+<h4 id="step-2文档加载与切分">Step 2：文档加载与切分</h4>
+<p><strong>文档加载模块</strong>支持 PDF、Markdown、TXT
+等常见格式，根据文件扩展名自动选择对应的读取方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">read_file_content</span>(<span class="params">cls, file_path: <span class="built_in">str</span></span>):</span><br><span class="line">    <span class="keyword">if</span> file_path.endswith(<span class="string">&#x27;.pdf&#x27;</span>):</span><br><span class="line">        <span class="keyword">return</span> cls.read_pdf(file_path)</span><br><span class="line">    <span class="keyword">elif</span> file_path.endswith(<span class="string">&#x27;.md&#x27;</span>):</span><br><span class="line">        <span class="keyword">return</span> cls.read_markdown(file_path)</span><br><span class="line">    <span class="keyword">elif</span> file_path.endswith(<span class="string">&#x27;.txt&#x27;</span>):</span><br><span class="line">        <span class="keyword">return</span> cls.read_text(file_path)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">&quot;Unsupported file type&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>文档读取后需要进行切分。切分策略采用滑动窗口方式，设置最大 Token
+长度（<code>max_token_len=600</code>）与重叠长度（<code>cover_content=150</code>），确保片段之间有内容重叠，以提升检索的连贯性与准确性。</p>
+<blockquote>
+<p><strong>切分逻辑说明</strong>：</p>
+<ul>
+<li>每块最多 600 token，其中 150 token 与上一块重叠，实际新增内容为 450
+token。</li>
+<li>按换行符粗切分后，分三种情况处理：单行超长则强制拆块；当前行可并入则追加；否则保存当前块并开启新块。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>Claude responded: 切分逻辑的三种情况详细说明如下：</p>
+<p>切分逻辑的三种情况详细说明如下：</p>
+<blockquote>
+<p><strong>切分参数说明</strong>：<code>max_token_len=600</code>（每块上限），<code>cover_content=150</code>（块间重叠），实际每块新增内容为
+<code>token_len = 600 - 150 = 450</code> token。</p>
+</blockquote>
+<p><strong>情况 1：单行长度超过 <code>max_token_len</code>（600
+token）</strong></p>
+<p>该行本身就超过了一个块的上限，无法整行放入任何块中，必须强制拆分。处理步骤如下：</p>
+<ol type="1">
+<li>若当前 <code>curr_chunk</code> 有内容，先将其保存到
+<code>chunk_text</code>，然后清空。</li>
+<li>将该行编码为 token 列表，按
+<code>token_len</code>（450）为步长切成若干子块。</li>
+<li>从第二个子块起，取上一块末尾的 150 个 token
+作为前缀拼入，保证块间语义连贯。</li>
+<li>每个子块保存到 <code>chunk_text</code>，处理完毕后重置
+<code>curr_chunk</code>。</li>
+</ol>
+<p><strong>情况 2：当前行加入后，<code>curr_chunk</code> 总长不超过
+<code>token_len</code>（450 token）</strong></p>
+<p>当前行可以安全并入正在构建的块，直接追加即可：</p>
+<ol type="1">
+<li>若 <code>curr_chunk</code> 已有内容，先追加换行符
+<code>\n</code>（+1 token）。</li>
+<li>将当前行拼入 <code>curr_chunk</code>，累加
+<code>curr_len</code>。</li>
+</ol>
+<p><strong>情况 3：当前行加入后，<code>curr_chunk</code> 总长会超过
+<code>token_len</code>（450 token）</strong></p>
+<p>当前块已满，需要收口并开启新块：</p>
+<ol type="1">
+<li>将当前 <code>curr_chunk</code> 保存到 <code>chunk_text</code>。</li>
+<li>取刚保存块的末尾 150
+个字符（<code>cover_content</code>）作为重叠前缀
+<code>cover_part</code>。</li>
+<li>新块初始内容为
+<code>cover_part + '\n' + 当前行</code>，从而保留上下文衔接。</li>
+<li>重置 <code>curr_len</code> 为新块的实际 token
+数，继续处理后续行。</li>
+</ol>
+<p>三种情况的判断优先级依次为：先判断单行是否超长（情况
+1），再判断能否并入当前块（情况 2），最后才触发换块逻辑（情况 3）。</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tiktoken</span><br><span class="line">enc = tiktoken.get_encoding(<span class="string">&quot;cl100k_base&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_chunk</span>(<span class="params">cls, text: <span class="built_in">str</span>, max_token_len: <span class="built_in">int</span> = <span class="number">600</span>, cover_content: <span class="built_in">int</span> = <span class="number">150</span></span>):</span><br><span class="line">    chunk_text = []</span><br><span class="line">    curr_len = <span class="number">0</span></span><br><span class="line">    curr_chunk = <span class="string">&#x27;&#x27;</span></span><br><span class="line">    token_len = max_token_len - cover_content</span><br><span class="line">    lines = text.splitlines()</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> lines:</span><br><span class="line">        line = line.strip()</span><br><span class="line">        line_len = <span class="built_in">len</span>(enc.encode(line))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> line_len &gt; max_token_len:</span><br><span class="line">            <span class="comment"># 情况1：单行超长，强制按 token_len 拆块</span></span><br><span class="line">            <span class="keyword">if</span> curr_chunk:</span><br><span class="line">                chunk_text.append(curr_chunk)</span><br><span class="line">                curr_chunk = <span class="string">&#x27;&#x27;</span></span><br><span class="line">                curr_len = <span class="number">0</span></span><br><span class="line">            line_tokens = enc.encode(line)</span><br><span class="line">            num_chunks = (<span class="built_in">len</span>(line_tokens) + token_len - <span class="number">1</span>) // token_len</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(num_chunks):</span><br><span class="line">                start_token = i * token_len</span><br><span class="line">                end_token = <span class="built_in">min</span>(start_token + token_len, <span class="built_in">len</span>(line_tokens))</span><br><span class="line">                chunk_part = enc.decode(line_tokens[start_token:end_token])</span><br><span class="line">                <span class="keyword">if</span> i &gt; <span class="number">0</span> <span class="keyword">and</span> chunk_text:</span><br><span class="line">                    prev_tokens = enc.encode(chunk_text[-<span class="number">1</span>])</span><br><span class="line">                    cover_part = enc.decode(prev_tokens[-cover_content:])</span><br><span class="line">                    chunk_part = cover_part + chunk_part</span><br><span class="line">                chunk_text.append(chunk_part)</span><br><span class="line">            curr_chunk = <span class="string">&#x27;&#x27;</span></span><br><span class="line">            curr_len = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">elif</span> curr_len + line_len + <span class="number">1</span> &lt;= token_len:</span><br><span class="line">            <span class="comment"># 情况2：可并入当前块</span></span><br><span class="line">            <span class="keyword">if</span> curr_chunk:</span><br><span class="line">                curr_chunk += <span class="string">&#x27;\n&#x27;</span></span><br><span class="line">                curr_len += <span class="number">1</span></span><br><span class="line">            curr_chunk += line</span><br><span class="line">            curr_len += line_len</span><br><span class="line"></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># 情况3：开启新块，添加重叠内容</span></span><br><span class="line">            <span class="keyword">if</span> curr_chunk:</span><br><span class="line">                chunk_text.append(curr_chunk)</span><br><span class="line">            <span class="keyword">if</span> chunk_text:</span><br><span class="line">                prev_chunk = chunk_text[-<span class="number">1</span>]</span><br><span class="line">                cover_part = prev_chunk[-cover_content:] <span class="keyword">if</span> <span class="built_in">len</span>(prev_chunk) &gt; cover_content <span class="keyword">else</span> prev_chunk</span><br><span class="line">                curr_chunk = cover_part + <span class="string">&#x27;\n&#x27;</span> + line</span><br><span class="line">                curr_len = <span class="built_in">len</span>(enc.encode(cover_part)) + <span class="number">1</span> + line_len</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                curr_chunk = line</span><br><span class="line">                curr_len = line_len</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> curr_chunk:</span><br><span class="line">        chunk_text.append(curr_chunk)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> chunk_text</span><br></pre></td></tr></table></figure>
+<h4 id="step-3向量化">Step 3：向量化</h4>
+<p>向量化模块将文档片段编码为稠密向量，是 RAG
+实现语义检索的基础。我们首先定义 <code>BaseEmbeddings</code>
+基类，便于后续扩展不同的 Embedding 模型：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">List</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">BaseEmbeddings</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, path: <span class="built_in">str</span>, is_api: <span class="built_in">bool</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="variable language_">self</span>.path = path</span><br><span class="line">        <span class="variable language_">self</span>.is_api = is_api  <span class="comment"># True：调用在线 API；False：加载本地模型</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_embedding</span>(<span class="params">self, text: <span class="built_in">str</span>, model: <span class="built_in">str</span></span>) -&gt; <span class="type">List</span>[<span class="built_in">float</span>]:</span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">cosine_similarity</span>(<span class="params">cls, vector1: <span class="type">List</span>[<span class="built_in">float</span>], vector2: <span class="type">List</span>[<span class="built_in">float</span>]</span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">        v1 = np.array(vector1, dtype=np.float32)</span><br><span class="line">        v2 = np.array(vector2, dtype=np.float32)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> np.<span class="built_in">all</span>(np.isfinite(v1)) <span class="keyword">or</span> <span class="keyword">not</span> np.<span class="built_in">all</span>(np.isfinite(v2)):</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0.0</span></span><br><span class="line">        dot_product = np.dot(v1, v2)</span><br><span class="line">        magnitude = np.linalg.norm(v1) * np.linalg.norm(v2)</span><br><span class="line">        <span class="keyword">if</span> magnitude == <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0.0</span></span><br><span class="line">        <span class="keyword">return</span> dot_product / magnitude</span><br><span class="line">        <span class="comment"># 数学公式：cos θ = A·B / (|A||B|)</span></span><br><span class="line">        <span class="comment"># 语义相近的文本，其向量方向接近，余弦值趋近于 1</span></span><br></pre></td></tr></table></figure>
+<p><code>BaseEmbeddings</code>
+提供两个核心方法：<code>get_embedding</code>
+获取文本向量表示（子类必须实现），<code>cosine_similarity</code>
+计算两向量间的余弦相似度（继承复用）。</p>
+<hr>
+<h4 id="step-4向量数据库与检索">Step 4：向量数据库与检索</h4>
+<p>向量数据库负责存储文档片段及其向量，并提供检索接口。完整代码见
+<code>VectorBase.py</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">VectorStore</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, document: <span class="type">List</span>[<span class="built_in">str</span>] = [<span class="string">&#x27;&#x27;</span>]</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="variable language_">self</span>.document = document</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_vector</span>(<span class="params">self, EmbeddingModel: BaseEmbeddings</span>) -&gt; <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">float</span>]]:</span><br><span class="line">        <span class="comment"># 将所有文档片段转为向量</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">persist</span>(<span class="params">self, path: <span class="built_in">str</span> = <span class="string">&#x27;storage&#x27;</span></span>):</span><br><span class="line">        <span class="comment"># 持久化保存向量数据库到本地</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">load_vector</span>(<span class="params">self, path: <span class="built_in">str</span> = <span class="string">&#x27;storage&#x27;</span></span>):</span><br><span class="line">        <span class="comment"># 从本地加载向量数据库</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">query</span>(<span class="params">self, query: <span class="built_in">str</span>, EmbeddingModel: BaseEmbeddings, k: <span class="built_in">int</span> = <span class="number">1</span></span>) -&gt; <span class="type">List</span>[<span class="built_in">str</span>]:</span><br><span class="line">        <span class="comment"># 将 query 向量化后，与数据库中所有向量计算相似度，返回 top-k 片段</span></span><br><span class="line">        query_vector = EmbeddingModel.get_embedding(query)</span><br><span class="line">        result = np.array([<span class="variable language_">self</span>.get_similarity(query_vector, vector) <span class="keyword">for</span> vector <span class="keyword">in</span> <span class="variable language_">self</span>.vectors])</span><br><span class="line">        <span class="keyword">return</span> np.array(<span class="variable language_">self</span>.document)[result.argsort()[-k:][::-<span class="number">1</span>]].tolist()</span><br></pre></td></tr></table></figure>
+<p><code>query</code>
+方法的核心逻辑：将用户问题向量化，<strong>与数据库中所有片段向量逐一计算余弦相似度</strong>，<strong>返回相似度最高的
+top-k 个文档片段</strong>。</p>
+<h4 id="step-5大模型模块">Step 5：大模型模块</h4>
+<p>大模型模块负责基于检索结果生成最终回答。同样采用基类设计，便于扩展本地模型或不同
+API 服务：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">BaseModel</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, path: <span class="built_in">str</span> = <span class="string">&#x27;&#x27;</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="variable language_">self</span>.path = path</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">chat</span>(<span class="params">self, prompt: <span class="built_in">str</span>, history: <span class="type">List</span>[<span class="built_in">dict</span>], content: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">load_model</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="comment"># 本地开源模型需实现此方法；API 模型无需实现</span></span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+<p>以硅基流动平台的 Qwen2.5 为例，实现 RAG 专用的对话类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">OpenAIChat</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, model: <span class="built_in">str</span> = <span class="string">&quot;Qwen/Qwen2.5-32B-Instruct&quot;</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        <span class="variable language_">self</span>.model = model</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">chat</span>(<span class="params">self, prompt: <span class="built_in">str</span>, history: <span class="type">List</span>[<span class="built_in">dict</span>], content: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        RAG_PROMPT_TEMPLATE = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        使用以上下文来回答用户的问题。如果你不知道答案，就说你不知道。总是使用中文回答。</span></span><br><span class="line"><span class="string">        问题: &#123;question&#125;</span></span><br><span class="line"><span class="string">        可参考的上下文：</span></span><br><span class="line"><span class="string">        ···</span></span><br><span class="line"><span class="string">        &#123;context&#125;</span></span><br><span class="line"><span class="string">        ···</span></span><br><span class="line"><span class="string">        如果给定的上下文无法让你做出回答，请回答数据库中没有这个内容，你不知道。</span></span><br><span class="line"><span class="string">        有用的回答:</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        client = OpenAI()</span><br><span class="line">        client.api_key = os.getenv(<span class="string">&quot;OPENAI_API_KEY&quot;</span>)</span><br><span class="line">        client.base_url = os.getenv(<span class="string">&quot;OPENAI_BASE_URL&quot;</span>)</span><br><span class="line">        history.append(&#123;<span class="string">&#x27;role&#x27;</span>: <span class="string">&#x27;user&#x27;</span>, <span class="string">&#x27;content&#x27;</span>: RAG_PROMPT_TEMPLATE.<span class="built_in">format</span>(question=prompt, context=content)&#125;)</span><br><span class="line">        response = client.chat.completions.create(</span><br><span class="line">            model=<span class="variable language_">self</span>.model,</span><br><span class="line">            messages=history,</span><br><span class="line">            max_tokens=<span class="number">2048</span>,</span><br><span class="line">            temperature=<span class="number">0.1</span></span><br><span class="line">        )</span><br><span class="line">        <span class="keyword">return</span> response.choices[<span class="number">0</span>].message.content</span><br></pre></td></tr></table></figure>
+<p>RAG
+专用提示词模板的关键设计在于：明确要求模型<strong>仅基于提供的上下文作答</strong>，若上下文不足则如实告知，避免模型"发挥"产生幻觉。</p>
+<h4 id="step-6tiny-rag-完整示例">Step 6：Tiny-RAG 完整示例</h4>
+<p><strong>首次运行（构建并保存数据库）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 加载文档并切分</span></span><br><span class="line">docs = ReadFiles(<span class="string">&#x27;./data&#x27;</span>).get_content(max_token_len=<span class="number">600</span>, cover_content=<span class="number">150</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 构建向量数据库</span></span><br><span class="line">vector = VectorStore(docs)</span><br><span class="line">embedding = OpenAIEmbedding()</span><br><span class="line">vector.get_vector(EmbeddingModel=embedding)</span><br><span class="line">vector.persist(path=<span class="string">&#x27;storage&#x27;</span>)  <span class="comment"># 持久化到本地，下次可直接加载</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 检索 + 生成</span></span><br><span class="line">question = <span class="string">&#x27;RAG 的原理是什么？&#x27;</span></span><br><span class="line">content = vector.query(question, EmbeddingModel=embedding, k=<span class="number">1</span>)[<span class="number">0</span>]</span><br><span class="line">chat = OpenAIChat(model=<span class="string">&#x27;Qwen/Qwen2.5-32B-Instruct&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(chat.chat(question, [], content))</span><br></pre></td></tr></table></figure>
+<p><strong>再次运行（加载已有数据库）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 直接加载本地数据库，无需重新向量化</span></span><br><span class="line">vector = VectorStore()</span><br><span class="line">vector.load_vector(<span class="string">&#x27;./storage&#x27;</span>)</span><br><span class="line"></span><br><span class="line">question = <span class="string">&#x27;RAG 的原理是什么？&#x27;</span></span><br><span class="line">embedding = ZhipuEmbedding()</span><br><span class="line">content = vector.query(question, EmbeddingModel=embedding, k=<span class="number">1</span>)[<span class="number">0</span>]</span><br><span class="line">chat = OpenAIChat(model=<span class="string">&#x27;Qwen/Qwen2.5-32B-Instruct&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(chat.chat(question, [], content))</span><br></pre></td></tr></table></figure>
+<h2 id="agent">3. Agent</h2>
+<h3 id="什么是-llm-agent">3.1 什么是 LLM Agent？</h3>
+<p>大模型 Agent 是一个以 LLM
+为核心"大脑"，并赋予其自主规划、记忆和工具使用能力的系统。它不再仅仅被动地响应用户的提示，而是能够：</p>
+<ol type="1">
+<li><strong>理解目标（Goal
+Understanding）</strong>：接收相对复杂或高层次的目标（例如"帮我规划一个周末去北京的旅游行程并预订机票酒店"）。</li>
+<li><strong>自主规划（Planning）</strong>：将大目标分解为一系列可执行的小步骤（如"搜索北京景点"、"查询天气"、"比较机票价格"、"调用预订
+API"等）。</li>
+<li><strong>记忆（Memory）</strong>：拥有短期记忆（记住当前任务的上下文）和长期记忆（从历史交互或外部知识库中检索信息）。</li>
+<li><strong>工具使用（Tool Use）</strong>：调用外部
+API、插件或代码执行环境来获取信息、执行操作或进行计算。</li>
+<li><strong>反思与迭代（Reflection &amp; Iteration）</strong>：（高级
+Agent）评估自身行为与结果，从中学习并调整后续计划。</li>
+</ol>
+<p>传统 LLM 像一个知识渊博但只能纸上谈兵的图书馆员，而 LLM Agent
+则更像一个全能的私人助理——不仅懂得多，还能跑腿办事，甚至能主动思考最优方案。</p>
+<p><img src="/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601094602462.png" style="zoom:80%;"></p>
+<h3 id="llm-agent-的类型">3.2 LLM Agent 的类型</h3>
+<ul>
+<li><strong>任务导向型（Task-Oriented）</strong>
+<ul>
+<li>特点：专注完成特定领域的明确任务，有预设流程和固定工具集，LLM
+主要负责理解意图与调用工具</li>
+<li>示例：餐厅预订机器人、GitHub Copilot 代码助手</li>
+</ul></li>
+<li><strong>规划与推理型（Planning &amp; Reasoning）</strong>
+<ul>
+<li>特点：强调自主分解复杂任务、制定多步计划，常采用
+ReAct（Reason+Act）或 CoT 思维框架</li>
+<li>示例：整合搜索、计算器、数据库的研究型 Agent</li>
+</ul></li>
+<li><strong>多 Agent 系统（Multi-Agent）</strong>
+<ul>
+<li>特点：多个不同角色的 Agent 协同工作，可通信、协作、辩论甚至竞争</li>
+<li>示例：AutoGen、ChatDev（模拟软件开发团队）</li>
+</ul></li>
+<li><strong>探索与学习型（Exploration &amp; Learning）</strong>
+<ul>
+<li>特点：在与环境交互中主动学习新知识、优化策略，包含复杂的记忆与反思机制</li>
+<li>示例：自主探索未知软件环境的 Agent、游戏策略 Agent</li>
+<li></li>
+</ul></li>
+</ul>
+<h3 id="动手构造一个-tiny-agent">3.3 动手构造一个 Tiny-Agent</h3>
+<p>本节基于 <code>openai</code> 库的 <code>tool_calls</code>
+功能，构造一个简单的任务导向型
+Agent，能够<strong>根据用户输入调用工具并回答问题</strong>。</p>
+<p>效果如图所示：</p>
+<p><img src="/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601094643037.png" style="zoom:80%;"></p>
+<hr>
+<h4 id="step-1初始化客户端和模型">Step 1：初始化客户端和模型</h4>
+<p>使用 <code>openai</code> 库，配置指向兼容 OpenAI API 的服务终端（以
+SiliconFlow 为例）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI</span><br><span class="line"></span><br><span class="line">client = OpenAI(</span><br><span class="line">    api_key=<span class="string">&quot;YOUR_API_KEY&quot;</span>,        <span class="comment"># 替换为你的 API Key</span></span><br><span class="line">    base_url=<span class="string">&quot;https://api.siliconflow.cn/v1&quot;</span>,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">model_name = <span class="string">&quot;Qwen/Qwen2.5-32B-Instruct&quot;</span></span><br></pre></td></tr></table></figure>
+<h4 id="step-2定义工具函数">Step 2：定义工具函数</h4>
+<p>在 <code>src/tools.py</code> 中定义 Agent
+可调用的工具函数。每个函数需要有清晰的文档字符串（docstring），描述其功能和参数——这将用于自动生成工具的
+JSON Schema：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># src/tools.py</span></span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime</span><br><span class="line"><span class="keyword">import</span> wikipedia</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_current_datetime</span>() -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    获取当前日期和时间。</span></span><br><span class="line"><span class="string">    :return: 当前日期和时间的字符串表示。</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> datetime.now().strftime(<span class="string">&quot;%Y-%m-%d %H:%M:%S&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">count_letter_in_string</span>(<span class="params">a: <span class="built_in">str</span>, b: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    统计字符串中某个字母的出现次数。</span></span><br><span class="line"><span class="string">    :param a: 要搜索的字符串。</span></span><br><span class="line"><span class="string">    :param b: 要统计的字母。</span></span><br><span class="line"><span class="string">    :return: 字母在字符串中出现的次数。</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">str</span>(a.count(b))</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">search_wikipedia</span>(<span class="params">query: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    在维基百科中搜索指定查询的前三个页面摘要。</span></span><br><span class="line"><span class="string">    :param query: 要搜索的查询字符串。</span></span><br><span class="line"><span class="string">    :return: 包含前三个页面摘要的字符串。</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    page_titles = wikipedia.search(query)</span><br><span class="line">    summaries = []</span><br><span class="line">    <span class="keyword">for</span> page_title <span class="keyword">in</span> page_titles[:<span class="number">3</span>]:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            wiki_page = wikipedia.page(title=page_title, auto_suggest=<span class="literal">False</span>)</span><br><span class="line">            summaries.append(<span class="string">f&quot;页面: <span class="subst">&#123;page_title&#125;</span>\n摘要: <span class="subst">&#123;wiki_page.summary&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">except</span> (wikipedia.exceptions.PageError, wikipedia.exceptions.DisambiguationError):</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;\n\n&quot;</span>.join(summaries) <span class="keyword">if</span> summaries <span class="keyword">else</span> <span class="string">&quot;维基百科没有搜索到合适的结果&quot;</span></span><br></pre></td></tr></table></figure>
+<p>为让 API 理解这些工具，需通过 <code>src/utils.py</code> 中的
+<code>function_to_json</code> 将函数转换为 JSON Schema：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># src/utils.py</span></span><br><span class="line"><span class="keyword">import</span> inspect</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">function_to_json</span>(<span class="params">func</span>) -&gt; <span class="built_in">dict</span>:</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="string">&quot;type&quot;</span>: <span class="string">&quot;function&quot;</span>,</span><br><span class="line">        <span class="string">&quot;function&quot;</span>: &#123;</span><br><span class="line">            <span class="string">&quot;name&quot;</span>: func.__name__,</span><br><span class="line">            <span class="string">&quot;description&quot;</span>: inspect.getdoc(func),</span><br><span class="line">            <span class="string">&quot;parameters&quot;</span>: &#123;</span><br><span class="line">                <span class="string">&quot;type&quot;</span>: <span class="string">&quot;object&quot;</span>,</span><br><span class="line">                <span class="string">&quot;properties&quot;</span>: parameters,</span><br><span class="line">                <span class="string">&quot;required&quot;</span>: required,</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<h4 id="step-3构造-agent-类">Step 3：构造 Agent 类</h4>
+<p>在 <code>src/core.py</code> 中定义 Agent
+类，负责<strong>管理对话历史</strong>、<strong>调用
+API</strong>、<strong>处理工具请求</strong>和<strong>执行工具函数</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Agent</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, client: OpenAI, model: <span class="built_in">str</span> = <span class="string">&quot;Qwen/Qwen2.5-32B-Instruct&quot;</span>,</span></span><br><span class="line"><span class="params">                 tools: <span class="type">List</span> = [], verbose: <span class="built_in">bool</span> = <span class="literal">True</span></span>):</span><br><span class="line">        <span class="variable language_">self</span>.client = client</span><br><span class="line">        <span class="variable language_">self</span>.tools = tools       <span class="comment"># Python 函数对象列表</span></span><br><span class="line">        <span class="variable language_">self</span>.model = model</span><br><span class="line">        <span class="variable language_">self</span>.messages = [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;system&quot;</span>, <span class="string">&quot;content&quot;</span>: SYSTEM_PROMPT&#125;]</span><br><span class="line">        <span class="variable language_">self</span>.verbose = verbose</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_tool_schema</span>(<span class="params">self</span>) -&gt; <span class="type">List</span>[<span class="type">Dict</span>]:</span><br><span class="line">        <span class="keyword">return</span> [function_to_json(tool) <span class="keyword">for</span> tool <span class="keyword">in</span> <span class="variable language_">self</span>.tools]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">handle_tool_call</span>(<span class="params">self, tool_call</span>):</span><br><span class="line">        function_name = tool_call.function.name       <span class="comment"># 函数名</span></span><br><span class="line">        function_args = tool_call.function.arguments  <span class="comment"># 函数参数（JSON 字符串）</span></span><br><span class="line">        function_id   = tool_call.<span class="built_in">id</span>                  <span class="comment"># 调用 ID，用于追踪本次调用</span></span><br><span class="line"></span><br><span class="line">        result = <span class="built_in">eval</span>(<span class="string">f&quot;<span class="subst">&#123;function_name&#125;</span>(**<span class="subst">&#123;function_args&#125;</span>)&quot;</span>)  <span class="comment"># 执行函数</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;tool&quot;</span>, <span class="string">&quot;content&quot;</span>: result, <span class="string">&quot;tool_call_id&quot;</span>: function_id&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_completion</span>(<span class="params">self, prompt</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        <span class="comment"># 1. 加入用户消息</span></span><br><span class="line">        <span class="variable language_">self</span>.messages.append(&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: prompt&#125;)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 2. 第一次调用模型，判断是否需要工具</span></span><br><span class="line">        response = <span class="variable language_">self</span>.client.chat.completions.create(</span><br><span class="line">            model=<span class="variable language_">self</span>.model,</span><br><span class="line">            messages=<span class="variable language_">self</span>.messages,</span><br><span class="line">            tools=<span class="variable language_">self</span>.get_tool_schema(),</span><br><span class="line">            stream=<span class="literal">False</span>,</span><br><span class="line">        )</span><br><span class="line">        <span class="comment"># 将用户输入交给model，如果判断需要使用工具，</span></span><br><span class="line">        <span class="comment"># 例如：</span></span><br><span class="line">        <span class="comment"># 用户：北京天气怎么样</span></span><br><span class="line">        <span class="comment"># 模型会判断：</span></span><br><span class="line">        <span class="comment"># 我不能凭空知道实时天气</span></span><br><span class="line">        <span class="comment"># 我应该调用 get_weather</span></span><br><span class="line">        <span class="comment"># 于是返回：</span></span><br><span class="line">        <span class="comment"># message.tool_calls = [</span></span><br><span class="line">        <span class="comment">#   &#123;</span></span><br><span class="line">        <span class="comment">#     &quot;function&quot;:&#123;</span></span><br><span class="line">        <span class="comment">#       &quot;name&quot;:&quot;get_weather&quot;,</span></span><br><span class="line">        <span class="comment">#       &quot;arguments&quot;:&quot;&#123;\&quot;city\&quot;:\&quot;北京\&quot;&#125;&quot;</span></span><br><span class="line">        <span class="comment">#     &#125;</span></span><br><span class="line">        <span class="comment">#   &#125;</span></span><br><span class="line">        <span class="comment"># ]</span></span><br><span class="line">        <span class="comment"># 模型不会真正执行函数，只会在 tool_calls 中输出&quot;我要调用哪个函数、传什么参数&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 3. 若模型决定调用工具</span></span><br><span class="line">        <span class="keyword">if</span> response.choices[<span class="number">0</span>].message.tool_calls:</span><br><span class="line">            <span class="variable language_">self</span>.messages.append(&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;assistant&quot;</span>, <span class="string">&quot;content&quot;</span>: response.choices[<span class="number">0</span>].message.content&#125;)</span><br><span class="line"></span><br><span class="line">            tool_list = []</span><br><span class="line">            <span class="keyword">for</span> tool_call <span class="keyword">in</span> response.choices[<span class="number">0</span>].message.tool_calls:</span><br><span class="line">                <span class="variable language_">self</span>.messages.append(<span class="variable language_">self</span>.handle_tool_call(tool_call))  <span class="comment"># 执行工具并将结果写入 messages</span></span><br><span class="line">                tool_list.append([tool_call.function.name, tool_call.function.arguments])</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 此时 messages 结构大致为：</span></span><br><span class="line">            <span class="comment"># [&#123;&quot;role&quot;:&quot;user&quot;,      &quot;content&quot;:&quot;北京天气怎么样&quot;&#125;,</span></span><br><span class="line">            <span class="comment">#  &#123;&quot;role&quot;:&quot;assistant&quot;, &quot;content&quot;: None, &quot;tool_calls&quot;:[...]&#125;,</span></span><br><span class="line">            <span class="comment">#  &#123;&quot;role&quot;:&quot;tool&quot;,      &quot;content&quot;:&quot;25度&quot;, &quot;tool_call_id&quot;:&quot;...&quot;&#125;]</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> <span class="variable language_">self</span>.verbose:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;调用工具：&quot;</span>, response.choices[<span class="number">0</span>].message.content, tool_list)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 4. 携带工具结果，第二次调用模型生成最终回答</span></span><br><span class="line">            response = <span class="variable language_">self</span>.client.chat.completions.create(</span><br><span class="line">                model=<span class="variable language_">self</span>.model,</span><br><span class="line">                messages=<span class="variable language_">self</span>.messages,</span><br><span class="line">                tools=<span class="variable language_">self</span>.get_tool_schema(),</span><br><span class="line">                stream=<span class="literal">False</span>,</span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 5. 将最终回答写入 messages 并返回</span></span><br><span class="line">        <span class="variable language_">self</span>.messages.append(&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;assistant&quot;</span>, <span class="string">&quot;content&quot;</span>: response.choices[<span class="number">0</span>].message.content&#125;)</span><br><span class="line">        <span class="keyword">return</span> response.choices[<span class="number">0</span>].message.content</span><br></pre></td></tr></table></figure>
+<p>Agent 的完整工作流程：</p>
+<ol type="1">
+<li>接收用户输入，加入对话历史。</li>
+<li>携带工具 Schema 调用大模型，模型判断是否需要工具。</li>
+<li>若需要，解析模型输出的工具调用请求，执行对应 Python 函数。</li>
+<li>将工具执行结果写回对话历史，再次调用模型。</li>
+<li>模型根据工具结果生成最终回复，返回给用户。</li>
+</ol>
+<p><img src="/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601102212641.png" style="zoom:80%;"></p>
+<h4 id="step-4运行-agent">Step 4：运行 Agent</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># demo.py</span></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    client = OpenAI(</span><br><span class="line">        api_key=<span class="string">&quot;YOUR_API_KEY&quot;</span>,</span><br><span class="line">        base_url=<span class="string">&quot;https://api.siliconflow.cn/v1&quot;</span>,</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    agent = Agent(</span><br><span class="line">        client=client,</span><br><span class="line">        model=<span class="string">&quot;Qwen/Qwen2.5-32B-Instruct&quot;</span>,</span><br><span class="line">        tools=[get_current_datetime, add, compare, count_letter_in_string],</span><br><span class="line">        verbose=<span class="literal">True</span>,</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        prompt = <span class="built_in">input</span>(<span class="string">&quot;\033[94mUser: \033[0m&quot;</span>)      <span class="comment"># 蓝色显示用户输入</span></span><br><span class="line">        <span class="keyword">if</span> prompt.lower() == <span class="string">&quot;exit&quot;</span>:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        response = agent.get_completion(prompt)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\033[92mAssistant: \033[0m&quot;</span>, response) <span class="comment"># 绿色显示回答</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2026/05/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-3/image-20260601102256539.png" style="zoom:80%;"></p>
+<hr>
+<blockquote>
+<p><strong>本节实现的 Agent 类型说明</strong></p>
+<p>本节构造的属于最基础的 <strong>Tool-Calling
+Agent</strong>，其本质特征是：</p>
+<ul>
+<li>只负责"调用工具 + 拼接结果"，不更新模型参数</li>
+<li>不改变自身能力，不保存长期经验（上下文仅限当次
+<code>messages</code>）</li>
+<li>每次对话都是"新大脑"，不会随使用变得更聪明</li>
+</ul>
+<p>这是理解更复杂 Agent 架构（如带记忆的 Agent、多 Agent
+系统）的基础。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM/" rel="tag"># 从零开始的LLM</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/%E7%AC%AC3%E8%8A%82/" rel="tag"># 第3节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/05/27/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-2/" rel="prev" title="从零开始的LLM 2.LLM模型及训练">
+                  <i class="fa fa-angle-left"></i> 从零开始的LLM 2.LLM模型及训练
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
