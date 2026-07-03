@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 从零开始学习ai文章系列已完成《动手学深度学习》和《磨菇书》两本书的学习，新开的LLM系列课本来自《Happy-LLM》和《Hello-Agents》和 《all-in-rag》，但是内容和排版等个人重新进行整理，因此不会按照原来课本中的章节来写。如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的LLM 6. RAG（检索增强生成）(一)">
+<meta property="og:url" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列已完成《动手学深度学习》和《磨菇书》两本书的学习，新开的LLM系列课本来自《Happy-LLM》和《Hello-Agents》和 《all-in-rag》，但是内容和排版等个人重新进行整理，因此不会按照原来课本中的章节来写。如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704005606873.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704004459713.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704010548463.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704020855566.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704021215540.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704020516342.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704021844554.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704021923875.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704022354098.png">
+<meta property="article:published_time" content="2026-07-03T16:12:00.000Z">
+<meta property="article:modified_time" content="2026-07-03T18:28:02.625Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="从零开始的LLM">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="第6节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704005606873.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/","path":"2026/07/04/从零开始的LLM-6/","title":"从零开始的LLM 6. RAG（检索增强生成）(一)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>从零开始的LLM 6. RAG（检索增强生成）(一) | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-rag"><span class="nav-number">2.</span> <span class="nav-text">1. 什么是 RAG</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rag-%E5%9C%A8%E6%95%B4%E4%B8%AA%E6%B5%81%E7%A8%8B%E4%B8%AD%E7%9A%84%E4%BD%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">2. RAG 在整个流程中的位置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rag%E5%86%85%E9%83%A8%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%E5%91%A2"><span class="nav-number">4.</span> <span class="nav-text">3.RAG内部怎么实现呢。</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E8%B7%AF%E7%94%B1query-routing"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 查询路由（Query Routing）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D%E4%B8%BB%E6%B5%81%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-number">4.1.1.</span> <span class="nav-text">两种主流实现方式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E9%87%8D%E5%86%99query-transformation"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 查询重写（Query
+Transformation）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%B8%80%E5%9F%BA%E4%BA%8E-prompt-%E7%9A%84%E6%9F%A5%E8%AF%A2%E9%87%8D%E5%86%99"><span class="nav-number">4.2.1.</span> <span class="nav-text">方法一：基于 Prompt
+的查询重写</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%BA%8Chydehypothetical-document-embeddings"><span class="nav-number">4.2.2.</span> <span class="nav-text">方法二：HyDE（Hypothetical
+Document Embeddings）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B9%B6%E7%94%9F%E6%88%90%E5%9B%9E%E7%AD%94"><span class="nav-number">5.</span> <span class="nav-text">3.3 构建上下文并生成回答</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%AC%E9%A1%B9%E7%9B%AE%E4%B8%AD%E7%9A%84%E5%9B%9E%E7%AD%94%E7%94%9F%E6%88%90"><span class="nav-number">5.0.1.</span> <span class="nav-text">本项目中的回答生成</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">4. 小结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="从零开始的LLM 6. RAG（检索增强生成）(一) | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从零开始的LLM 6. RAG（检索增强生成）(一)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2026-07-04 00:12:00 / 修改时间：02:28:02" itemprop="dateCreated datePublished" datetime="2026-07-04T00:12:00+08:00">2026-07-04</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列已完成《动手学深度学习》和《磨菇书》两本书的学习，新开的LLM系列课本来自《<a target="_blank" rel="noopener" href="https://datawhalechina.github.io/happy-llm/">Happy-LLM</a>》和《<a target="_blank" rel="noopener" href="https://hello-agents.datawhale.cc/#/">Hello-Agents</a>》和 《<a target="_blank" rel="noopener" href="https://github.com/datawhalechina/all-in-rag">all-in-rag</a>》，但是内容和排版等个人重新进行整理，因此不会按照原来课本中的章节来写。如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>由于 RAG 部分内容较多，单篇草稿已超过 1.4
+万字，因此将拆分为上下两篇进行介绍。</p>
+<p>整体内容基于对 <strong>all-in-rag</strong> 项目的学习与实践总结。</p>
+<p>接下来，文章将以原项目中的 <strong>“第八章：项目实战一”</strong>
+为主线，从整体流程入手，再逐步深入到各个模块的实现细节。</p>
+<ul>
+<li><strong>篇章一</strong>：主要介绍 RAG
+搜索引擎之外的内容，包括整体流程、系统架构以及各模块的作用等概述性内容。</li>
+<li><strong>篇章二</strong>：重点讲解 RAG
+搜索引擎的具体实现，以及其中涉及的关键技术与实现细节。</li>
+</ul>
+<hr>
+<h2 id="什么是-rag">1. 什么是 RAG</h2>
+<p>RAG（<strong>Retrieval-Augmented
+Generation</strong>，检索增强生成）是一种在大语言模型（LLM）生成回答之前，先从外部知识库中检索相关信息，再结合这些信息进行回答的技术。</p>
+<p>你可以将 RAG 理解为一个<strong>搜索工具</strong>。</p>
+<p>当用户提出一个问题时，它会先从知识库中搜索与问题相关的内容，然后再把这些内容提供给
+LLM，帮助模型生成更加准确、更加符合事实的回答。</p>
+<p>需要特别强调的是，<strong>RAG
+是一个检索系统，而不是记忆系统。</strong></p>
+<p>很多初学者容易误以为，RAG
+能够"记住"大量知识，或者能够"回忆"以前见过的内容。实际上并非如此。</p>
+<p>RAG 的核心能力始终都是 <strong>Retrieval（检索）</strong>，而不是
+<strong>Memory（记忆）</strong>。它没有主动记忆能力，每一次用户发起查询时，都会重新执行一次完整的检索流程：</p>
+<ol type="1">
+<li>将用户的问题转换为向量表示（Embedding）。</li>
+<li>在向量数据库（或其他检索系统）中进行相似度搜索。</li>
+<li>找到最相似的文档片段（Chunk）。</li>
+<li>将这些文档片段与用户问题一起发送给 LLM。</li>
+<li>由 LLM 综合上下文生成最终回答。</li>
+</ol>
+<p>整个过程中，RAG
+<strong>不会回忆过去检索过什么内容</strong>，也不会因为之前检索过而记住某些知识。每一次查询都是一次全新的检索过程。</p>
+<p>此外，还需要理解一个非常重要的概念：</p>
+<blockquote>
+<p><strong>RAG
+检索到的是"相似"的内容，而不一定是真正"相关"的内容。</strong></p>
+</blockquote>
+<p>对于向量检索而言，它依据的是向量空间中的距离（相似度）进行匹配；对于关键词检索而言，它依据的是关键词之间的匹配关系进行搜索。</p>
+<p>因此，<strong>相似（Similar）并不等于相关（Relevant）</strong>。</p>
+<p>例如，用户询问的是某个算法的实现方式，而检索结果可能只是包含大量相同专业术语的另一篇文章，却并没有真正回答用户的问题。</p>
+<p>这也是 RAG 中最核心的问题之一——<strong>检索质量（Retrieval
+Quality）</strong>。如果检索阶段没有找到真正有价值的内容，那么即使后续使用再强大的
+LLM，也很难生成高质量的回答。因此，RAG
+的大量研究工作实际上都是围绕如何提高检索质量、提高召回率以及排序质量展开的。</p>
+<h2 id="rag-在整个流程中的位置">2. RAG 在整个流程中的位置</h2>
+<p>理解了 RAG 的作用之后，我们再来看它在整个问答流程中的位置。</p>
+<p>在没有使用 RAG 时，流程非常简单，用户的问题会直接发送给 LLM：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">response = LLM(query)</span><br></pre></td></tr></table></figure>
+<p>此时，LLM 只能依赖模型参数中已经学到的知识进行回答。</p>
+<p>而加入 RAG 后，流程会多出一个检索步骤。用户的问题首先交给 RAG
+系统，由它从知识库中搜索相关文档：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">relevant_docs = RAG(query)</span><br></pre></td></tr></table></figure>
+<p>随后，再将<strong>用户问题</strong>和<strong>检索得到的相关文档</strong>一起交给
+LLM：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">response = LLM(query, relevant_docs)</span><br></pre></td></tr></table></figure>
+<p>整个流程可以表示为：</p>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704005606873.png" style="zoom:80%;"></p>
+<p>也正因为如此，RAG 并不是用于替代 LLM，而是作为 LLM
+的一个外挂知识系统，在回答问题之前，为模型提供更加丰富、更具时效性的上下文信息，从而提升回答的准确性和可靠性。</p>
+<h2 id="rag内部怎么实现呢">3.RAG内部怎么实现呢。</h2>
+<h3 id="查询路由query-routing">3.1 查询路由（Query Routing）</h3>
+<blockquote>
+<p>来自原文：<a target="_blank" rel="noopener" href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter4/14_query_rewriting.md">查询重构与分发</a></p>
+</blockquote>
+<p>当用户的 <code>query</code> 进入 RAG
+系统后，首先经过的通常不是检索，而是<strong>查询路由（Query
+Routing）</strong>。</p>
+<p>查询路由可以理解为 RAG 系统中的<strong>智能调度中心</strong>。</p>
+<p>如果一个 RAG
+系统只连接一个知识库，那么所有查询都可以直接进入检索阶段；但在实际项目中，一个系统往往会接入多个数据源、多个检索器，甚至拥有不同的处理流程。例如：</p>
+<ul>
+<li>不同类型的知识库（文档、代码、数据库等）</li>
+<li>不同的检索策略（向量检索、关键词检索、混合检索）</li>
+<li>不同的 Prompt 模板</li>
+<li>不同的 Agent 或工具</li>
+</ul>
+<p>这时，并不是所有查询都应该走同一条流程，而是需要先分析用户的意图，再决定最适合的处理路径，这就是<strong>查询路由</strong>的作用。</p>
+<p>简单来说，它负责回答这样一个问题：</p>
+<blockquote>
+<p><strong>"这个问题应该交给谁来处理？"</strong></p>
+</blockquote>
+<p>因此，查询路由本质上是一个<strong>分类（Classification）</strong>问题。它根据用户问题的语义，将查询分发到最合适的数据源、检索器、处理组件或
+Prompt 模板，从而提高系统效率，并提升最终回答的准确性。</p>
+<hr>
+<h4 id="两种主流实现方式">两种主流实现方式</h4>
+<p>目前，查询路由主要有两种实现方式。</p>
+<p><strong>方法一：基于 LLM 的意图识别（LLM Routing）</strong></p>
+<p>这是目前最常见、也是最灵活的一种方式。</p>
+<p>其核心思想是：<strong>让 LLM
+自己判断用户的问题应该走哪条路线。</strong></p>
+<p>开发者只需要在 Prompt
+中预先定义好所有可选路由，并说明每条路由适用于什么场景，然后让 LLM
+根据用户的问题输出对应的路由标签。</p>
+<p>整个流程如下：</p>
+<ol type="1">
+<li>定义所有可选的路由（例如数据源、检索器或 Prompt 模板）。</li>
+<li>编写 Prompt，描述每条路由的适用范围。</li>
+<li>将用户问题发送给 LLM。</li>
+<li>LLM 输出对应的路由标签。</li>
+<li>程序根据标签调用相应的检索器或处理链。</li>
+</ol>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704004459713.png"></p>
+<p>这种方式最大的优点是<strong>理解能力强、扩展性高</strong>。由于 LLM
+具备较强的语义理解能力，即使用户的表达方式发生变化，它通常也能够做出正确判断。</p>
+<p>当然，它也存在一定缺点：每次查询都需要额外调用一次
+LLM，因此会增加一定的响应时间和调用成本。</p>
+<p><strong>方法二：基于嵌入相似度的路由（Embedding
+Routing）</strong></p>
+<p>另一种方式是不使用
+LLM，而是直接利用向量相似度完成路由选择，因此延迟更低、成本也更低。</p>
+<p>它的核心思想是：</p>
+<blockquote>
+<p><strong>将每个路由都表示成一段描述文本，然后比较用户问题与这些描述之间的语义相似度。</strong></p>
+</blockquote>
+<p>整个流程如下：</p>
+<ol type="1">
+<li>为每条路由编写一段能够描述其适用场景的文本。</li>
+<li>使用 Embedding 模型将这些描述转换成向量，并提前保存。</li>
+<li>用户查询到来后，同样计算其向量表示。</li>
+<li>计算<strong>查询向量</strong>与<strong>各路由向量</strong>之间的相似度。</li>
+<li>选择相似度最高的路由，并执行对应的处理流程。</li>
+</ol>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704010548463.png"></p>
+<p>这种方式无需调用
+LLM，因此速度更快，非常适合对实时性要求较高的场景。</p>
+<p>不过，它的分类能力通常受限于 Embedding
+模型本身以及路由描述的质量，在面对复杂意图时，一般不如 LLM
+路由灵活。</p>
+<hr>
+<p>本项目使用的是<strong>基于 LLM 的意图识别</strong>。</p>
+<p>项目中的食谱知识库支持多种不同类型的问题，例如：</p>
+<ul>
+<li><strong>list</strong>：仅返回菜名列表；</li>
+<li><strong>detail</strong>：查询某道菜的详细制作方法；</li>
+<li><strong>general</strong>：咨询与食谱相关的一般性问题。</li>
+</ul>
+<p>不同类型的问题会使用<strong>不同的 Prompt
+模板</strong>以及对应的检索流程。</p>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704020855566.png" style="zoom:80%;"></p>
+<p>因此，在真正开始检索之前，系统会首先调用 LLM
+对用户问题进行分类，判断其属于 <code>list</code>、<code>detail</code>
+还是
+<code>general</code>，然后再将查询分发到对应的处理链，最终完成后续的 RAG
+检索与回答生成。</p>
+<h3 id="查询重写query-transformation">3.2 查询重写（Query
+Transformation）</h3>
+<p>经过查询路由之后，用户的问题已经被分发到了对应的检索链路。但此时，系统通常<strong>不会立即开始检索</strong>，而是会先对用户的
+<code>query</code> 进行一次<strong>查询重写（Query
+Transformation）</strong>（原文中称为<strong>查询翻译（Query
+Translation）</strong>）。</p>
+<p>需要说明的是，查询重写并不一定发生在路由之后，它也可以发生在路由之前。例如，在前面介绍的<strong>基于嵌入相似度的路由（Embedding
+Routing）</strong>中，为了获得更加准确的路由结果，也可以先对查询进行重写，再计算其向量表示。</p>
+<p>查询重写的目标只有一个：</p>
+<blockquote>
+<p><strong>弥合用户自然语言与知识库文档之间的语义鸿沟（Semantic
+Gap）。</strong></p>
+</blockquote>
+<p>现实中的用户提问通常存在以下特点：</p>
+<ul>
+<li>表达过于简短；</li>
+<li>省略了大量上下文；</li>
+<li>使用口语化表达；</li>
+<li>一个问题中包含多个子问题；</li>
+<li>使用知识库中不存在的术语。</li>
+</ul>
+<p>而知识库中的文档往往具有更加正式、完整、结构化的表达方式。</p>
+<p>如果直接拿原始 Query
+去检索，很可能无法找到真正相关的文档。因此，在检索之前，通常会先利用 LLM
+对 Query
+进行优化，使其更加符合知识库中的表达形式，从而提升召回率和检索准确率。</p>
+<h4 id="方法一基于-prompt-的查询重写">方法一：基于 Prompt
+的查询重写</h4>
+<p>这是目前最常见，也是实现成本最低的一种方法。</p>
+<p>核心思想十分简单：<strong>利用 Prompt 引导 LLM
+对用户的问题进行重新表达。</strong></p>
+<p>根据不同的需求，Prompt 可以设计成多种不同的重写方式，例如：</p>
+<p><strong>（1）补充问题细节</strong></p>
+<p>用户的问题往往十分简短，而 LLM 可以根据语义补充必要的信息，使 Query
+更加完整。</p>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">用户：</span><br><span class="line">介绍 Transformer</span><br><span class="line"></span><br><span class="line">重写后：</span><br><span class="line">请详细介绍 Transformer 模型的基本结构、Self-Attention 机制、Encoder 与 Decoder 的组成，以及它相较于 RNN 的优势。</span><br></pre></td></tr></table></figure>
+<p>这样生成的 Query 通常能够匹配到更多相关文档。</p>
+<p><strong>（2）查询分解（Query Decomposition）</strong></p>
+<p>有些问题实际上包含多个子问题，一次检索很难覆盖全部内容。</p>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Qwen3 和 DeepSeek-R1 有什么区别？各自适用于哪些场景？</span><br></pre></td></tr></table></figure>
+<p>可以重写为：</p>
+<ul>
+<li>Qwen3 的主要特点是什么？</li>
+<li>DeepSeek-R1 的主要特点是什么？</li>
+<li>两者有哪些区别？</li>
+<li>两者分别适用于哪些应用场景？</li>
+</ul>
+<p>随后分别检索，再合并结果。</p>
+<p>这种方法尤其适用于复杂问答（Complex QA）。</p>
+<p><strong>（3）查询扩展（Query Expansion）</strong></p>
+<p>有时候，用户使用的关键词与知识库中的表达方式并不一致。</p>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">微调</span><br></pre></td></tr></table></figure>
+<p>可以扩展为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">模型微调、Fine-tuning、SFT、Supervised Fine-Tuning、Instruction Tuning</span><br></pre></td></tr></table></figure>
+<p>通过增加同义词、近义词、专业术语等关键词，可以提高文档的召回率。</p>
+<p><strong>（4）生成结构化查询（Structured Query
+Generation）</strong></p>
+<p>对于结构化数据源，LLM
+还可以将用户的自然语言直接转换为数据库能够执行的查询语句，而不是继续进行文本检索。</p>
+<p>例如，假设系统连接的是一个 MySQL 数据库，其中存储着商品信息。</p>
+<p>用户提出问题：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">价格低于 100 元且销量最高的耳机有哪些？</span><br></pre></td></tr></table></figure>
+<p>LLM 可以先将其转换为对应的 SQL 语句：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT *</span><br><span class="line">FROM products</span><br><span class="line">WHERE price &lt; 100</span><br><span class="line">ORDER BY sales DESC;</span><br></pre></td></tr></table></figure>
+<p>随后，系统直接执行该 SQL，并返回查询结果。</p>
+<p>需要注意的是，这里的检索与 RAG 中常见的<strong>向量检索（Vector
+Retrieval）</strong>完全不同。</p>
+<p>这里查询的是<strong>传统关系型数据库（如
+MySQL、PostgreSQL）</strong>，执行的是 SQL
+查询，依赖的是数据库的索引、过滤条件以及排序等能力；而向量检索则是在向量数据库中，根据向量之间的相似度（如余弦相似度、欧氏距离等）寻找语义最接近的文档。</p>
+<p>因此，生成结构化查询更适用于具有明确结构的数据源，例如：</p>
+<ul>
+<li>MySQL、PostgreSQL 等关系型数据库；</li>
+<li>Neo4j 等图数据库（生成 Cypher 语句）；</li>
+<li>Elasticsearch（生成 DSL 查询）；</li>
+<li>各类提供 REST API 的业务系统（生成对应的请求参数）。</li>
+</ul>
+<p>这种方式本质上属于
+<strong>Text-to-SQL</strong>、<strong>Text-to-Cypher</strong>
+等自然语言到结构化查询的转换，而不是传统意义上的语义相似度检索。</p>
+<hr>
+<p>本项目中，仅对经过 <code>detail</code> 路由的 Query
+执行查询重写，所使用的 Prompt 如下图所示。</p>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704021215540.png" style="zoom:80%;"></p>
+<hr>
+<h4 id="方法二hydehypothetical-document-embeddings">方法二：HyDE（Hypothetical
+Document Embeddings）</h4>
+<p>另一种经典的查询改写方法是 <strong>HyDE（Hypothetical Document
+Embeddings，假设性文档嵌入）</strong>。</p>
+<p>HyDE 由 <strong>Luyu Gao</strong>
+等人在论文中提出，是一种<strong>无需微调模型即可提升向量检索效果</strong>的方法。</p>
+<p>它主要解决的是向量检索中的一个典型问题：</p>
+<blockquote>
+<p><strong>用户的 Query
+往往非常短，而知识库中的文档却十分完整，两者在向量空间中的语义分布存在较大的差距。</strong></p>
+</blockquote>
+<p>例如，用户可能只输入一句：</p>
+<blockquote>
+<p>Transformer 为什么比 RNN 好？</p>
+</blockquote>
+<p>但知识库中的文档却可能包含数百甚至数千字，对 Transformer
+的背景、结构、优势等进行了完整介绍。</p>
+<p>直接使用这句 Query 计算向量，往往无法准确定位到真正相关的文档。</p>
+<p>HyDE 的思路非常巧妙：</p>
+<p>它<strong>不直接使用 Query 去检索</strong>，而是先让 LLM
+<strong>生成一篇"假设已经回答了该问题"的文档</strong>，然后再利用这篇假设文档进行向量检索。</p>
+<p>这样，就把原本困难的：</p>
+<blockquote>
+<p><strong>Query → Document</strong></p>
+</blockquote>
+<p>匹配问题，</p>
+<p>转化为了更加容易的：</p>
+<blockquote>
+<p><strong>Document → Document</strong></p>
+</blockquote>
+<p>匹配问题。</p>
+<p>由于两侧都是完整的文档，因此向量空间中的语义分布更加接近，检索效果通常会更好。</p>
+<p>HyDE 的整体流程如下：</p>
+<ol type="1">
+<li><p><strong>生成（Generate）</strong></p>
+<p>将用户 Query 输入给生成式
+LLM，让模型生成一篇能够回答该问题的"假设性文档"。这篇文档不要求完全真实，但必须与理想答案保持较高的语义一致性。</p></li>
+<li><p><strong>编码（Embed）</strong></p>
+<p>使用 Embedding
+模型对这篇假设文档进行向量化，得到其语义表示。</p></li>
+<li><p><strong>检索（Retrieve）</strong></p>
+<p>使用该向量在向量数据库中进行相似度搜索，找到与这篇假设文档最接近的真实文档。</p></li>
+</ol>
+<p>最终，系统将检索到的真实文档作为 RAG 的上下文，交给后续的 LLM
+生成回答。</p>
+<p>相比直接对 Query 进行向量检索，HyDE
+往往能够获得更高的召回率，尤其适用于用户问题较短、语义信息不足的场景。不过，它也需要额外调用一次
+LLM
+来生成假设文档，因此会带来一定的时间和计算成本。在实际项目中，需要根据检索效果与系统性能之间的权衡决定是否采用。</p>
+<h2 id="构建上下文并生成回答">3.3 构建上下文并生成回答</h2>
+<p>经过检索后，搜索引擎会返回与用户问题最相关的 <strong>Top-K</strong>
+个结果。这些结果可以是文档片段（Chunk），也可以是完整文档（Document），具体取决于知识库的组织方式以及检索策略。</p>
+<p>随后，RAG
+会将这些检索结果作为<strong>上下文（Context）</strong>，与用户的原始问题共同构造成
+Prompt，并发送给 LLM，由模型生成最终回答。</p>
+<p>如下图所示：</p>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704020516342.png" style="zoom:80%;"></p>
+<p>从整个流程可以看出，<strong>RAG
+并不负责生成答案</strong>，它的职责只是从外部知识库中检索出与问题相关的信息，并将这些信息作为上下文提供给
+LLM。真正完成理解、推理以及回答生成工作的，始终是大语言模型本身。</p>
+<p>因此，可以将 RAG 理解为 LLM
+的一个<strong>外部知识提供者</strong>。它通过动态检索外部知识，弥补模型参数中知识有限、知识过时等问题，使模型能够基于最新、最相关的信息生成更加准确、更加可靠的回答。</p>
+<p>当然，检索返回的文档数量（Top-K）也是一个需要权衡的参数。K
+值过小，可能遗漏关键知识，导致回答信息不足；K
+值过大，则可能引入大量无关内容，不仅增加 Token
+消耗，还可能使模型受到无关上下文的干扰。因此，在实际项目中，通常需要结合知识库规模、文档长度以及模型上下文窗口大小，对
+Top-K 参数进行调优。</p>
+<hr>
+<h4 id="本项目中的回答生成">本项目中的回答生成</h4>
+<p>前面介绍查询路由时提到，本项目将用户问题划分为三种类型：</p>
+<ul>
+<li><strong>list</strong>：菜谱列表查询；</li>
+<li><strong>detail</strong>：菜谱详情查询；</li>
+<li><strong>general</strong>：一般性问答。</li>
+</ul>
+<p>不同类型的问题，在获得检索结果后，会采用不同的处理方式。</p>
+<p><strong>（1）List 模式</strong></p>
+<p>对于 <strong>list</strong> 类型的问题，并不需要 LLM 参与生成。</p>
+<p>系统会直接从检索结果中提取符合条件的菜名，并组成列表返回给用户。这种方式不仅响应速度更快，还能够避免
+LLM 在生成过程中产生幻觉（Hallucination）。</p>
+<p>如下图所示：</p>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704021844554.png"></p>
+<p><strong>（2）Detail 模式</strong></p>
+<p>对于 <strong>detail</strong>
+类型的问题，则需要将检索得到的相关文档填充到对应的 Prompt 模板中，再交由
+LLM 生成回答。</p>
+<p>为了保证回答格式统一、内容完整，本项目采用了结构化
+Prompt，对回答内容进行了明确约束，例如要求模型按照菜品介绍、所需食材、制作步骤、注意事项等固定结构进行输出，从而提升回答的规范性、可读性以及实用性。</p>
+<p>对应的 Prompt 模板如下：</p>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704021923875.png"></p>
+<p><strong>（3）General 模式</strong></p>
+<p>对于 <strong>general</strong> 类型的问题，其处理方式与
+<strong>detail</strong> 基本一致，同样会将检索得到的上下文填充到对应的
+Prompt 模板中，再交由 LLM 进行回答生成。不同之处在于，两者使用的 Prompt
+模板不同：<strong>detail</strong>
+更侧重于生成结构化、步骤清晰的菜谱内容，而 <strong>general</strong>
+则更适用于开放式的食谱相关问答。</p>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6/image-20260704022354098.png"></p>
+<h2 id="小结">4. 小结</h2>
+<p>本章节主要介绍了 RAG
+的基本概念、整体工作流程，以及检索引擎之外的关键技术，包括查询路由（Query
+Routing）、查询重写（Query Transformation）和回答生成等内容。</p>
+<p>通过这些模块可以看到，RAG 并不仅仅是"检索 +
+LLM"这么简单，而是由多个环节协同工作，共同提升最终回答的准确性与可靠性。</p>
+<p>下一章节将聚焦于 <strong>RAG 检索引擎</strong>
+本身，详细介绍其内部实现，包括文档切分、向量化、向量数据库、检索策略等核心技术，进一步理解
+RAG 是如何从知识库中高效、准确地检索出相关信息的。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM/" rel="tag"># 从零开始的LLM</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/%E7%AC%AC6%E8%8A%82/" rel="tag"># 第6节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/06/22/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-5/" rel="prev" title="从零开始的LLM 5.智能体经典范式构建">
+                  <i class="fa fa-angle-left"></i> 从零开始的LLM 5.智能体经典范式构建
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/" rel="next" title="从零开始的LLM-6_2">
+                  从零开始的LLM-6_2 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
