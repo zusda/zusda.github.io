@@ -46,25 +46,39 @@
 
 
 
-    <meta property="og:type" content="article">
-<meta property="og:title" content="从零开始的LLM-6_2">
+    <meta name="description" content="前言 从零开始学习ai文章系列已完成《动手学深度学习》和《磨菇书》两本书的学习，新开的LLM系列课本来自《Happy-LLM》和《Hello-Agents》和 《all-in-rag》，但是内容和排版等个人重新进行整理，因此不会按照原来课本中的章节来写。如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的LLM 6. RAG（检索增强生成）(二)">
 <meta property="og:url" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 从零开始学习ai文章系列已完成《动手学深度学习》和《磨菇书》两本书的学习，新开的LLM系列课本来自《Happy-LLM》和《Hello-Agents》和 《all-in-rag》，但是内容和排版等个人重新进行整理，因此不会按照原来课本中的章节来写。如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704033153946.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704040338453.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704043525228.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704043540167.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704041115368.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704041214583.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704211700168.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704212644536.png">
 <meta property="article:published_time" content="2026-07-03T18:29:05.000Z">
-<meta property="article:modified_time" content="2026-07-03T18:29:05.158Z">
+<meta property="article:modified_time" content="2026-07-04T13:35:07.751Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="从零开始的LLM">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="第6节">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704033153946.png">
 
 
 <link rel="canonical" href="https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/","path":"2026/07/04/从零开始的LLM-6-2/","title":"从零开始的LLM-6_2"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/","path":"2026/07/04/从零开始的LLM-6-2/","title":"从零开始的LLM 6. RAG（检索增强生成）(二)"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>从零开始的LLM-6_2 | Hexo</title>
+<title>从零开始的LLM 6. RAG（检索增强生成）(二) | Hexo</title>
   
 
 
@@ -154,7 +168,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -167,6 +181,10 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rag-%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">1. RAG 搜索引擎整体流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87"><span class="nav-number">3.</span> <span class="nav-text">2. 数据准备</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BDdocument-loading"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 数据加载（Document Loading）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E6%96%87%E6%A1%A3%E5%8A%A0%E8%BD%BD%E5%B7%A5%E5%85%B7"><span class="nav-number">3.2.</span> <span class="nav-text">常见的文档加载工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%9C%AC%E5%88%86%E5%9D%97"><span class="nav-number">3.3.</span> <span class="nav-text">2.2 文本分块</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%96%87%E6%9C%AC%E5%88%86%E5%9D%97"><span class="nav-number">3.3.1.</span> <span class="nav-text">2.2.1 为什么需要文本分块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-chunk-%E4%B8%8D%E6%98%AF%E8%B6%8A%E5%A4%A7%E8%B6%8A%E5%A5%BD"><span class="nav-number">3.3.2.</span> <span class="nav-text">2.2.2 为什么 Chunk 不是越大越好</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E6%96%87%E6%9C%AC%E5%88%86%E5%9D%97%E7%AD%96%E7%95%A5"><span class="nav-number">3.3.3.</span> <span class="nav-text">2.2.3 常见文本分块策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%AC%E9%A1%B9%E7%9B%AE%E4%B8%AD%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.3.4.</span> <span class="nav-text">2.2.4 本项目中的实现</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E6%9C%AC%E5%90%91%E9%87%8F%E5%8C%96embedding"><span class="nav-number">4.</span> <span class="nav-text">3. 文本向量化（Embedding）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-embedding"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 什么是 Embedding</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#embedding-%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5"><span class="nav-number">4.1.1.</span> <span class="nav-text">3.1.1 Embedding 基础概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4%E4%B8%AD%E7%9A%84%E8%AF%AD%E4%B9%89%E8%A1%A8%E7%A4%BA"><span class="nav-number">4.1.2.</span> <span class="nav-text">3.1.2 向量空间中的语义表示</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9-embedding-%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 如何选择 Embedding 模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91%E9%87%8F%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 向量数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%9C%AC%E5%90%91%E9%87%8F%E5%8C%96"><span class="nav-number">4.4.</span> <span class="nav-text">3.4 文本向量化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E6%A8%A1%E6%80%81-embedding"><span class="nav-number">5.</span> <span class="nav-text">3.5 多模态 Embedding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%91%E9%87%8F%E7%B4%A2%E5%BC%95"><span class="nav-number">6.</span> <span class="nav-text">3.6 向量索引</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%90%91%E9%87%8F%E7%B4%A2%E5%BC%95"><span class="nav-number">6.1.</span> <span class="nav-text">3.6.1 为什么需要向量索引</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E5%90%91%E9%87%8F%E7%B4%A2%E5%BC%95"><span class="nav-number">6.1.1.</span> <span class="nav-text">3.6.2 常见向量索引</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E7%B4%A2%E5%BC%95"><span class="nav-number">6.2.</span> <span class="nav-text">3.6.3 如何选择索引</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2"><span class="nav-number">7.</span> <span class="nav-text">4. 向量检索</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2ann-search"><span class="nav-number">7.1.</span> <span class="nav-text">4.1 基础向量检索（ANN Search）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A2%9E%E5%BC%BA%E6%A3%80%E7%B4%A2"><span class="nav-number">7.2.</span> <span class="nav-text">4.2 增强检索</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%87%E6%BB%A4%E6%A3%80%E7%B4%A2filtered-search"><span class="nav-number">7.2.1.</span> <span class="nav-text">4.2.1 过滤检索（Filtered Search）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8C%83%E5%9B%B4%E6%A3%80%E7%B4%A2range-search"><span class="nav-number">7.2.2.</span> <span class="nav-text">4.2.2 范围检索（Range Search）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2hybrid-search"><span class="nav-number">7.2.3.</span> <span class="nav-text">4.2.3 混合检索（Hybrid Search）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E7%BB%84%E6%A3%80%E7%B4%A2grouping-search"><span class="nav-number">7.2.4.</span> <span class="nav-text">4.2.4 分组检索（Grouping Search）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E9%A1%B9%E7%9B%AEdense-sparse-%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2"><span class="nav-number">7.3.</span> <span class="nav-text">4.3 本项目：Dense + Sparse
+混合检索</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E7%A8%80%E7%96%8F%E5%90%91%E9%87%8Fsparse-vector"><span class="nav-number">7.3.1.</span> <span class="nav-text">4.3.1 什么是稀疏向量（Sparse
+Vector）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2"><span class="nav-number">7.3.2.</span> <span class="nav-text">4.3.2 为什么需要混合检索？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#rrfreciprocal-rank-fusion"><span class="nav-number">7.3.3.</span> <span class="nav-text">4.3.3 RRF（Reciprocal Rank
+Fusion）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2%E5%B9%B6%E4%B8%8D%E6%98%AF%E4%B8%87%E8%83%BD%E7%9A%84"><span class="nav-number">7.3.4.</span> <span class="nav-text">4.3.4 混合检索并不是万能的</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A3%80%E7%B4%A2%E7%BB%93%E6%9E%9C%E4%BC%98%E5%8C%96"><span class="nav-number">8.</span> <span class="nav-text">5. 检索结果优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E4%B8%8A%E4%B8%8B%E6%96%87%E6%89%A9%E5%B1%95"><span class="nav-number">8.1.</span> <span class="nav-text">5.1 为什么需要上下文扩展？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sentence-window-retrieval"><span class="nav-number">8.2.</span> <span class="nav-text">5.2 Sentence Window Retrieval</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#chunk-doc-%E8%BD%AC%E6%8D%A2"><span class="nav-number">8.3.</span> <span class="nav-text">5.3 Chunk → Doc 转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E8%AE%BE%E8%AE%A1"><span class="nav-number">8.4.</span> <span class="nav-text">5.4 元数据设计</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">9.</span> <span class="nav-text">6. 总结</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -230,12 +248,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="从零开始的LLM-6_2 | Hexo">
+      <meta itemprop="name" content="从零开始的LLM 6. RAG（检索增强生成）(二) | Hexo">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          从零开始的LLM-6_2
+          从零开始的LLM 6. RAG（检索增强生成）(二)
         </h1>
 
         <div class="post-meta-container">
@@ -245,8 +263,9 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2026-07-04 02:29:05" itemprop="dateCreated datePublished" datetime="2026-07-04T02:29:05+08:00">2026-07-04</time>
+      <time title="创建时间：2026-07-04 02:29:05 / 修改时间：21:35:07" itemprop="dateCreated datePublished" datetime="2026-07-04T02:29:05+08:00">2026-07-04</time>
     </span>
 
   
@@ -258,7 +277,974 @@
     
     
     
-    <div class="post-body" itemprop="articleBody">
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>从零开始学习ai文章系列已完成《动手学深度学习》和《磨菇书》两本书的学习，新开的LLM系列课本来自《<a target="_blank" rel="noopener" href="https://datawhalechina.github.io/happy-llm/">Happy-LLM</a>》和《<a target="_blank" rel="noopener" href="https://hello-agents.datawhale.cc/#/">Hello-Agents</a>》和 《<a target="_blank" rel="noopener" href="https://github.com/datawhalechina/all-in-rag">all-in-rag</a>》，但是内容和排版等个人重新进行整理，因此不会按照原来课本中的章节来写。如果哪里有错误的欢迎指正。或者不清晰的可以直接查看原文部分。</p>
+<span id="more"></span>
+<p>由于 RAG 部分内容较多，单篇草稿已超过 1.4
+万字，因此将拆分为上下两篇进行介绍。</p>
+<p>整体内容基于对 <strong>all-in-rag</strong> 项目的学习与实践总结。</p>
+<p>接下来，文章将以原项目中的 <strong>“第八章：项目实战一”</strong>
+为主线，从整体流程入手，再逐步深入到各个模块的实现细节。</p>
+<ul>
+<li><strong>篇章一</strong>：主要介绍 RAG
+搜索引擎之外的内容，包括整体流程、系统架构以及各模块的作用等概述性内容。</li>
+<li><strong>篇章二</strong>：重点讲解 RAG
+搜索引擎的具体实现，以及其中涉及的关键技术与实现细节。</li>
+</ul>
+<hr>
+<h2 id="rag-搜索引擎整体流程">1. RAG 搜索引擎整体流程</h2>
+<p>上一章节，我们介绍了 RAG
+的整体工作流程，包括查询路由、查询重写、检索以及回答生成等内容。</p>
+<p>这一章节开始，我们将重点研究 <strong>RAG 搜索引擎</strong>
+本身，看看它是如何将海量文档组织起来，并能够在用户提问时快速找到最相关内容的。</p>
+<p>从整体来看，一个 RAG 搜索引擎主要可以分为两个阶段：</p>
+<ol type="1">
+<li><strong>数据准备（Offline）</strong></li>
+<li><strong>在线检索（Online）</strong></li>
+</ol>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704033153946.png"></p>
+<p>可以看到，整个搜索引擎实际上包含两个相互独立的阶段。</p>
+<p>第一阶段是<strong>数据准备</strong>。这一阶段通常在系统上线之前完成，其目的是将各种原始数据转换成适合检索的形式。</p>
+<p>例如：</p>
+<ul>
+<li>文本、Markdown、PDF
+等文档会先进行解析，然后切分成多个文档片段（Chunk）；</li>
+<li>图片或图文混合数据则会使用对应的多模态 Embedding
+模型进行向量化；</li>
+<li>每个 Chunk 都会通过 Embedding
+模型转换成一个高维向量（Vector），并与对应的元数据（Metadata）一起存入向量数据库。</li>
+</ul>
+<p>需要注意的是，此时数据库中仅仅保存了一批向量，并不能高效地完成相似度搜索。</p>
+<p>因此，还需要进一步<strong>构建向量索引（Vector Index）</strong>。</p>
+<p>索引可以理解为向量数据库中的"目录"或"导航结构"，它负责按照一定规则组织这些向量，使系统能够在海量数据中快速找到与查询最相似的内容，而无需逐个比较所有向量。</p>
+<p>目前主流的向量数据库（例如 Milvus）提供了多种索引算法，例如：</p>
+<ul>
+<li><strong>FLAT</strong>：暴力搜索，逐个计算所有向量之间的距离，结果最准确，但速度最慢；</li>
+<li><strong>IVF（Inverted
+File）</strong>：先将向量聚类，再在相关聚类中进行搜索，大幅提升检索效率；</li>
+<li><strong>HNSW（Hierarchical Navigable Small
+World）</strong>：基于图结构构建索引，是目前应用最广泛的高性能近似最近邻（ANN）算法之一。</li>
+</ul>
+<p>完成数据准备之后，系统便可以进入第二阶段——<strong>在线检索</strong>。</p>
+<p>当用户提出问题时，系统首先使用与知识库相同的 Embedding 模型，将 Query
+转换为向量表示。随后，在已经构建好索引的向量数据库中进行相似度搜索，快速找到最相关的
+Top-K 个文档，并返回给后续的 RAG 流程。</p>
+<p>本章后续内容也将围绕这两个阶段展开：</p>
+<ul>
+<li><strong>第一部分：数据准备</strong>——介绍文档解析、文本切块（Chunking）、Embedding
+向量化以及向量数据库的存储方式。</li>
+<li><strong>第二部分：索引构建与检索</strong>——介绍向量索引的基本原理，以及向量数据库如何利用索引完成高效检索，包括各种索引算法及常见检索策略等内容。</li>
+</ul>
+<h2 id="数据准备">2. 数据准备</h2>
+<p>在 RAG 中，数据准备（Data
+Preparation）是整个检索流程的基础。只有将原始数据整理成适合检索的形式，后续才能完成向量化、索引构建以及相似度搜索。</p>
+<p>通常来说，数据准备主要包括两个步骤：</p>
+<ol type="1">
+<li><strong>数据加载（Document Loading）</strong></li>
+<li><strong>文本分块（Text Chunking）</strong></li>
+</ol>
+<p>需要说明的是，RAG 的数据并不仅限于文本。</p>
+<p>目前主流的数据类型主要有两类：</p>
+<ul>
+<li><strong>文本（Text）</strong>：包括 PDF、Word、Markdown、HTML、TXT
+等各种文档，是目前最常见的数据来源。</li>
+<li><strong>图像（Image）</strong>：借助多模态 Embedding
+模型，可以直接将图片编码为向量，用于图片检索或图文混合检索。</li>
+</ul>
+<p>至于视频，虽然近年来也出现了不少 Video RAG
+相关工作，但由于视频数据量大、时序信息复杂，目前整体仍处于发展阶段，尚未像文本
+RAG 那样成熟，因此本文主要围绕文本数据展开。</p>
+<p>对于<strong>文本数据</strong>，一般都需要先进行<strong>文本分块（Chunking）</strong>；而<strong>图像</strong>通常可以<strong>直接通过多模态
+Embedding
+模型生成向量</strong>。当然，如果图片分辨率较高、内容复杂，也可以先切分为多个区域，再分别进行向量化。</p>
+<h3 id="数据加载document-loading">2.1 数据加载（Document Loading）</h3>
+<p>数据加载的目标，是将各种格式的原始文档转换为程序能够统一处理的数据结构。</p>
+<p>现实中的知识库通常包含多种文件格式，例如：</p>
+<ul>
+<li>PDF</li>
+<li>Word</li>
+<li>Markdown</li>
+<li>HTML</li>
+<li>TXT</li>
+<li>网页</li>
+<li>...</li>
+</ul>
+<p>这些格式各不相同，因此需要借助<strong>文档加载器（Document
+Loader）</strong>进行统一解析。</p>
+<p>一般来说，一个文档加载器需要完成三个核心任务：</p>
+<ol type="1">
+<li><strong>解析文档内容</strong>：将 PDF、Word、Markdown
+等不同格式转换为可处理的文本内容。</li>
+<li><strong>提取元数据（Metadata）</strong>：例如文档来源、文件名、页码、作者等信息，为后续检索提供辅助信息。</li>
+<li><strong>统一数据结构</strong>：将文本内容与元数据封装成统一的数据对象，方便后续进行文本切块、向量化以及存入向量数据库。</li>
+</ol>
+<p>整个过程与传统数据工程中的
+<strong>ETL（Extract、Transform、Load）</strong>
+十分相似，其目标都是将杂乱无章的原始数据整理成统一、规范的数据格式。</p>
+<h3 id="常见的文档加载工具">常见的文档加载工具</h3>
+<p>目前 RAG
+生态中已经出现了许多成熟的文档加载工具，不同工具各有侧重点。</p>
+<p>侧重点。</p>
+<table>
+<colgroup>
+<col style="width: 22%">
+<col style="width: 51%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr>
+<th>工具名称</th>
+<th>特点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PyMuPDF4LLM</td>
+<td>PDF 转 Markdown，支持 OCR、表格识别</td>
+<td>科研论文、技术文档</td>
+</tr>
+<tr>
+<td>TextLoader</td>
+<td>读取纯文本文件</td>
+<td>TXT、Markdown</td>
+</tr>
+<tr>
+<td>DirectoryLoader</td>
+<td>批量加载目录</td>
+<td>混合文档管理</td>
+</tr>
+<tr>
+<td>Unstructured</td>
+<td>多格式统一解析</td>
+<td>PDF、Word、HTML 等</td>
+</tr>
+<tr>
+<td>FireCrawlLoader</td>
+<td>网页内容抓取</td>
+<td>在线文档、新闻</td>
+</tr>
+<tr>
+<td>LlamaParse</td>
+<td>深度 PDF 结构解析</td>
+<td>学术论文、法律合同</td>
+</tr>
+<tr>
+<td>Docling</td>
+<td>企业级文档解析</td>
+<td>报告、合同</td>
+</tr>
+<tr>
+<td>Marker</td>
+<td>PDF 转 Markdown</td>
+<td>书籍、论文</td>
+</tr>
+<tr>
+<td>MinerU</td>
+<td>多模态文档解析</td>
+<td>学术论文、财务报表</td>
+</tr>
+</tbody>
+</table>
+<p>可以看到，不同工具之间最大的区别主要体现在<strong>支持的文档格式</strong>以及<strong>解析精度</strong>上。例如，有些工具更加擅长
+OCR，有些则专注于 PDF 的版面恢复，还有一些支持网页抓取或表格识别。</p>
+<hr>
+<p><strong>本项目中的实现</strong></p>
+<p>本项目的数据源是一组 Markdown 格式的食谱文件，不涉及
+PDF、图片或复杂排版，因此无需使用专门的文档解析工具，直接读取文本内容即可：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(md_file, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    content = f.read()</span><br></pre></td></tr></table></figure>
+<p>读取文本后，还需要为文档添加对应的<strong>元数据（Metadata）</strong>。</p>
+<p>元数据用于描述文档本身，而不是文档内容。例如：</p>
+<ul>
+<li>文档来源（Source）</li>
+<li>文件路径</li>
+<li>文件名</li>
+<li>文档 ID</li>
+<li>文档类型</li>
+<li>页码（如果有）</li>
+</ul>
+<p>这些信息虽然不会参与
+Embedding，但在后续检索、过滤、溯源以及父子文档关联等场景中都具有重要作用。</p>
+<p>因此，本项目将<strong>文本内容</strong>与<strong>元数据</strong>一起封装为一个
+<code>Document</code> 对象：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">doc = Document(</span><br><span class="line">    page_content=content,</span><br><span class="line">    metadata=&#123;</span><br><span class="line">        <span class="string">&quot;source&quot;</span>: <span class="built_in">str</span>(md_file),</span><br><span class="line">        <span class="string">&quot;parent_id&quot;</span>: parent_id,</span><br><span class="line">        <span class="string">&quot;doc_type&quot;</span>: <span class="string">&quot;parent&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>至此，一份原始 Markdown
+文档便完成了加载，并被转换为统一的数据结构，为下一步的<strong>文本分块（Chunking）</strong>做好准备。</p>
+<h3 id="文本分块">2.2 文本分块</h3>
+<blockquote>
+<p>原文：<a target="_blank" rel="noopener" href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter2/05_text_chunking.md">文本分块</a></p>
+</blockquote>
+<p>完成文档加载后，下一步就是<strong>文本分块（Text
+Chunking）</strong>。</p>
+<p>文本分块是 RAG
+数据准备阶段中最重要的环节之一，其目标是将一篇完整文档拆分成多个较小且语义完整的文本块（Chunk），便于后续进行向量化、索引构建以及相似度检索。</p>
+<h4 id="为什么需要文本分块">2.2.1 为什么需要文本分块</h4>
+<p>文本分块最直接的原因，是为了适应 RAG
+系统中两个核心组件的输入限制：</p>
+<ul>
+<li><strong>Embedding 模型（Embedding
+Model）</strong>：负责将文本转换为向量。这类模型通常都有固定的最大输入长度，无法一次处理整篇文档。</li>
+<li><strong>大语言模型（LLM）</strong>：负责根据检索得到的上下文生成回答，同样受到上下文窗口（Context
+Window）的限制，无法无限制地接收检索结果。</li>
+</ul>
+<p>因此，一篇较长的文档必须先切分成多个较小的
+Chunk，再分别进行向量化并存入向量数据库。</p>
+<blockquote>
+<p>需要说明的是，文本分块主要针对<strong>文本数据</strong>。</p>
+<p>对于图片等多模态数据，通常可以直接利用多模态 Embedding
+模型生成向量，而无需进行切块。当然，对于分辨率较高、内容较复杂的大幅图片，也可以先划分为多个区域，再分别进行向量化，以获得更细粒度的检索效果。</p>
+</blockquote>
+<h4 id="为什么-chunk-不是越大越好">2.2.2 为什么 Chunk 不是越大越好</h4>
+<p>很多初学者都会产生一个疑问：</p>
+<blockquote>
+<p><strong>既然 Embedding 模型最多能够处理数千个
+Token，为什么不直接将每个 Chunk 切到接近最大长度？</strong></p>
+</blockquote>
+<p>答案是否定的。</p>
+<p>虽然大多数 Embedding 模型都基于
+Transformer，但最终都会将整段文本压缩为<strong>一个固定维度的向量</strong>（例如
+768 维或 1024 维）。通常采用 <strong>[CLS] 向量</strong> 或 <strong>Mean
+Pooling</strong> 等方式，将所有 Token
+的信息聚合为一个向量，用于表示整个文本块的语义。</p>
+<p>这意味着，<strong>无论输入几十个 Token 还是几千个
+Token，最终都只能得到一个向量。</strong></p>
+<p><strong>文本越长</strong>，一个向量需要表达的<strong>语义信息就越多</strong>，<strong>信息不可避免地会被压缩和稀释</strong>，从而导致向量表示更加笼统，降低检索精度。</p>
+<p>除此之外，一个优秀的 Chunk
+应当尽可能只围绕<strong>一个主题（Topic）</strong>展开。</p>
+<p>例如，一篇关于《王者荣耀》中鲁班七号的攻略文档，可以包含以下三个部分：</p>
+<ul>
+<li>技能介绍</li>
+<li>推荐出装</li>
+<li>背景故事</li>
+</ul>
+<p>如果将三部分内容全部放入同一个
+Chunk，那么当用户查询"鲁班七号怎么出装？"时，这个 Chunk
+虽然包含了答案，但由于同时混杂了大量技能介绍和背景故事，其整体语义会被严重稀释，从而降低检索相关性。</p>
+<p>相反，如果将三个主题分别切分为三个
+Chunk，那么"推荐出装"这一块将与用户问题高度匹配，更容易被准确召回。</p>
+<p>因此，文本分块的目标并不仅仅是满足模型输入长度限制，更重要的是在<strong>上下文完整性</strong>与<strong>语义聚焦性</strong>之间取得平衡，从而提升整个
+RAG 系统的检索效果。</p>
+<h4 id="常见文本分块策略">2.2.3 常见文本分块策略</h4>
+<p>目前，RAG 中常见的文本分块策略主要有以下几种。</p>
+<p><strong>（1）固定大小分块（Fixed Chunking）</strong></p>
+<p>固定大小分块是最简单、最常见的一种方式。</p>
+<p>它按照预先设定的 <code>chunk_size</code> 对文本进行切分，并通过
+<code>chunk_overlap</code> 保留相邻 Chunk
+之间的一定重叠内容，以缓解上下文被截断的问题。</p>
+<p>例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">text_splitter = CharacterTextSplitter(</span><br><span class="line">    chunk_size=<span class="number">200</span>,</span><br><span class="line">    chunk_overlap=<span class="number">10</span>,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>这种方式实现简单、速度快、计算开销低，适用于日志、普通文本等结构较弱的数据。</p>
+<p>不过，它主要依据字符数量进行切分，可能会在句子甚至语义边界处截断文本，导致
+Chunk 的语义完整性受到影响。</p>
+<p><strong>（2）递归字符分块（Recursive Chunking）</strong></p>
+<p>递归字符分块是在固定大小分块基础上的进一步优化，也是目前最常用的分块方式之一。</p>
+<p>它不会直接按照固定长度切分，而是按照预设的<strong>分隔符优先级</strong>逐层尝试，例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">段落 → 换行 → 句号 → 逗号 → 空格 → 字符</span><br></pre></td></tr></table></figure>
+<p>如果当前层级切分后的文本仍然超过
+<code>chunk_size</code>，则继续使用下一层级分隔符递归切分，直到满足长度要求。</p>
+<p>例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">text_splitter = RecursiveCharacterTextSplitter(</span><br><span class="line">    separators=[<span class="string">&quot;\n\n&quot;</span>, <span class="string">&quot;\n&quot;</span>, <span class="string">&quot;。&quot;</span>, <span class="string">&quot;，&quot;</span>, <span class="string">&quot; &quot;</span>, <span class="string">&quot;&quot;</span>],</span><br><span class="line">    chunk_size=<span class="number">200</span>,</span><br><span class="line">    chunk_overlap=<span class="number">10</span>,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>相比固定大小分块，它能够尽可能保留完整的段落和句子，使生成的 Chunk
+更符合自然语言的语义结构，因此也是目前 LangChain
+默认推荐的分块方式。</p>
+<p>此外，<code>RecursiveCharacterTextSplitter</code> 还支持针对
+Python、Java、C++
+等编程语言使用专门的分隔规则，从而按照类、函数等代码结构进行切分。</p>
+<blockquote>
+<p><code>CharacterTextSplitter</code> 默认仅使用
+<code>"\n\n"</code>（段落）作为分隔符。当某个段落超过
+<code>chunk_size</code>
+时，它不会继续向更细粒度进行切分，而是直接保留该段落（或发出超长提示）。</p>
+<p>而 <code>RecursiveCharacterTextSplitter</code>
+则允许指定<strong>多级分隔符</strong>，当使用当前分隔符切分后仍然超过
+<code>chunk_size</code>
+时，会继续尝试下一层级分隔符，直到满足长度要求或已经细化到单个字符。</p>
+<p>例如，可以定义如下分隔符优先级：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">separators = [</span><br><span class="line">    <span class="string">&quot;\n\n&quot;</span>,  <span class="comment"># 段落</span></span><br><span class="line">    <span class="string">&quot;\n&quot;</span>,    <span class="comment"># 换行</span></span><br><span class="line">    <span class="string">&quot;。&quot;</span>,     <span class="comment"># 句号</span></span><br><span class="line">    <span class="string">&quot;，&quot;</span>,     <span class="comment"># 逗号</span></span><br><span class="line">    <span class="string">&quot; &quot;</span>,     <span class="comment"># 空格</span></span><br><span class="line">    <span class="string">&quot;&quot;</span>       <span class="comment"># 单个字符</span></span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>其切分顺序可以简单理解为：</p>
+<blockquote>
+<p><strong>段落 → 换行 → 句子 → 短语 → 单词 → 字符</strong></p>
+</blockquote>
+<p>只有当上一层级无法将文本切分到目标大小时，才会继续尝试下一层级，因此能够最大程度保留文本原有的语义结构。</p>
+<p>对于不同语言，分隔符也可以进行相应调整。例如，中文、日文、泰文等没有明显单词边界的语言，通常会加入全角标点、表意标点或零宽空格等分隔符，以获得更加自然的切分效果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">separators = [</span><br><span class="line">    <span class="string">&quot;\n\n&quot;</span>,</span><br><span class="line">    <span class="string">&quot;\n&quot;</span>,</span><br><span class="line">    <span class="string">&quot; &quot;</span>,</span><br><span class="line">    <span class="string">&quot;.&quot;</span>,</span><br><span class="line">    <span class="string">&quot;,&quot;</span>,</span><br><span class="line">    <span class="string">&quot;\u200b&quot;</span>,  <span class="comment"># 零宽空格（泰文、日文等）</span></span><br><span class="line">    <span class="string">&quot;\uff0c&quot;</span>,  <span class="comment"># 全角逗号</span></span><br><span class="line">    <span class="string">&quot;\u3001&quot;</span>,  <span class="comment"># 顿号</span></span><br><span class="line">    <span class="string">&quot;\uff0e&quot;</span>,  <span class="comment"># 全角句号</span></span><br><span class="line">    <span class="string">&quot;\u3002&quot;</span>,  <span class="comment"># 中文句号</span></span><br><span class="line">    <span class="string">&quot;&quot;</span></span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>此外，<code>RecursiveCharacterTextSplitter</code>
+还针对编程语言提供了专门的分隔规则。对于 Python、Java、C++
+等<strong>代码文档</strong>，它会优先按照类、函数、控制语句等代码结构进行切分，而不是简单按照字符长度划分，从而更好地保留代码的逻辑完整性。</p>
+<p>例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">splitter = RecursiveCharacterTextSplitter.from_language(</span><br><span class="line">    language=Language.PYTHON,</span><br><span class="line">    chunk_size=<span class="number">500</span>,</span><br><span class="line">    chunk_overlap=<span class="number">50</span>,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>这种方式尤其适用于代码知识库（Code
+RAG），能够避免将一个完整的函数或类拆分到多个 Chunk
+中，从而提升后续检索和生成的效果。</p>
+</blockquote>
+<p><strong>（3）语义分块（Semantic Chunking）</strong></p>
+<p>前两种方法都依赖字符长度或分隔符，而<strong>语义分块（Semantic
+Chunking）</strong>则直接依据文本语义进行切分。</p>
+<p>其核心思想是：</p>
+<blockquote>
+<p><strong>当文本主题发生明显变化时，就在此处分割。</strong></p>
+</blockquote>
+<p>因此，每个 Chunk
+都具有较高的内部语义一致性，而不是单纯满足长度限制。</p>
+<p>LangChain 提供了 <code>SemanticChunker</code>
+对这一策略进行了实现。</p>
+<p>相比传统分块方式，语义分块通常能够获得更好的检索效果，但由于需要额外计算句子之间的语义相似度，因此计算成本也相对更高。</p>
+<p><strong>（4）基于文档结构的分块（Structure-aware
+Chunking）</strong></p>
+<p>对于 <strong>Markdown、HTML、LaTeX
+等具有明显层级结构的文档</strong>，可以充分利用其标题信息进行分块。</p>
+<p>以 Markdown
+为例，可以利用一级标题、二级标题等结构，将每个章节作为一个独立的逻辑块，再继承对应标题作为元数据。</p>
+<p>LangChain 提供了 <code>MarkdownHeaderTextSplitter</code>
+来实现这一功能。</p>
+<p>不过，仅按照标题切分也存在局限。如果某个章节内容过长，仍然会超过模型的输入限制。</p>
+<p>因此，更推荐采用<strong>两阶段分块策略</strong>：</p>
+<ol type="1">
+<li>首先利用 <code>MarkdownHeaderTextSplitter</code>
+按照标题层级完成逻辑分块；</li>
+<li>再利用 <code>RecursiveCharacterTextSplitter</code>
+对过大的逻辑块继续切分。</li>
+</ol>
+<p>这样既能够<strong>保留文档原有的层级结构，又能够保证最终 Chunk
+的长度符合 Embedding
+模型的要求</strong>，是目前处理结构化文档较为推荐的一种方案。</p>
+<h4 id="本项目中的实现">2.2.4 本项目中的实现</h4>
+<p>本项目仅采用了<strong>基于文档结构的分块策略</strong>，并未进行第二阶段的长度切分。</p>
+<p>这是因为知识库中的每个 Markdown
+食谱文档内容都比较短，按照标题层级完成逻辑分块后，不会出现单个 Chunk
+过长的情况，因此无需再使用 <code>RecursiveCharacterTextSplitter</code>
+对其进行进一步切分。</p>
+<p>因此，本项目直接使用 <code>MarkdownHeaderTextSplitter</code>
+按照文档标题进行分块，在保留文档层级结构和标题元数据的同时，也能够满足后续向量化与检索的需求。</p>
+<h2 id="文本向量化embedding">3. 文本向量化（Embedding）</h2>
+<blockquote>
+<p>原文：<a target="_blank" rel="noopener" href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter3/06_vector_embedding.md">向量嵌入</a></p>
+<p>原文：<a target="_blank" rel="noopener" href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter4/11_hybrid_search.md">混合检索</a></p>
+</blockquote>
+<p>完成文档加载和文本分块后，接下来需要解决一个新的问题：</p>
+<blockquote>
+<p><strong>如何让计算机理解文本之间的"相似性"？</strong></p>
+</blockquote>
+<p>对于人来说，很容易知道"机器学习"与"深度学习"关系密切，而"西红柿炒鸡蛋"与"番茄炒蛋"表达的是同一道菜。但对于计算机而言，文本本质上只是字符串，无法直接进行语义比较。</p>
+<p>因此，在 RAG
+中，需要先将文本转换成计算机能够理解和计算的数值表示，这个过程就是
+<strong>Embedding（向量嵌入）</strong>。</p>
+<h3 id="什么是-embedding">3.1 什么是 Embedding</h3>
+<h4 id="embedding-基础概念">3.1.1 Embedding 基础概念</h4>
+<p><strong>Embedding（向量嵌入）</strong>
+是一种利用深度学习模型，将真实世界中的复杂数据（如文本、图像、音频、视频等）转换为固定长度数值向量的技术。</p>
+<p>简单来说，就是把每一段文本、每一张图片映射到一个高维数学空间中，并赋予它一个唯一的坐标，这个坐标就是
+<strong>Embedding 向量</strong>。</p>
+<p>整个过程如下图所示：</p>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704040338453.png"></p>
+<p>Embedding 主要包含三个组成部分：</p>
+<ul>
+<li><strong>数据对象（Data）</strong>：需要进行编码的数据，例如文本、图片或音频。</li>
+<li><strong>Embedding 模型（Embedding
+Model）</strong>：负责提取数据的语义特征，并生成向量表示。</li>
+<li><strong>Embedding
+向量（Vector）</strong>：模型输出的固定长度数值向量，例如：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[0.16, 0.29, -0.88, ..., 0.54]</span><br></pre></td></tr></table></figure>
+<p>不同模型输出向量的维度各不相同，通常在几百到几千维之间。</p>
+<p>需要注意的是，Embedding
+保存的并不是原始文本，而是文本所包含的<strong>语义信息</strong>。因此，它能够应用于语义搜索、文本聚类、推荐系统以及
+RAG 检索等各种任务。</p>
+<h4 id="向量空间中的语义表示">3.1.2 向量空间中的语义表示</h4>
+<p>Embedding
+最重要的特点在于，它生成的向量并不是随机数值，而是对数据语义的数学表示。</p>
+<p>在 Embedding
+模型训练过程中（通常采用对比学习等方法），模型会不断调整向量空间，使<strong>语义相近的数据对应的向量距离更近，而语义无关的数据距离更远</strong>。</p>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">西红柿炒鸡蛋  ←→  番茄炒蛋      （距离很近）</span><br><span class="line"></span><br><span class="line">西红柿炒鸡蛋  ←→  篮球比赛      （距离很远）</span><br></pre></td></tr></table></figure>
+<p>因此，当用户提出问题时，RAG 并不是直接比较字符串，而是<strong>将
+Query 同样转换为向量，然后在向量空间中寻找距离最近的文档
+Chunk</strong>。</p>
+<p>为了衡量两个向量之间的相似程度，向量数据库通常采用以下几种距离计算方式：</p>
+<ul>
+<li><strong>余弦相似度（Cosine
+Similarity）</strong>：计算两个向量夹角的余弦值，也是目前最常用的相似度度量方式。值越接近
+1，说明两个向量方向越一致，语义越相似。</li>
+<li><strong>点积（Dot
+Product）</strong>：计算两个向量对应元素乘积之和。当向量经过归一化后，点积与余弦相似度等价，因此很多
+Embedding 模型都会采用该方式。</li>
+<li><strong>欧氏距离（Euclidean
+Distance）</strong>：计算两个向量之间的直线距离，距离越小表示越相似，不过在文本检索领域使用相对较少。</li>
+</ul>
+<p>正因为 Embedding 将"语义相似"转换成了"向量距离相近"，RAG
+才能够利用数学计算，在海量文档中快速找到与用户问题最相关的内容。</p>
+<h3 id="如何选择-embedding-模型">3.2 如何选择 Embedding 模型</h3>
+<p>理解了 Embedding 的原理之后，接下来需要选择合适的 Embedding
+模型。</p>
+<p>目前最权威、应用最广泛的公开评测基准之一是 <strong>MTEB（Massive Text
+Embedding Benchmark）</strong>。它由 Hugging Face
+维护，覆盖文本检索、分类、聚类、排序等多个任务，是目前评价 Embedding
+模型综合能力的重要参考。</p>
+<blockquote>
+<p>MTEB 排行榜：https://huggingface.co/spaces/mteb/leaderboard</p>
+</blockquote>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704043525228.png"></p>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704043540167.png"></p>
+<p>排行榜主要包含以下几个指标：</p>
+<ul>
+<li><strong>Mean Task
+Score</strong>：模型在多个任务上的平均得分，也是最值得关注的综合性能指标。</li>
+<li><strong>Number of
+Parameters</strong>：模型参数量，通常参数越多，模型能力越强，但计算资源消耗也越高。</li>
+<li><strong>Embedding
+Size</strong>：输出向量维度。维度越高，一般能够表示更丰富的语义信息，但也会增加存储和计算成本。</li>
+<li><strong>Max
+Tokens</strong>：模型能够处理的最大输入长度，对于长文档检索尤为重要。</li>
+</ul>
+<p>实际项目中，没有绝对最好的 Embedding 模型，应综合考虑：</p>
+<ul>
+<li>检索效果</li>
+<li>推理速度</li>
+<li>GPU/CPU 资源</li>
+<li>向量维度</li>
+<li>最大输入长度</li>
+</ul>
+<p>根据业务需求进行选择。</p>
+<h3 id="向量数据库">3.3 向量数据库</h3>
+<p>完成文本向量化之后，还需要一个能够高效存储和检索这些向量的数据库，这就是<strong>向量数据库（Vector
+Database）</strong>。</p>
+<p>与传统关系型数据库不同，向量数据库存储的是高维向量，并针对<strong>相似度搜索（ANN）</strong>进行了专门优化，能够在海量数据中快速找到与查询向量最相似的结果。</p>
+<p>向量数据库的主要功能包括：</p>
+<ul>
+<li>存储高维向量数据；</li>
+<li>建立向量索引，提高检索效率；</li>
+<li>支持 Top-K 相似度搜索；</li>
+<li>支持元数据过滤、范围查询等高级检索功能；</li>
+<li>与 LangChain、LlamaIndex 等 AI 框架无缝集成。</li>
+</ul>
+<p>目前主流的向量数据库包括：</p>
+<table>
+<thead>
+<tr>
+<th>数据库</th>
+<th>特点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FAISS</td>
+<td>轻量级、本地部署</td>
+<td>学习、小型项目</td>
+</tr>
+<tr>
+<td>Milvus</td>
+<td>开源分布式</td>
+<td>大规模生产环境</td>
+</tr>
+<tr>
+<td>Qdrant</td>
+<td>Rust 实现、高性能</td>
+<td>高并发检索</td>
+</tr>
+<tr>
+<td>Weaviate</td>
+<td>GraphQL、多模态支持</td>
+<td>AI 应用</td>
+</tr>
+<tr>
+<td>Pinecone</td>
+<td>云托管</td>
+<td>企业级服务</td>
+</tr>
+</tbody>
+</table>
+<p>本项目使用的是 <strong>FAISS</strong>。</p>
+<h3 id="文本向量化">3.4 文本向量化</h3>
+<p>完成模型选择之后，就可以开始对知识库中的所有 Chunk 进行向量化。</p>
+<p>整个过程实际上非常简单，只需要提供：</p>
+<ul>
+<li>文本分块（Chunks）；</li>
+<li>Embedding 模型。</li>
+</ul>
+<p>即可完成所有文档的编码，并建立向量索引。</p>
+<p>例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">self</span>.vectorstore = FAISS.from_documents(</span><br><span class="line">    documents=chunks,</span><br><span class="line">    embedding=<span class="variable language_">self</span>.embeddings</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>这里传入两个参数：</p>
+<ul>
+<li><code>documents</code>：前面文本分块得到的
+<code>chunks</code>；</li>
+<li><code>embedding</code>：用于将文本编码为向量的 Embedding 模型。</li>
+</ul>
+<p>调用 <code>FAISS.from_documents()</code> 后，框架会自动遍历所有
+<code>Document</code>，读取每个 <code>Document</code> 的
+<code>page_content</code>，并使用 Embedding
+模型将其转换为向量。随后，FAISS 会创建对应的向量索引（默认使用 Flat
+Index），并将所有向量加入索引中，同时保存原始文档与向量之间的映射关系，最终返回一个
+<code>vectorstore</code> 对象。</p>
+<p><code>vectorstore</code> 内部主要包含三个部分：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vectorstore.index                 <span class="comment"># FAISS 向量索引</span></span><br><span class="line">vectorstore.docstore              <span class="comment"># 原始 Document 对象</span></span><br><span class="line">vectorstore.index_to_docstore_id  <span class="comment"># 向量索引与 Document 的映射关系</span></span><br></pre></td></tr></table></figure>
+<p>它们分别承担不同的职责：</p>
+<ul>
+<li><strong>index</strong>：负责存储向量索引，并执行相似度搜索。</li>
+<li><strong>docstore</strong>：负责保存原始
+<code>Document</code>，包括文本内容和元数据（Metadata）。</li>
+<li><strong>index_to_docstore_id</strong>：负责建立向量与文档之间的映射关系，使检索到向量后能够快速定位对应的原始文档。</li>
+</ul>
+<p>至此，知识库中的每个 Chunk 都已经完成向量化，并加入到 FAISS
+的向量索引中。</p>
+<p><strong>后续当用户输入 Query 时，也会经过同一个 Embedding
+模型转换为向量</strong>，再利用 FAISS
+在向量索引中执行相似度搜索，找到最相关的 Top-K
+个结果，最后根据映射关系返回对应的原始 Chunk，作为后续 RAG
+生成回答的上下文。</p>
+<h2 id="多模态-embedding">3.5 多模态 Embedding</h2>
+<p>除了文本之外，图片同样可以进行向量化。</p>
+<p>多模态 Embedding（Multimodal
+Embedding）的目标，是将文本、图片等不同类型的数据映射到同一个向量空间。</p>
+<p>例如：</p>
+<ul>
+<li>"一只奔跑的小狗"</li>
+<li>一张小狗奔跑的<strong>图片</strong></li>
+</ul>
+<p>虽然它们的<strong>数据形式不同，但经过多模态 Embedding
+编码后，其向量会位于相近的位置</strong>。</p>
+<p>目前最经典的模型之一是 <strong>CLIP（Contrastive Language-Image
+Pre-training）</strong>。</p>
+<p>CLIP 采用双编码器（Dual Encoder）结构：</p>
+<ul>
+<li>图像编码器负责提取图片特征；</li>
+<li>文本编码器负责提取文本特征；</li>
+</ul>
+<p>最终将二者映射到统一的向量空间。</p>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704041115368.png"></p>
+<p>因此，对于图片知识库，只需要<strong>使用支持图像编码的 Embedding
+模型</strong>完成向量化，再存入向量数据库即可，整个流程与文本完全一致。</p>
+<h2 id="向量索引">3.6 向量索引</h2>
+<h3 id="为什么需要向量索引">3.6.1 为什么需要向量索引</h3>
+<p>完成文本向量化后，所有 Chunk
+都已经转换为向量并存入向量数据库。此时如果直接进行检索，最简单的方法就是将查询向量与数据库中的每一个向量逐一计算相似度，再从中选出最相似的
+Top-K 个结果。</p>
+<p>这种方式虽然能够得到最精确的结果，但随着数据规模增大，计算开销会迅速增加，检索速度也会越来越慢。</p>
+<p>因此，向量数据库通常会为向量构建<strong>索引（Index）</strong>。</p>
+<p>从本质上来说，索引是一种为了<strong>加速查询</strong>而设计的数据结构。它通过预先组织向量数据，使检索时无需遍历所有向量，而是在较小的搜索范围内快速找到最相似的结果，从而大幅提升检索效率。当然，这也需要额外占用一定的内存和存储空间。</p>
+<p>需要注意的是，<strong>稠密向量（Dense Vector）和稀疏向量（Sparse
+Vector）拥有各自不同的索引算法</strong>。只有在对应类型的向量字段上，才能构建相应类型的索引。</p>
+<p>例如，在 <strong>Milvus</strong>
+中，可以为稠密向量字段指定对应的索引算法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">index_params.add_index(</span><br><span class="line">    field_name=<span class="string">&quot;vector&quot;</span>, <span class="comment"># 指定数据中的&quot;vector&quot;字段</span></span><br><span class="line">    index_type=<span class="string">&quot;HNSW&quot;</span>,  <span class="comment"># 索引类型</span></span><br><span class="line">    metric_type=<span class="string">&quot;COSINE&quot;</span>, <span class="comment"># 计算相似度的方法</span></span><br><span class="line">    params=&#123;</span><br><span class="line">        <span class="string">&quot;M&quot;</span>: <span class="number">16</span>,</span><br><span class="line">        <span class="string">&quot;efConstruction&quot;</span>: <span class="number">256</span></span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>（Milvus是另一个向量数据库）</p>
+<h4 id="常见向量索引">3.6.2 常见向量索引</h4>
+<p>Milvus 提供了多种向量索引算法，不同算法侧重于不同的性能目标。</p>
+<hr>
+<p><strong>（1）FLAT</strong>（FAISS默认索引）</p>
+<p>FLAT 是最基础的索引方式，本质上采用<strong>暴力搜索（Brute
+Force）</strong>。</p>
+<p>检索时会计算查询向量与数据库中所有向量之间的距离，因此能够获得
+<strong>100% 的召回率</strong>。</p>
+<p><strong>优点：</strong></p>
+<ul>
+<li>检索结果最准确；</li>
+<li>无近似误差。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>检索速度慢；</li>
+<li>数据规模越大，性能下降越明显。</li>
+</ul>
+<p><strong>适用场景：</strong></p>
+<p>数据规模较小，或对检索精度要求极高的场景。</p>
+<hr>
+<p><strong>（2）IVF 系列</strong></p>
+<p>IVF（Inverted File
+Index）可以理解为先对所有向量进行聚类，将相似向量划分到多个"桶（Cluster）"中。</p>
+<p>查询时，不再搜索全部数据，而是先找到最相关的几个桶，再在桶内进行精确搜索。</p>
+<p>Milvus 提供了多种 IVF 变体，例如：</p>
+<ul>
+<li>IVF_FLAT</li>
+<li>IVF_SQ8</li>
+<li>IVF_PQ</li>
+</ul>
+<p>它们的主要区别在于是否对桶内向量进行了压缩（量化）。</p>
+<p><strong>优点：</strong></p>
+<ul>
+<li>检索速度快；</li>
+<li>性能与召回率之间具有较好的平衡。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>属于近似搜索，召回率不是 100%。</li>
+</ul>
+<p><strong>适用场景：</strong></p>
+<p>大多数生产环境，也是目前最常见的索引方案之一。</p>
+<hr>
+<p><strong>（3）HNSW</strong>（推荐）</p>
+<p>HNSW（Hierarchical Navigable Small
+World）是一种基于图结构的近似最近邻索引。</p>
+<p>它会构建多层邻接图，查询时先从高层快速定位，再逐步向底层逼近目标区域，因此具有极高的检索效率。</p>
+<p><strong>优点：</strong></p>
+<ul>
+<li>查询速度极快；</li>
+<li>召回率高；</li>
+<li>特别适合高维向量。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li><strong>索引构建时间较长；</strong></li>
+<li>内存占用较高。</li>
+</ul>
+<p><strong>适用场景：</strong></p>
+<p>实时搜索、推荐系统等对查询延迟要求较高的场景。</p>
+<hr>
+<p><strong>（4）DiskANN</strong></p>
+<p>DiskANN 是一种针对 SSD 等高速磁盘优化的向量索引。</p>
+<p>相比完全依赖内存的索引，它能够<strong>支持远超内存容量的大规模数据集</strong>，同时保持较低的查询延迟。</p>
+<p><strong>优点：</strong></p>
+<ul>
+<li>支持十亿级甚至更大的数据规模；</li>
+<li>内存占用低。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>查询速度略慢于纯内存索引。</li>
+</ul>
+<p><strong>适用场景：</strong></p>
+<p>超大规模向量数据库。</p>
+<hr>
+<h3 id="如何选择索引">3.6.3 如何选择索引</h3>
+<p>不同索引算法各有优缺点，并不存在唯一最优方案，需要根据数据规模、内存资源、查询延迟以及召回率进行综合权衡。</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐索引</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>数据量较小，追求 100% 准确率</td>
+<td>FLAT</td>
+</tr>
+<tr>
+<td>数据可全部载入内存，追求低延迟</td>
+<td>HNSW</td>
+</tr>
+<tr>
+<td>数据可全部载入内存，兼顾性能与资源消耗</td>
+<td>IVF_FLAT / IVF_SQ8</td>
+</tr>
+<tr>
+<td>数据规模巨大，无法全部载入内存</td>
+<td>DiskANN</td>
+</tr>
+</tbody>
+</table>
+<p>实际项目中，通常需要结合具体数据集进行测试，才能确定最合适的索引类型及参数配置。</p>
+<h2 id="向量检索">4. 向量检索</h2>
+<p>经过上一节的处理，我们已经完成了知识库的向量化：原始文档经过文本分块（Chunking）后，被
+Embedding 模型转换为向量，并存储到了向量数据库中。至此，RAG
+的<strong>离线数据准备阶段</strong>已经完成。</p>
+<p>接下来进入 <strong>在线检索阶段</strong>。</p>
+<p>当用户输入一个 Query 时，系统同样会先通过 Embedding
+模型将其转换为查询向量，然后利用向量数据库中的索引，在海量 Chunk
+中快速找到与其最相似的 Top-K 个结果，并将这些结果作为后续 LLM
+生成回答的上下文。</p>
+<p>本节将介绍向量数据库中的各种检索方式，包括基础的 ANN
+检索、过滤检索、范围检索、混合检索等，并结合本项目所采用的 Dense +
+Sparse Hybrid Search，分析其具体实现方式与适用场景。</p>
+<h3 id="基础向量检索ann-search">4.1 基础向量检索（ANN Search）</h3>
+<p>完成数据向量化并构建索引后，就可以开始进行向量检索了。</p>
+<p>向量数据库的核心能力，就是<strong>近似最近邻检索（Approximate Nearest
+Neighbor，ANN）</strong>。与暴力搜索（Brute-force
+Search）需要计算查询向量与数据库中所有向量之间的距离不同，ANN
+会利用预先构建好的索引，在保证较高召回率的前提下，大幅减少搜索范围，从而实现毫秒级的相似度检索。</p>
+<p>一次 ANN 检索通常需要以下几个核心参数：</p>
+<ul>
+<li><strong>anns_field</strong>：指定进行检索的向量字段。</li>
+<li><strong>data</strong>：查询向量（Query Embedding）。</li>
+<li><strong>limit（Top-K）</strong>：返回最相似结果的数量。</li>
+<li><strong>search_params</strong>：检索参数，包括距离计算方式（如
+Cosine、L2）以及索引对应的搜索参数。</li>
+</ul>
+<p>ANN
+检索已经能够满足大多数相似度搜索需求，但在实际业务中，通常还需要结合更多检索策略进一步提升效果。</p>
+<h3 id="增强检索">4.2 增强检索</h3>
+<p>在基础 ANN 检索的基础上，Milvus
+提供了多种增强检索能力，以满足更加复杂的业务需求。</p>
+<h4 id="过滤检索filtered-search">4.2.1 过滤检索（Filtered Search）</h4>
+<p>很多场景下，我们不仅希望找到<strong>最相似</strong>的数据，还希望这些数据满足某些业务条件。</p>
+<p>过滤检索（Filtered
+Search）就是将向量相似度检索与<strong>标量字段过滤</strong>结合起来，实现<strong>"先过滤，再检索"</strong>。</p>
+<p>其工作流程如下：</p>
+<ol type="1">
+<li>根据过滤表达式（Filter）筛选符合条件的数据；</li>
+<li>在筛选后的数据集合中执行 ANN 检索；</li>
+<li>返回满足条件且最相似的 Top-K 结果。</li>
+</ol>
+<p>例如：</p>
+<ul>
+<li>电商："查找与当前商品最相似，但价格低于 500
+元且仍有库存的商品。"</li>
+<li>知识库："检索人工智能相关文章，但仅限于 2023
+年之后发布的技术文档。"</li>
+</ul>
+<p>相比普通 ANN 检索，过滤检索能够有效减少无关结果，提高检索精度。</p>
+<h4 id="范围检索range-search">4.2.2 范围检索（Range Search）</h4>
+<p>默认情况下，ANN 检索返回的是最相似的 Top-K 个结果。</p>
+<p>但有时候，我们更关心的是<strong>所有满足相似度要求的数据</strong>。</p>
+<p>范围检索允许设置一个<strong>距离（或相似度）阈值</strong>，返回所有位于该范围内的数据，而不是固定数量的结果。</p>
+<p>例如：</p>
+<ul>
+<li>人脸识别：返回所有<strong>相似度大于 0.9</strong> 的人脸。</li>
+<li>异常检测：找出距离正常样本超过某个阈值的数据。</li>
+</ul>
+<p>这种方式更加适合需要设定业务阈值，而不是固定 Top-K 的应用场景。</p>
+<h4 id="混合检索hybrid-search">4.2.3 混合检索（Hybrid Search）</h4>
+<p>混合检索（Hybrid Search）是目前 RAG
+系统中最常见、也是最重要的检索方式之一。</p>
+<p>它允许同时利用多个向量字段进行检索，例如：</p>
+<ul>
+<li>稠密向量（Dense Embedding）</li>
+<li>稀疏向量（Sparse Embedding）</li>
+<li>图像向量</li>
+<li>多模态向量</li>
+</ul>
+<p>然后再<strong>将多个检索结果融合为最终排序</strong>。</p>
+<p>整个流程如下：</p>
+<ol type="1">
+<li>对不同向量字段分别执行 ANN 检索；</li>
+<li>获得多个独立的 Top-K 排名；</li>
+<li>使用 Reranker 对多个结果进行融合排序；</li>
+<li>输出最终检索结果。</li>
+</ol>
+<p>目前常见的融合方式包括：</p>
+<ul>
+<li><strong>RRFRanker（Reciprocal Rank Fusion）</strong></li>
+<li><strong>WeightedRanker</strong></li>
+</ul>
+<p>混合检索最大的优势在于能够融合不同检索方式各自的优点，因此也是当前
+RAG 系统中最常见的检索方案。</p>
+<p>例如：</p>
+<ul>
+<li>多模态商品检索：同时利用商品图片和商品描述进行搜索。</li>
+<li>RAG 检索：结合 Dense Embedding 的语义理解能力与 Sparse Embedding
+的关键词匹配能力，提高整体召回率和准确率。</li>
+</ul>
+<h4 id="分组检索grouping-search">4.2.4 分组检索（Grouping Search）</h4>
+<p>传统的 Top-K 检索容易出现大量来自同一来源的数据。</p>
+<p>例如搜索"机器学习"，返回的前十条结果全部来自同一本教材的不同章节，虽然相关，但缺乏多样性。</p>
+<p>分组检索允许按照某个字段（如 <code>document_id</code>）进行分组。</p>
+<p>检索结束后，同一组中仅保留最相关的数据，从而保证最终结果来源更加丰富。</p>
+<p>例如：</p>
+<ul>
+<li>视频检索：保证返回的视频来自不同创作者。</li>
+<li>文档检索：保证返回的内容来自不同书籍或不同知识来源。</li>
+</ul>
+<p>这种方式能够有效提升检索结果的覆盖率与多样性。</p>
+<hr>
+<h3 id="本项目dense-sparse-混合检索">4.3 本项目：Dense + Sparse
+混合检索</h3>
+<p>本项目最终采用的是 <strong>Dense + Sparse Hybrid
+Search</strong>。</p>
+<p>其中：</p>
+<ul>
+<li>Dense Embedding（稠密向量）负责语义理解；</li>
+<li>Sparse Embedding（稀疏向量）负责关键词精确匹配；</li>
+<li>最后使用 <strong>RRF（Reciprocal Rank Fusion）</strong>
+对两路检索结果进行融合排序。</li>
+</ul>
+<p>下面分别介绍本项目中涉及的几个核心组成部分。</p>
+<h4 id="什么是稀疏向量sparse-vector">4.3.1 什么是稀疏向量（Sparse
+Vector）</h4>
+<p>前面介绍的 Embedding 向量实际上都属于<strong>稠密向量（Dense
+Vector）</strong>。</p>
+<p>稠密向量由 Embedding
+模型生成，能够表达文本的语义信息，因此也常被称为<strong>语义向量</strong>。</p>
+<p>除此之外，还有另一类向量表示方式——<strong>稀疏向量（Sparse
+Vector）</strong>。</p>
+<p>稀疏向量通常来源于传统的信息检索算法（如
+BM25）。与稠密向量不同，它的每一个维度都对应词汇表中的一个词，仅保存非零元素，因此具有很强的可解释性。</p>
+<p>例如，一个包含 5 万个词的词汇表中：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">西红柿 -&gt; 第88维</span><br><span class="line">炒     -&gt; 第666维</span><br><span class="line">鸡蛋   -&gt; 第999维</span><br></pre></td></tr></table></figure>
+<p>对应的稀疏向量可表示为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(50000, [88, 666, 999], [1.2, 0.8, 1.5])</span><br></pre></td></tr></table></figure>
+<p>其中：</p>
+<ul>
+<li><code>50000</code> 表示词汇表大小；</li>
+<li><code>[88, 666, 999]</code> 表示非零元素所在的维度；</li>
+<li><code>[1.2, 0.8, 1.5]</code> 表示对应词的权重。</li>
+</ul>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">索引： [88, 666, 999]</span><br><span class="line">权重： [1.2, 0.8, 1.5]</span><br></pre></td></tr></table></figure>
+<p>表示：</p>
+<ul>
+<li>第 88 个词（"西红柿"）的权重为 <strong>1.2</strong></li>
+<li>第 666 个词（"炒"）的权重为 <strong>0.8</strong></li>
+<li>第 999 个词（"鸡蛋"）的权重为 <strong>1.5</strong></li>
+</ul>
+<p>权重表示该词在当前文档中的重要程度，通常由 <strong>BM25</strong> 或
+<strong>TF-IDF</strong> 等算法计算得到。</p>
+<p>与稠密向量相比，两者各有特点：</p>
+<table>
+<thead>
+<tr>
+<th>稠密向量（Dense）</th>
+<th>稀疏向量（Sparse）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>深度学习生成</td>
+<td>词频统计生成</td>
+</tr>
+<tr>
+<td>能理解语义</td>
+<td>精确匹配关键词</td>
+</tr>
+<tr>
+<td>支持同义词</td>
+<td>可解释性强</td>
+</tr>
+<tr>
+<td>擅长语义检索</td>
+<td>擅长关键词检索</td>
+</tr>
+</tbody>
+</table>
+<p>正因为二者优势互补，因此越来越多的 RAG 系统采用 <strong>Hybrid
+Search</strong>，同时利用 Dense 与 Sparse
+两种检索方式，以兼顾语义理解能力和关键词匹配能力。</p>
+<p>本项目同样构建了稀疏向量，并结合对应的稀疏索引算法参与最终检索。</p>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704041214583.png"></p>
+<h4 id="为什么需要混合检索">4.3.2 为什么需要混合检索？</h4>
+<p>Dense 与 Sparse 各自具有不同优势。</p>
+<p><strong>Dense Embedding 擅长：</strong></p>
+<ul>
+<li>理解语义相似性，例如"简单易做的菜"能够匹配到标记为"简单"的菜谱；</li>
+<li>理解同义词，例如"制作方法"能够匹配"做法""烹饪步骤"；</li>
+<li>理解用户真实意图，例如"适合新手"能够匹配难度较低的菜谱。</li>
+</ul>
+<p><strong>Sparse Embedding（BM25）擅长：</strong></p>
+<ul>
+<li>精确匹配菜名，例如"宫保鸡丁"；</li>
+<li>精确匹配食材名称，例如"西红柿""土豆丝"；</li>
+<li>精确匹配专业术语，例如"爆炒""红烧"等烹饪方式。</li>
+</ul>
+<p>因此，两种检索方式具有很强的互补性。</p>
+<p>Dense 负责理解语义，Sparse
+负责保证关键词不会遗漏，两者结合通常能够获得比单一路径更好的检索效果。</p>
+<h4 id="rrfreciprocal-rank-fusion">4.3.3 RRF（Reciprocal Rank
+Fusion）</h4>
+<p>本项目采用 <strong>RRF（Reciprocal Rank Fusion）</strong>
+作为最终的融合策略。</p>
+<p>与直接融合相似度分数不同，RRF
+并不关注不同检索器输出的原始分数，而是只关注文档在各自结果中的<strong>排名</strong>。</p>
+<p>其核心思想非常简单：</p>
+<blockquote>
+<p>一个文档在多个检索结果中的排名越靠前，它最终获得的融合得分就越高。</p>
+</blockquote>
+<p>因此，即使 Dense 与 Sparse
+的评分标准完全不同，也能够方便地进行融合。</p>
+<p>相比直接融合相似度，RRF
+更稳定，也更容易兼容不同类型的检索器，因此目前被广泛应用于 Hybrid
+Search。</p>
+<h4 id="混合检索并不是万能的">4.3.4 混合检索并不是万能的</h4>
+<p>虽然 Hybrid Search 能够融合 Dense 与 Sparse
+的优势，但并<strong>不意味着它一定优于单一路径</strong>。</p>
+<p>例如查询：</p>
+<blockquote>
+<p><strong>"悬崖上的白龙"</strong></p>
+</blockquote>
+<p>Dense 检索能够很好地理解"悬崖""白龙""巨龙"等整体语义，因此 Top1
+可以准确命中目标图片。</p>
+<p>但 Sparse
+检索由于关键词"龙"出现在大量图片描述中，可能会召回一些仅包含"龙"字、但语义完全无关的数据，例如<strong>"奶龙"</strong>等结果。</p>
+<p>经过 RRF 融合后，这些结果仍有可能进入最终
+Top-K，从而引入一定噪声。</p>
+<p>另外，由于 <strong>RRF
+只依据排名进行融合，不考虑原始相似度，因此融合后的分数通常会非常接近，不再具有
+Dense 检索中明显的区分度。</strong></p>
+<p>因此，在一些语义已经十分明确的场景中，Dense
+检索本身已经能够取得较好的效果，盲目加入 Sparse
+检索反而可能降低最终质量。</p>
+<p>对于这类情况，可以采用 <strong>WeightedRanker</strong> 提高 Dense
+检索的权重，或者根据查询类型动态选择 Dense、Sparse 或 Hybrid
+检索方式，从而获得更好的整体效果。</p>
+<p>因此，<strong>混合检索并不是万能方案，而是需要根据具体业务场景进行权衡与调优。</strong></p>
+<h2 id="检索结果优化">5. 检索结果优化</h2>
+<p>经过上一章节的向量检索后，我们已经获得了与用户问题最相关的
+<strong>Top-K Chunk</strong>。但这些 Chunk 并不会直接作为上下文发送给
+LLM，在实际项目中，通常还需要进行一系列优化处理，以进一步提升最终回答的质量。</p>
+<p>本项目主要采用了<strong>上下文扩展（Context
+Expansion）</strong>策略。</p>
+<h3 id="为什么需要上下文扩展">5.1 为什么需要上下文扩展？</h3>
+<p>在 RAG 中，一个经典的问题是：</p>
+<ul>
+<li><strong>Chunk 切得较小</strong>：检索精度更高，但上下文不足，LLM
+难以理解完整语义。</li>
+<li><strong>Chunk
+切得较大</strong>：上下文更加完整，但容易包含大量无关信息，降低检索精度。</li>
+</ul>
+<p>因此，<strong>检索阶段</strong>与<strong>生成阶段</strong>对文本粒度的需求其实是不同的。</p>
+<ul>
+<li>检索阶段希望 Chunk 尽可能小，提高召回精度；</li>
+<li>生成阶段希望上下文尽可能完整，帮助 LLM 理解问题。</li>
+</ul>
+<p>这也是为什么许多 RAG
+框架都会采用<strong>检索小块、生成大块</strong>的策略。</p>
+<hr>
+<h3 id="sentence-window-retrieval">5.2 Sentence Window Retrieval</h3>
+<p>为了解决上述矛盾，LlamaIndex 提出了 <strong>Sentence Window
+Retrieval（句子窗口检索）</strong>。</p>
+<p>其核心思想可以概括为一句话：</p>
+<blockquote>
+<p><strong>索引时使用小块，提高检索精度；生成时恢复大块，提高上下文完整性。</strong></p>
+</blockquote>
+<p>整个流程如下：</p>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704211700168.png" style="zoom:67%;"></p>
+<p>本项目采用了与 <strong>Sentence Window Retrieval</strong>
+相同的核心思想：<strong>检索时使用小块，生成时恢复更大的上下文。</strong>
+不同的是，<strong>Sentence Window Retrieval
+通常恢复的是目标句子附近的若干句</strong>，而<strong>本项目直接恢复
+Chunk 所属的完整文档（Doc）</strong>，从而提供更加完整的上下文信息。</p>
+<p>这样既保证了检索的准确性，又避免了仅提供一小段文本导致上下文缺失的问题。</p>
+<hr>
+<h3 id="chunk-doc-转换">5.3 Chunk → Doc 转换</h3>
+<p>在本项目中，上下文扩展发生在<strong>两路检索结果融合之前</strong>。</p>
+<p>具体来说，稠密向量检索（Dense Search）和稀疏向量检索（Sparse
+Search）会分别返回各自的 <strong>Top-K Chunk</strong>。</p>
+<p>随后，并不会直接对这些 Chunk 进行融合，而是<strong>分别根据每个 Chunk
+的 <code>parent_id</code> 恢复其所属的完整文档（Doc）</strong>。</p>
+<p>由于多个 Chunk
+往往来自同一篇文档，因此恢复后的文档列表还需要进行一次去重，最终得到两路检索对应的
+Doc 集合，再作为后续上下文构建的输入。</p>
+<p>整个流程如下：</p>
+<p><img src="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/image-20260704212644536.png"></p>
+<hr>
+<h3 id="元数据设计">5.4 元数据设计</h3>
+<p>为了支持检索后的上下文扩展，本项目在数据准备阶段便建立好了父文档与子文档之间的映射关系。</p>
+<p>整个数据准备模块主要维护三类数据：</p>
+<ul>
+<li><code>documents</code>：保存完整文档（Parent Document）。</li>
+<li><code>chunks</code>：保存切分后的文本块（Chunk）。</li>
+<li><code>parent_child_map</code>：保存 <strong>Chunk ID → Parent
+ID</strong> 的映射关系。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">DataPreparationModule</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, data_path: <span class="built_in">str</span></span>):</span><br><span class="line">        <span class="variable language_">self</span>.documents: <span class="type">List</span>[Document] = []</span><br><span class="line">        <span class="variable language_">self</span>.chunks: <span class="type">List</span>[Document] = []</span><br><span class="line">        <span class="variable language_">self</span>.parent_child_map: <span class="type">Dict</span>[<span class="built_in">str</span>, <span class="built_in">str</span>] = &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>每个完整文档都会拥有唯一的 <code>parent_id</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">doc = Document(</span><br><span class="line">    page_content=content,</span><br><span class="line">    metadata=&#123;</span><br><span class="line">        <span class="string">&quot;source&quot;</span>: <span class="built_in">str</span>(md_file),</span><br><span class="line">        <span class="string">&quot;parent_id&quot;</span>: parent_id,</span><br><span class="line">        <span class="string">&quot;doc_type&quot;</span>: <span class="string">&quot;parent&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>而每个 Chunk 在继承父文档元数据的基础上，还会拥有自己的
+<code>chunk_id</code>，并建立父子映射关系：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">chunk.metadata.update(&#123;</span><br><span class="line">    <span class="string">&quot;chunk_id&quot;</span>: child_id,</span><br><span class="line">    <span class="string">&quot;parent_id&quot;</span>: parent_id,</span><br><span class="line">    <span class="string">&quot;doc_type&quot;</span>: <span class="string">&quot;child&quot;</span>,</span><br><span class="line">    <span class="string">&quot;chunk_index&quot;</span>: i</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="variable language_">self</span>.parent_child_map[child_id] = parent_id</span><br></pre></td></tr></table></figure>
+<p>因此，当 Dense Search 和 Sparse Search 返回多个 Chunk
+后，程序首先<strong>根据 Chunk 的 <code>chunk_id</code> 查询
+<code>parent_child_map</code>，获得对应的
+<code>parent_id</code>，随后再恢复出完整文档</strong>，并进行去重。</p>
+<p>这样做的好处是无需遍历所有文档即可快速完成 <strong>Chunk → Parent
+Document</strong> 的映射，大幅降低了恢复上下文的开销。</p>
+<h2 id="总结">6. 总结</h2>
+<p>至此，我们已经完成了整个 RAG 向量搜索引擎的构建。</p>
+<p><strong>离线阶段</strong>:
+系统完成文档加载、文本分块、向量化以及索引构建；</p>
+<p><strong>在线阶段</strong>: 用户输入 Query
+后，系统通过稠密向量和稀疏向量进行检索，经过上下文扩展后，最终返回与问题最相关的一组完整文档（Doc）。</p>
+<p>这些文档将作为上下文提供给 LLM，由模型生成最终回答。至此，一个完整的
+RAG 检索流程便构建完成。</p>
 
     </div>
 
@@ -267,6 +1253,11 @@
     
 
     <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM/" rel="tag"># 从零开始的LLM</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/%E7%AC%AC6%E8%8A%82/" rel="tag"># 第6节</a>
+          </div>
 
         
 
