@@ -71,7 +71,7 @@
 <meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260531094403646.png">
 <meta property="og:image" content="https://zusda.github.io/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260531100744666.png">
 <meta property="article:published_time" content="2026-05-26T07:49:51.000Z">
-<meta property="article:modified_time" content="2026-07-05T18:30:34.250Z">
+<meta property="article:modified_time" content="2026-07-13T12:17:30.596Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ai">
 <meta property="article:tag" content="从零开始的LLM">
@@ -191,7 +191,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E7%BB%93%E6%9E%84graph-structure"><span class="nav-number">2.</span> <span class="nav-text">1. 图结构（Graph Structure）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#attention%E6%9C%BA%E5%88%B6"><span class="nav-number">3.</span> <span class="nav-text">2. attention机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cross-attention"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 Cross-Attention</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#attention%E8%AE%A1%E7%AE%97%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">3. attention计算流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%85%A5"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 输入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E5%8F%98%E6%8D%A2%E5%BE%97%E5%88%B0-q-k-v"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 线性变换得到 Q, K, V</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%86%E5%88%86%E5%A4%9A%E5%A4%B4multi-head"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 拆分多头（Multi-Head）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%8F%E4%B8%AA-head-%E8%AE%A1%E7%AE%97-attention"><span class="nav-number">4.4.</span> <span class="nav-text">3.4 每个 Head 计算 Attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%BC%E6%8E%A5%E5%A4%9A%E5%A4%B4%E7%BB%93%E6%9E%9C"><span class="nav-number">4.5.</span> <span class="nav-text">3.5 拼接多头结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E7%BA%BF%E6%80%A7%E5%B1%82"><span class="nav-number">4.6.</span> <span class="nav-text">3.6 输出线性层</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81positional-encoding"><span class="nav-number">5.</span> <span class="nav-text">4. 位置编码（Positional
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E7%BB%93%E6%9E%84graph-structure"><span class="nav-number">2.</span> <span class="nav-text">1. 图结构（Graph Structure）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#attention%E6%9C%BA%E5%88%B6"><span class="nav-number">3.</span> <span class="nav-text">2. attention机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cross-attention"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 Cross-Attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#self-attention"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 Self-Attention</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#attention%E8%AE%A1%E7%AE%97%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">3. attention计算流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%85%A5"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 输入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E5%8F%98%E6%8D%A2%E5%BE%97%E5%88%B0-q-k-v"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 线性变换得到 Q, K, V</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%86%E5%88%86%E5%A4%9A%E5%A4%B4multi-head"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 拆分多头（Multi-Head）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%8F%E4%B8%AA-head-%E8%AE%A1%E7%AE%97-attention"><span class="nav-number">4.4.</span> <span class="nav-text">3.4 每个 Head 计算 Attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%BC%E6%8E%A5%E5%A4%9A%E5%A4%B4%E7%BB%93%E6%9E%9C"><span class="nav-number">4.5.</span> <span class="nav-text">3.5 拼接多头结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E7%BA%BF%E6%80%A7%E5%B1%82"><span class="nav-number">4.6.</span> <span class="nav-text">3.6 输出线性层</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81positional-encoding"><span class="nav-number">5.</span> <span class="nav-text">4. 位置编码（Positional
 Encoding）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mask-self-attention%E6%8E%A9%E7%A0%81%E8%87%AA%E6%B3%A8%E6%84%8F%E5%8A%9B"><span class="nav-number">6.</span> <span class="nav-text">5. Mask
 Self-Attention（掩码自注意力）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%8E%A9%E7%A0%81"><span class="nav-number">6.1.</span> <span class="nav-text">5.1 为什么需要掩码？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A9%E7%A0%81%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%B9%B6%E8%A1%8C%E9%97%AE%E9%A2%98"><span class="nav-number">6.2.</span> <span class="nav-text">5.2 掩码如何解决并行问题？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A9%E7%A0%81%E7%9F%A9%E9%98%B5%E7%9A%84%E5%BD%A2%E6%80%81"><span class="nav-number">6.3.</span> <span class="nav-text">5.3 掩码矩阵的形态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A9%E7%A0%81%E5%9C%A8%E6%B3%A8%E6%84%8F%E5%8A%9B%E8%AE%A1%E7%AE%97%E4%B8%AD%E7%9A%84%E5%85%B7%E4%BD%93%E4%BD%9C%E7%94%A8"><span class="nav-number">6.4.</span> <span class="nav-text">5.4
 掩码在注意力计算中的具体作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">6.5.</span> <span class="nav-text">5.5 小结</span></a></li></ol></li></ol></div>
@@ -207,7 +207,7 @@ Self-Attention（掩码自注意力）</span></a><ol class="nav-child"><li class
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-count">79</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -218,7 +218,7 @@ Self-Attention（掩码自注意力）</span></a><ol class="nav-child"><li class
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-count">24</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -281,7 +281,7 @@ Self-Attention（掩码自注意力）</span></a><ol class="nav-child"><li class
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-07-06 02:30:34" itemprop="dateModified" datetime="2026-07-06T02:30:34+08:00">2026-07-06</time>
+      <time title="修改时间：2026-07-13 20:17:30" itemprop="dateModified" datetime="2026-07-13T20:17:30+08:00">2026-07-13</time>
     </span>
 
   
@@ -341,7 +341,7 @@ Q-&gt;K。</p>
 <p>如图所示，Query "时间是什么" 与新闻中每个词的 Key
 逐一比对后，"昨日"和"3月5日"获得了最高的注意力权重——它们的 Value
 将被重点提取。</p>
-<p><strong>2.2 Self-Attention</strong></p>
+<h3 id="self-attention">2.2 Self-Attention</h3>
 <p>Query、Key、Value
 均来自同一个输入。每个词既是"提问者"，也是"被查询者"——每个节点都会去关注序列中的所有其他节点，形成我们之前介绍的<strong>全连接图结构</strong>。</p>
 <p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260526165417670.png"></p>
@@ -454,7 +454,7 @@ token
 一旦被选中，真正输出的内容。</li>
 </ul>
 <blockquote>
-<p><strong>为什么不直接用 XX X 本身作为 Q、K、V？</strong></p>
+<p><strong>为什么不直接用 X 本身作为 Q、K、V？</strong></p>
 <p>因为 X 是 Embedding 给出的原始坐标，它只有一种表达。而 Q、K、V
 需要分别回答三个完全不同的问题——"我该关注谁"、"我能被谁关注"、"我能贡献什么"——这三件事对同一个
 token

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 学习letta的整体架构、记忆系统和工具调用机制。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的LLM 7. letta框架学习与应用">
+<meta property="og:url" content="https://zusda.github.io/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 学习letta的整体架构、记忆系统和工具调用机制。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/image-20260726000459731.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/image-20260726005738324.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/image-20260726014135210.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/image-20260726105841614.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/image-20260726233831473.png">
+<meta property="og:image" content="https://zusda.github.io/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/image-20260726232430958.png">
+<meta property="article:published_time" content="2026-07-25T15:13:49.000Z">
+<meta property="article:modified_time" content="2026-07-26T15:41:58.714Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="从零开始的LLM">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="第7节">
+<meta property="article:tag" content="持续学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/image-20260726000459731.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/","path":"2026/07/25/从零开始的LLM-7/","title":"从零开始的LLM 7. letta框架学习与应用"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>从零开始的LLM 7. letta框架学习与应用 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#letta-%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text">1. letta 介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#core-memory"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 Core Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#message-historyrecall-memory"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 Message History（Recall
+Memory）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#passagearchival-memory"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 Passage（Archival Memory）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E8%BF%90%E8%A1%8C"><span class="nav-number">3.</span> <span class="nav-text">2. 安装运行</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-letta"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 安装 Letta</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-postgresql-%E4%B8%8E-pgvector"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 配置 PostgreSQL 与
+pgvector</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 初始化数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5"><span class="nav-number">3.4.</span> <span class="nav-text">2.4 配置数据库连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-python-%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BE%9D%E8%B5%96"><span class="nav-number">3.5.</span> <span class="nav-text">2.5 安装 Python 数据库依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8-letta"><span class="nav-number">3.6.</span> <span class="nav-text">2.6 启动 Letta</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#agent-state-%E7%90%86%E8%A7%A3"><span class="nav-number">4.</span> <span class="nav-text">3. Agent State 理解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-agent"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 创建 Agent</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8E-agent-%E5%AF%B9%E8%AF%9D"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 与 Agent 对话</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B-agent-%E7%9A%84%E5%B7%A5%E5%85%B7"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 查看 Agent 的工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B-system-prompt"><span class="nav-number">4.4.</span> <span class="nav-text">3.4 查看 System Prompt</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#agent-%E8%BA%AB%E4%BB%BD"><span class="nav-number">4.4.1.</span> <span class="nav-text">① Agent 身份</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#memory%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F"><span class="nav-number">4.4.2.</span> <span class="nav-text">② Memory（记忆系统）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#folder-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-number">4.4.3.</span> <span class="nav-text">③ Folder 文件系统</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#agent-%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">4.4.4.</span> <span class="nav-text">④ Agent 工作流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#heartbeat%E5%BF%83%E8%B7%B3%E6%9C%BA%E5%88%B6"><span class="nav-number">4.5.</span> <span class="nav-text">3.5 Heartbeat（心跳机制）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B-core-memory"><span class="nav-number">4.6.</span> <span class="nav-text">3.6 查看 Core Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B-message-history"><span class="nav-number">4.7.</span> <span class="nav-text">3.7 查看 Message History</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E8%AF%A6%E6%83%85"><span class="nav-number">5.</span> <span class="nav-text">4. 架构详情</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#core-memory-1"><span class="nav-number">5.1.</span> <span class="nav-text">4.1 Core Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#history-message"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 History Message</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#folder"><span class="nav-number">5.3.</span> <span class="nav-text">4.3 Folder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#archive-memory"><span class="nav-number">5.4.</span> <span class="nav-text">4.4 Archive Memory</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AA%E4%BA%BA%E8%AE%BE%E8%AE%A1%E7%9A%84%E7%B1%BB-letta-agent-%E5%A4%96%E7%BD%AE%E6%A1%86%E6%9E%B6"><span class="nav-number">6.</span> <span class="nav-text">5. 个人设计的类 Letta Agent
+外置框架</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="从零开始的LLM 7. letta框架学习与应用 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从零开始的LLM 7. letta框架学习与应用
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-07-25 23:13:49" itemprop="dateCreated datePublished" datetime="2026-07-25T23:13:49+08:00">2026-07-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-07-26 23:41:58" itemprop="dateModified" datetime="2026-07-26T23:41:58+08:00">2026-07-26</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>学习letta的整体架构、记忆系统和工具调用机制。</p>
+<span id="more"></span>
+<p>经过前面的学习，我们已经系统地完成了大语言模型（LLM）的基础部分，主要参考了以下资料：</p>
+<ul>
+<li>《动手学深度学习》</li>
+<li>《蘑菇书》</li>
+<li>《Happy-LLM》</li>
+<li>《Hello-Agents》</li>
+<li>《all-in-rag》</li>
+</ul>
+<p>到这里，可以认为已经具备了继续深入学习 Agent 的基础能力。</p>
+<p>接下来的内容将不再像之前那样按照固定课程循序渐进，而是更多围绕当前
+Agent 领域的研究方向展开。学习内容既会涉及工程实践（如各种 Agent
+框架、工作流、记忆系统等），也会涉及算法与模型层面的探索（如多模态、持续学习等）。</p>
+<ol type="1">
+<li>Generative Agents</li>
+<li>Letta</li>
+<li>A-MEM</li>
+<li>Voyager</li>
+</ol>
+<p>这条路线主要围绕 <strong>Agent 的持续学习（Continual
+Learning）</strong> 展开，也是我目前最感兴趣的方向：<strong>如何让一个
+Agent
+在长期运行过程中不断积累经验、提升能力，而不是每次都从零开始。</strong></p>
+<p>目前来看，大致有两种思路：</p>
+<ol type="1">
+<li><strong>不修改模型本身。</strong> 仅通过
+Prompt、记忆系统（Memory）、RAG、工具调用等机制，使 Agent
+能够不断积累知识和经验，实现能力的持续增长。</li>
+<li><strong>修改模型本身。</strong> 基于 Agent
+长期运行过程中积累的对话、笔记和总结等数据，在合适的时机对模型进行持续训练（Continual
+Fine-tuning），使模型真正将这些经验内化，而不仅仅依赖外部记忆。</li>
+</ol>
+<p>由于这一阶段更多是阅读论文、分析开源项目、验证实验以及整理个人理解，而不是单纯跟着教程学习，因此资料收集、实验和整理都会比之前花费更多时间。</p>
+<hr>
+<p>主要资料来自多年前的letta教程 <a target="_blank" rel="noopener" href="https://learn.deeplearning.ai/courses/llms-as-operating-systems-agent-memory/lesson/c25gr/editable-memory">链接</a></p>
+<hr>
+<h2 id="letta-介绍">1. letta 介绍</h2>
+<p><strong>Letta</strong> 是一个开源的 <strong>Stateful Agent（有状态
+Agent）</strong> 框架，由 Berkeley 提出的 <strong>MemGPT</strong>
+项目发展而来。与传统聊天机器人主要依赖单一上下文不同，Letta 将 Prompt
+视为 Agent 的<strong>工作记忆（Working
+Memory）</strong>，并借鉴操作系统的内存管理思想，将<strong>不同类型的信息划分到不同层级进行管理</strong>。例如，用户画像和当前任务等核心信息会始终保留在上下文中，而历史对话、长期知识和外部文档则存储在
+Prompt
+之外，仅在需要时通过检索重新加载到上下文。这种分层管理机制既缓解了上下文窗口（Context
+Window）的限制，也使 Agent 能够在长期运行过程中持续积累和利用经验。</p>
+<p>这种分层管理机制缓解了 LLM Context Window 有限带来的影响，使 Agent
+能够<strong>在长期运行过程中持续积累和利用信息</strong>，而不必将所有历史内容始终保留在
+Prompt 中。</p>
+<p>Letta 的整体prompt架构可以简单理解为下图：</p>
+<p><img src="/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/image-20260726000459731.png" style="zoom:80%;"></p>
+<h3 id="core-memory">1.1 Core Memory</h3>
+<p>Core Memory（新版文档称为 <strong>Memory Blocks</strong>）可以理解为
+Agent 的<strong>工作记忆</strong>。</p>
+<p>它会直接放入
+Prompt，因此模型每一次推理都会看到里面的内容，不需要任何检索。官方推荐将真正重要且需要长期保持的信息放在这里，例如：</p>
+<ul>
+<li>Agent Persona（角色设定）</li>
+<li>用户基本信息</li>
+<li>当前任务</li>
+<li>当前状态</li>
+<li>长期工作计划</li>
+</ul>
+<p>每个 Memory Block 主要由三个部分组成：</p>
+<ul>
+<li><strong>Label</strong>：唯一标识该记忆块。</li>
+<li><strong>Description</strong>：描述该记忆块的用途，帮助模型理解何时读取或修改。</li>
+<li><strong>Value</strong>：真正存储的数据内容。</li>
+</ul>
+<p>由于 Core Memory 会占用 Context
+Window，因此通常只适合存放少量、高价值的信息，而不适合保存大量历史数据。</p>
+<p>Agent 可以通过内置的 Memory Tool 对 Memory Block
+进行新增、修改和删除，因此 Core Memory 并不是一段固定的 System
+Prompt，而是一块<strong>可动态更新的 Prompt</strong>。</p>
+<h3 id="message-historyrecall-memory">1.2 Message History（Recall
+Memory）</h3>
+<p>Message History 对应 Letta 中的 <strong>Recall Memory</strong>。</p>
+<p>它保存的是<strong>完整的聊天记录</strong>，包括：</p>
+<ul>
+<li>User Message</li>
+<li>Assistant Message</li>
+<li>Tool Call</li>
+<li>Tool Result</li>
+</ul>
+<p>随着对话不断进行，<strong>Prompt
+中只会保留最近的一段聊天记录（Message Buffer）</strong>，以避免占满
+Context Window。当新的消息不断加入时，较早的消息会从当前 Prompt
+中移除，但消息本身并不会被删除，而是始终保存在 Recall Memory 中。</p>
+<p><strong>当 Agent 需要回顾过去的对话时，可以通过 Recall Memory
+提供的搜索工具，根据关键词或语义检索历史消息</strong>，并将检索结果重新加入当前
+Prompt 参与推理，而无需开发者自行维护聊天记录数据库。</p>
+<p>需要注意的是，Recall Memory
+保存的是<strong>完整且原始的消息记录</strong>，不会主动整理、总结或提炼其中的内容。如果需要长期保存用户偏好、经验总结等知识，则更适合写入
+Archival Memory。</p>
+<p>因此，可以将 Recall Memory 理解为：</p>
+<blockquote>
+<p><strong>Recall Memory =
+完整保存历史消息，并支持按需检索的聊天记录数据库。</strong></p>
+</blockquote>
+<h3 id="passagearchival-memory">1.3 Passage（Archival Memory）</h3>
+<p>在 Letta 中，<strong>Archival Memory 本质上是一个可读写的
+RAG（Retrieval-Augmented Generation）系统</strong>。</p>
+<p>需要注意的是，<strong>Passage</strong> 这一概念在 Letta
+的不同版本中有所变化。</p>
+<p>在早期版本中，<strong>Archival Memory</strong>
+同时承担了长期记忆和外部知识库的功能，其中存储的基本单位统称为
+<strong>Passage</strong>，主要分为两类：</p>
+<ul>
+<li><strong>FolderPassage</strong>：由上传的<strong>外部文件</strong>生成，例如
+PDF、Markdown、Word 等文档。</li>
+<li><strong>ArchivalPassage</strong>：由用户或 Agent
+在运行过程中主动写入的长期记忆，例如<strong>经验总结</strong>、<strong>知识笔记</strong>或<strong>用户偏好</strong>。</li>
+</ul>
+<p>因此，当时无论是上传文档还是写入长期记忆，本质上都会转换为
+Passage，并存储在同一套 Archival Memory 中。</p>
+<p>而在新版 Letta
+中，这两部分被进一步拆分：<strong>Files（Folder）</strong>
+专门负责管理外部文档，<strong>Archival Memory</strong> 则专注于存放
+Agent 的长期记忆。虽然逻辑上已经分离，但两者底层仍然遵循类似 RAG
+的处理流程：文本经过分块（Chunking）、向量化（Embedding）后存入向量数据库，并在需要时通过语义检索返回相关内容。</p>
+<h2 id="安装运行">2. 安装运行</h2>
+<h3 id="安装-letta">2.1 安装 Letta</h3>
+<p>首先安装 Letta 服务端和 Python 客户端：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pip install letta</span><br><span class="line">pip install letta-client</span><br></pre></td></tr></table></figure>
+<p>其中：</p>
+<ul>
+<li><code>letta</code>：Letta 服务端及核心代码。</li>
+<li><code>letta-client</code>：用于通过 Python 调用 Letta Server
+的客户端 SDK。</li>
+</ul>
+<p>需要注意的是，<code>pip install letta</code> 安装的就是 GitHub
+仓库发布到 PyPI 的正式版本，本质上与
+<code>github.com/letta-ai/letta</code>
+仓库保持同步，只是经过了打包发布。</p>
+<h3 id="配置-postgresql-与-pgvector">2.2 配置 PostgreSQL 与
+pgvector</h3>
+<p>按官方设计，Letta 支持 SQLite 和 PostgreSQL 两种数据库。</p>
+<p>不过，截至本文编写时（版本 <strong>0.16.x</strong>），由于 SQLite
+存在一些问题，实际运行过程中仍会依赖
+PostgreSQL，因此建议直接<strong>安装
+PostgreSQL（这部分需要用户自己去安装）</strong>。</p>
+<p>安装完成后，还需要安装 <strong>pgvector</strong> 扩展，用于存储
+Embedding 向量。</p>
+<p>Windows 用户可以直接下载官方维护的预编译版本：</p>
+<blockquote>
+<p>https://github.com/andreiramani/pgvector_pgsql_windows/releases</p>
+</blockquote>
+<p>下载后，将对应文件复制到 PostgreSQL 安装目录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">c:/vector.xxx/include/server/extension/vector</span><br><span class="line">    ↓</span><br><span class="line">c:/PostgreSQL/18/include/server/extension/vector</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">c:/vector.xxx/lib/vector.dll</span><br><span class="line">    ↓</span><br><span class="line">c:/PostgreSQL/18/lib/</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">c:/vector.xxx/share/extension/*</span><br><span class="line">    ↓</span><br><span class="line">c:/PostgreSQL/18/share/extension/</span><br></pre></td></tr></table></figure>
+<p>复制完成后，重启 PostgreSQL 服务：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">net</span> stop postgresql-x64-<span class="number">18</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">net</span> <span class="built_in">start</span> postgresql-x64-<span class="number">18</span></span><br></pre></td></tr></table></figure>
+<h3 id="初始化数据库">2.3 初始化数据库</h3>
+<p>新建数据库后，数据库中仍然没有 Letta 所需的数据表。</p>
+<p>例如：</p>
+<ul>
+<li>organizations</li>
+<li>agents</li>
+<li>blocks</li>
+<li>passages</li>
+<li>messages</li>
+</ul>
+<p>这些表都是通过 <strong>Alembic Migration</strong>
+创建的，因此需要执行一次数据库迁移。</p>
+<p>首先下载 Letta 的 Release 源码，然后进入项目目录：</p>
+<p><img src="/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/image-20260726005738324.png" style="zoom: 80%;"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd F:\letta-0.16.8</span><br></pre></td></tr></table></figure>
+<p>执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">alembic upgrade head</span><br></pre></td></tr></table></figure>
+<p>该命令会自动创建 Letta 所需的全部数据表。</p>
+<blockquote>
+<p><strong>说明</strong></p>
+<p>目前 PyPI 安装包并未包含 Alembic 配置，因此需要从 GitHub 下载 Letta
+源码，在项目目录中执行迁移命令。</p>
+</blockquote>
+<h3 id="配置数据库连接">2.4 配置数据库连接</h3>
+<p>目前 Alembic 默认仍可能连接 SQLite，而不是
+PostgreSQL，因此需要手动指定数据库连接地址。</p>
+<p>在命令行中执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set LETTA_PG_URI=postgresql+pg8000://letta:letta@localhost:5432/letta</span><br></pre></td></tr></table></figure>
+<p>其中：</p>
+<ul>
+<li><code>letta</code>：数据库用户名</li>
+<li><code>letta</code>：数据库密码</li>
+<li><code>localhost:5432</code>：数据库地址</li>
+<li><code>letta</code>：数据库名称</li>
+</ul>
+<p>如果长期使用，也可以直接将该环境变量配置到系统环境变量中。</p>
+<h3 id="安装-python-数据库依赖">2.5 安装 Python 数据库依赖</h3>
+<p>最后安装 Python 侧的 PostgreSQL 依赖：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pip install pgvector</span><br><span class="line">pip install pg8000</span><br></pre></td></tr></table></figure>
+<p>其中：</p>
+<ul>
+<li><strong>pg8000</strong>：Python 连接 PostgreSQL 的驱动。</li>
+<li><strong>pgvector</strong>：Python 版 pgvector，用于让 SQLAlchemy
+能够识别 PostgreSQL 的 <code>vector</code> 字段类型。</li>
+</ul>
+<h3 id="启动-letta">2.6 启动 Letta</h3>
+<p>完成以上配置后，运行以下 Python 文件即可启动 Letta Server：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> asyncio</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line">os.environ[<span class="string">&quot;PYTHONIOENCODING&quot;</span>] = <span class="string">&quot;utf-8&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 必须在任何 asyncio/asyncpg 代码运行之前设置</span></span><br><span class="line"><span class="keyword">if</span> sys.platform == <span class="string">&quot;win32&quot;</span>:</span><br><span class="line">    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())</span><br><span class="line"></span><br><span class="line"><span class="comment"># 必须在 import letta 之前设置，否则 Letta 可能读不到，默认走 OpenAI</span></span><br><span class="line">os.environ[<span class="string">&quot;OLLAMA_BASE_URL&quot;</span>] = <span class="string">&quot;http://localhost:11434/v1&quot;</span></span><br><span class="line">os.environ[<span class="string">&quot;LETTA_PG_URI&quot;</span>]=<span class="string">&quot;postgresql+asyncpg://letta:letta@localhost:5432/letta&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> letta.server.rest_api.app <span class="keyword">import</span> start_server</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    start_server()</span><br></pre></td></tr></table></figure>
+<p><img src="/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/image-20260726014135210.png"></p>
+<h2 id="agent-state-理解">3. Agent State 理解</h2>
+<p>首先创建 <code>Letta</code>
+客户端，以及一个用于打印消息的辅助函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> letta_client <span class="keyword">import</span> Letta</span><br><span class="line"></span><br><span class="line">client = Letta(base_url=<span class="string">&quot;http://localhost:8283&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">print_message</span>(<span class="params">message</span>):</span><br><span class="line">    <span class="keyword">if</span> message.message_type == <span class="string">&quot;reasoning_message&quot;</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;🧠 Reasoning: &quot;</span> + message.reasoning)</span><br><span class="line">    <span class="keyword">elif</span> message.message_type == <span class="string">&quot;assistant_message&quot;</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;🤖 Agent: &quot;</span> + message.content)</span><br><span class="line">    <span class="keyword">elif</span> message.message_type == <span class="string">&quot;tool_call_message&quot;</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;🔧 Tool Call: &quot;</span> + message.tool_call.name + <span class="string">&quot;\n&quot;</span> + message.tool_call.arguments)</span><br><span class="line">    <span class="keyword">elif</span> message.message_type == <span class="string">&quot;tool_return_message&quot;</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;🔧 Tool Return: &quot;</span> + message.tool_return)</span><br><span class="line">    <span class="keyword">elif</span> message.message_type == <span class="string">&quot;user_message&quot;</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;👤 User Message: &quot;</span> + message.content)</span><br></pre></td></tr></table></figure>
+<h3 id="创建-agent">3.1 创建 Agent</h3>
+<p>下面的函数会在 Letta 中创建一个 Agent。如果同名 Agent
+已存在，则直接复用。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">get_agent_state</span>(<span class="params">name</span>):</span><br><span class="line">    client = Letta(base_url=<span class="string">&quot;http://localhost:8283&quot;</span>)</span><br><span class="line">    existing = <span class="built_in">list</span>(client.agents.<span class="built_in">list</span>(name=name))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> existing:</span><br><span class="line">        agent_state = existing[<span class="number">0</span>]</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;复用已有 agent: <span class="subst">&#123;agent_state.<span class="built_in">id</span>&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        agent_state = client.agents.create(</span><br><span class="line">            name=name,</span><br><span class="line">            memory_blocks=[</span><br><span class="line">                &#123;<span class="string">&quot;label&quot;</span>: <span class="string">&quot;human&quot;</span>, <span class="string">&quot;value&quot;</span>: <span class="string">&quot;My name is Charles&quot;</span>, <span class="string">&quot;limit&quot;</span>: <span class="number">10000</span>&#125;,</span><br><span class="line">                &#123;<span class="string">&quot;label&quot;</span>: <span class="string">&quot;persona&quot;</span>, <span class="string">&quot;value&quot;</span>: <span class="string">&quot;You are a helpful assistant and you always use emojis&quot;</span>&#125;</span><br><span class="line">            ],</span><br><span class="line">            model=<span class="string">&quot;ollama/qwen2.5:7b&quot;</span>,</span><br><span class="line">            embedding=<span class="string">&quot;ollama/nomic-embed-text:latest&quot;</span>,</span><br><span class="line">            context_window_limit=<span class="number">8192</span>,</span><br><span class="line">            include_base_tools = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line">        )</span><br><span class="line">        all_tools = <span class="built_in">list</span>(client.tools.<span class="built_in">list</span>())</span><br><span class="line">        archival_tools = [t <span class="keyword">for</span> t <span class="keyword">in</span> all_tools <span class="keyword">if</span> <span class="string">&quot;archival&quot;</span> <span class="keyword">in</span> t.name.lower()]</span><br><span class="line">        <span class="keyword">for</span> t <span class="keyword">in</span> archival_tools:</span><br><span class="line">            client.agents.tools.attach(agent_id=agent_state.<span class="built_in">id</span>, tool_id=t.<span class="built_in">id</span>)</span><br><span class="line"></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;新建 agent: <span class="subst">&#123;agent_state.<span class="built_in">id</span>&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> agent_state</span><br><span class="line"></span><br><span class="line">agent_state = get_agent_state(<span class="string">&quot;simple_agent&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>这里需要注意一点：</p>
+<blockquote>
+<p><code>agent_state</code> <strong>并不是 Agent 的运行时状态（Runtime
+State）</strong>，而是 Agent 的配置对象（Configuration），其中包含了
+Agent 的 ID、模型配置、Memory Blocks、System Prompt
+等元信息。之后只需要提供 <code>agent_id</code>，Letta 就能够恢复该 Agent
+并继续对话。</p>
+</blockquote>
+<p>其中：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">memory_blocks=[</span><br><span class="line">    ...</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>对应的就是 <strong>Core Memory（Memory Blocks）</strong>。</p>
+<h3 id="与-agent-对话">3.2 与 Agent 对话</h3>
+<p>创建完成后，只需要提供 <code>agent_id</code> 即可让 Agent
+回答问题。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">response = client.agents.messages.create(</span><br><span class="line">    agent_id=agent_state.<span class="built_in">id</span>,</span><br><span class="line">    messages=[</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>,</span><br><span class="line">            <span class="string">&quot;content&quot;</span>: <span class="string">&quot;hows it going????&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>可以看到，API 中并不需要重新传入模型、Memory 或 Prompt。</p>
+<p>这些信息都会根据 <code>agent_id</code> 自动恢复。</p>
+<h3 id="查看-agent-的工具">3.3 查看 Agent 的工具</h3>
+<p>可以通过下面的代码查看当前 Agent 所拥有的工具。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tools = client.agents.tools.<span class="built_in">list</span>(agent_id=agent_state.<span class="built_in">id</span>)</span><br><span class="line"><span class="built_in">print</span>([t.name <span class="keyword">for</span> t <span class="keyword">in</span> tools])</span><br></pre></td></tr></table></figure>
+<p>理论上，agent会自动包含 Letta 的基础工具（如 Memory、Message
+等）。</p>
+<p>不过目前部分版本存在一些问题，因此有时需要像前面的代码一样，手动将工具重新挂载到
+Agent 上。</p>
+<h3 id="查看-system-prompt">3.4 查看 System Prompt</h3>
+<p>每个 Agent 都拥有一份完整的 System Prompt，可以直接查看：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(agent_state.system)</span><br></pre></td></tr></table></figure>
+<p>下面是格式化后的内容：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">base_instructions</span>&gt;</span></span><br><span class="line">    You are a helpful self-improving agent with advanced memory and file system capabilities.</span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">memory</span>&gt;</span></span><br><span class="line">        You have an advanced memory system that enables you to remember past interactions and continuously improve your own capabilities.</span><br><span class="line">        Your memory consists of memory blocks and external memory:</span><br><span class="line">            - Memory Blocks: Stored as memory blocks, each containing a label (title), description (explaining how this block should influence your behavior), and value (the actual content). Memory blocks have size limits. Memory blocks are embedded within your system instructions and remain constantly available in-context.</span><br><span class="line"></span><br><span class="line">            - External memory: Additional memory storage that is accessible and that you can bring into context with tools when needed.</span><br><span class="line">        Memory management tools allow you to edit existing memory blocks and query for external memories.</span><br><span class="line">    <span class="tag">&lt;/<span class="name">memory</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">file_system</span>&gt;</span></span><br><span class="line">        You have access to a structured file system that mirrors real-world directory structures. Each directory can contain multiple files.</span><br><span class="line">        Files include:</span><br><span class="line">            - Metadata: Information such as read-only permissions and character limits</span><br><span class="line">            - Content: The main body of the file that you can read and analyze</span><br><span class="line"></span><br><span class="line">        Available file operations:</span><br><span class="line">            - Open and view files</span><br><span class="line">            - Search within files and directories</span><br><span class="line">            - Your core memory will automatically reflect the contents of any currently open files</span><br><span class="line">            </span><br><span class="line">        You should only keep files open that are directly relevant to the current user interaction to maintain optimal performance.</span><br><span class="line">    <span class="tag">&lt;/<span class="name">file_system</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    Continue executing and calling tools until the current task is complete or you need user input. To continue: call another tool. To yield control: end your response without calling a tool.</span><br><span class="line">    </span><br><span class="line">    Base instructions complete.</span><br><span class="line"><span class="tag">&lt;/<span class="name">base_instructions</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>整个 Base Prompt 主要包含四部分内容。</p>
+<h4 id="agent-身份">① Agent 身份</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">You are a helpful self-improving agent...</span><br></pre></td></tr></table></figure>
+<p>定义 Agent 的基本身份以及整体行为。</p>
+<h4 id="memory记忆系统">② Memory（记忆系统）</h4>
+<p>介绍 Letta 的记忆结构，包括：</p>
+<ul>
+<li>Memory Blocks（Core Memory）
+<ul>
+<li>始终放在 Prompt 中。</li>
+<li>由多个 Block 组成，例如
+<code>human</code>、<code>persona</code>。</li>
+</ul></li>
+<li>External Memory
+<ul>
+<li>不会始终进入 Prompt。</li>
+<li>需要通过 Tool 检索后再加入上下文。</li>
+<li>一般指 Archive Memory 等外部记忆。</li>
+</ul></li>
+</ul>
+<h4 id="folder-文件系统">③ Folder 文件系统</h4>
+<p>介绍 Agent 如何访问 Letta 的 Folder。</p>
+<p>Folder 类似一个文件系统，Agent 可以通过工具：</p>
+<ul>
+<li>打开文件</li>
+<li>搜索文件</li>
+<li>阅读文件内容</li>
+</ul>
+<p>当需要使用文件内容时，会先通过 RAG
+检索相关文件，再打开这些文件。将文件的内容加入当前 Prompt，使 Agent
+能够基于文件内容继续推理和回答问题。</p>
+<h4 id="agent-工作流程">④ Agent 工作流程</h4>
+<p>最后定义了 Agent 的整体工作方式：</p>
+<blockquote>
+<p>持续调用工具完成任务，直到任务结束，或者需要等待用户输入。</p>
+</blockquote>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Continue executing and calling tools...</span><br></pre></td></tr></table></figure>
+<p>这也是 Letta 能够进行多步推理（Multi-step Reasoning）的基础。</p>
+<hr>
+<p>需要注意的是，<strong>Message History
+并没有在这里详细介绍。</strong></p>
+<p>这是因为对于 LLM
+而言，对话历史本身就是天然的上下文，无需再额外告诉模型如何使用。</p>
+<h3 id="heartbeat心跳机制">3.5 Heartbeat（心跳机制）</h3>
+<p>Letta 采用 <strong>Heartbeat（心跳）机制</strong> 来实现 Agent
+的多步执行。</p>
+<p>由于 LLM
+每次调用都是<strong>无状态（Stateless）</strong>的，一次推理结束后不会保留内部状态。因此，当
+Agent 调用 Tool 获得结果后，运行时（Runtime）会将 <strong>Tool
+Call</strong>、<strong>Tool Result</strong> 等信息加入 Message
+History，重新构造完整 Prompt，再次调用
+LLM，使其基于最新信息继续推理。</p>
+<p>然而，并不是<strong>所有 Tool
+调用后都需要继续推理</strong>。例如，Agent
+在搜索文件（<code>search_file()</code>）后，通常还需要根据搜索结果继续分析，因此需要再次调用
+LLM；而当 Agent 调用 <code>send_message("总结完成，以下是结果……")</code>
+时，消息已经发送给用户，本轮任务实际上已经结束。</p>
+<p>因此 Letta 将是否继续执行的控制权交给 LLM，由 <strong>Tool
+调用时</strong>携带 <code>request_heartbeat</code> 参数：</p>
+<ul>
+<li><strong><code>request_heartbeat = true</code></strong>：表示当前
+Tool 只是任务中的一个中间步骤，Tool 执行完成后，Runtime 会再次调用
+LLM，使 Agent 继续完成后续工作。</li>
+<li><strong><code>request_heartbeat = false</code></strong>：表示当前
+Tool 已完成最终操作（如向用户发送消息），Runtime 不再继续调用
+LLM，本轮任务结束。</li>
+</ul>
+<h3 id="查看-core-memory">3.6 查看 Core Memory</h3>
+<p>可以直接查看 Agent 当前保存的 Memory Blocks。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(agent_state.memory)</span><br></pre></td></tr></table></figure>
+<p>输出内容如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">Memory(</span><br><span class="line">	blocks=[</span><br><span class="line">		Block(</span><br><span class="line">			value=<span class="string">&#x27;My name is Charles&#x27;</span>,</span><br><span class="line">			<span class="built_in">id</span>=<span class="string">&#x27;block-2b0c35e8-6ad5-4bec-bb9a-8e59820a2f60&#x27;</span>,</span><br><span class="line">			base_template_id=<span class="literal">None</span>,</span><br><span class="line">			created_by_id=<span class="literal">None</span>,</span><br><span class="line">			deployment_id=<span class="literal">None</span>,</span><br><span class="line">			description=<span class="string">&#x27;The human block: Stores key details about the person you are conversing with, allowing for more personalized and friend-like conversation.&#x27;</span>,</span><br><span class="line">			entity_id=<span class="literal">None</span>,</span><br><span class="line">			hidden=<span class="literal">None</span>,</span><br><span class="line">			is_template=<span class="literal">False</span>,</span><br><span class="line">			label=<span class="string">&#x27;human&#x27;</span>,</span><br><span class="line">			last_updated_by_id=<span class="literal">None</span>,</span><br><span class="line">			limit=<span class="number">10000</span>,</span><br><span class="line">			metadata=&#123;&#125;,</span><br><span class="line">			preserve_on_migration=<span class="literal">False</span>,</span><br><span class="line">			project_id=<span class="literal">None</span>,</span><br><span class="line">			read_only=<span class="literal">False</span>,</span><br><span class="line">			tags=[],</span><br><span class="line">			template_id=<span class="literal">None</span>,</span><br><span class="line">			template_name=<span class="literal">None</span></span><br><span class="line">		),</span><br><span class="line">		Block(</span><br><span class="line">			value=<span class="string">&#x27;You are a helpful assistant and you always use emojis&#x27;</span>,</span><br><span class="line">			<span class="built_in">id</span>=<span class="string">&#x27;block-16afb2b9-6f75-4b07-b4af-b779f36add4e&#x27;</span>,</span><br><span class="line">			base_template_id=<span class="literal">None</span>,</span><br><span class="line">			created_by_id=<span class="literal">None</span>,</span><br><span class="line">			deployment_id=<span class="literal">None</span>,</span><br><span class="line">			description=<span class="string">&#x27;The persona block: Stores details about your current persona, guiding how you behave and respond. This helps you to maintain consistency and personality in your interactions.&#x27;</span>,</span><br><span class="line">			entity_id=<span class="literal">None</span>,</span><br><span class="line">			hidden=<span class="literal">None</span>,</span><br><span class="line">			is_template=<span class="literal">False</span>,</span><br><span class="line">			label=<span class="string">&#x27;persona&#x27;</span>,</span><br><span class="line">			last_updated_by_id=<span class="literal">None</span>,</span><br><span class="line">			limit=<span class="number">100000</span>,</span><br><span class="line">			metadata=&#123;&#125;,</span><br><span class="line">			preserve_on_migration=<span class="literal">False</span>,</span><br><span class="line">			project_id=<span class="literal">None</span>,</span><br><span class="line">			read_only=<span class="literal">False</span>,</span><br><span class="line">			tags=[],</span><br><span class="line">			template_id=<span class="literal">None</span>,</span><br><span class="line">			template_name=<span class="literal">None</span></span><br><span class="line">		)</span><br><span class="line">	],</span><br><span class="line">	agent_type=<span class="string">&#x27;letta_v1_agent&#x27;</span>,</span><br><span class="line">	file_blocks=[],</span><br><span class="line">	git_enabled=<span class="literal">False</span>,</span><br><span class="line">	prompt_template=<span class="string">&#x27;&#x27;</span></span><br><span class="line">)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>其中可以看到每个 Memory Block 的：</p>
+<ul>
+<li><code>label</code>：名称（如
+<code>human</code>、<code>persona</code>）</li>
+<li><code>value</code>：实际内容</li>
+<li><code>description</code>：该 Block 的作用说明</li>
+<li><code>limit</code>：最大长度限制</li>
+</ul>
+<p>这些 Block 会始终作为 Prompt 的一部分参与推理，因此通常用于保存 Agent
+的长期人格设定，以及用户的重要信息。</p>
+<h3 id="查看-message-history">3.7 查看 Message History</h3>
+<p>可以根据 <code>agent_id</code> 查看当前 Agent 的完整消息历史。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> message <span class="keyword">in</span> client.agents.messages.<span class="built_in">list</span>(agent_id=agent_state.<span class="built_in">id</span>):</span><br><span class="line">    print_message(message)</span><br></pre></td></tr></table></figure>
+<p>打印结果如下：</p>
+<p><img src="/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/image-20260726105841614.png" style="zoom:80%;"></p>
+<h2 id="架构详情">4. 架构详情</h2>
+<p>虽然在第 1 节中已经简单介绍了各个组成部分，但这一节将进一步说明 Core
+Memory、History Message、Folder 和 Archive Memory 在 Letta
+中各自承担的职责。</p>
+<p>由于本文更关注 Letta 的整体架构设计，而不是 SDK
+的具体使用方式，因此后续不会详细介绍每个模块的 API
+操作。有需要的读者可以参考 <a target="_blank" rel="noopener" href="https://docs.letta.com/agent-sdk">Letta SDK 文档</a> 与 <a target="_blank" rel="noopener" href="https://learn.deeplearning.ai/courses/llms-as-operating-systems-agent-memory/lesson/c25gr/editable-memory">LLMs
+as Operating Systems: Agent Memory</a> 自行学习。</p>
+<h3 id="core-memory-1">4.1 Core Memory</h3>
+<p>前面已经介绍过，Core Memory 会像 System Prompt
+一样，在每一次模型调用时完整地加入 Prompt 中，因此其中的内容始终能够被
+Agent 感知。</p>
+<p>不过，两者最大的区别在于：</p>
+<ul>
+<li><strong>System Prompt</strong>
+通常由开发者定义，运行过程中基本保持不变。</li>
+<li><strong>Core Memory</strong> 则可以由 Agent
+通过工具主动修改，因此它是一块<strong>可编辑的 Prompt 区域（Editable
+Prompt）</strong>。</li>
+</ul>
+<p>因此，可以将 Core Memory 看作是 System Prompt
+的一种延伸，用来存放那些<strong>必须始终存在于上下文中的信息</strong>。这些信息<strong>既可以由用户明确要求记录，也可以由
+Agent 在持续交互过程中主动总结、归纳并写入</strong>。例如：</p>
+<ul>
+<li>Agent 自身的身份、角色设定；</li>
+<li>用户的重要长期信息（如用户要求记住的偏好、习惯等）；</li>
+<li>回复风格、行为规范；</li>
+<li>当前长期任务的目标与进展；</li>
+<li>Agent 在长期交互过程中形成的重要认知或工作状态；</li>
+<li>其他需要持续保留的重要信息。</li>
+</ul>
+<p>由于 Core Memory 会一直占用 Prompt
+Token，因此其中的<strong>信息应当保持精简</strong>，只保留那些真正需要在每一次推理时都参与思考的内容，而不适合存放大量历史信息。</p>
+<p>从整个架构来看，Core Memory 更像是 Agent 的<strong>工作记忆（Working
+Memory）</strong>，负责维护当前最重要的状态。</p>
+<h3 id="history-message">4.2 History Message</h3>
+<p>History Message 保存的是当前会话中的历史消息。</p>
+<p>这些历史对话本身就包含了大量上下文信息，例如用户之前提出的问题、Agent
+的回答以及当前讨论的主题，因此默认携带一定数量的历史消息能够显著提升
+Agent 对当前对话的理解能力和连续性。</p>
+<p>不过，随着对话不断进行，History 会越来越长，不可能无限制地放入 Prompt
+中。因此通常会限制：</p>
+<ul>
+<li>最大消息数量（Message Count）</li>
+<li>最大 Token 数（Token Budget）</li>
+</ul>
+<p>当超过限制时，便删除最早的历史消息，或通过摘要（Summary）等方式压缩历史内容，从而控制
+Prompt 的大小。</p>
+<p>这种设计也比较符合人类的认知方式：近期发生的事情记得更清楚，而很久以前的细节则会逐渐遗忘，只保留重要的信息。</p>
+<h3 id="folder">4.3 Folder</h3>
+<p>Folder 用于存放外部知识，例如
+PDF、Word、Markdown、网页等各种文档。</p>
+<p>这些内容会经过切分（Chunk）、Embedding，并存入向量数据库形成可检索的
+Passage，因此其本质就是一个<strong>只读的 RAG 知识库</strong>。</p>
+<p>当 Agent 需要相关知识时，会先进行检索，再将检索结果加入当前 Prompt
+中参与推理，而不是一次性将整个文档加载进上下文。</p>
+<p>因此，可以把 Folder 理解为 Agent
+的外部参考资料，它负责提供知识，而不会主动参与记忆的维护。</p>
+<h3 id="archive-memory">4.4 Archive Memory</h3>
+<p>从底层实现来看，Archive Memory 与 Folder
+使用的是同一种存储形式——<strong>Passage + RAG 检索</strong>。</p>
+<p>两者最大的区别在于数据来源：</p>
+<ul>
+<li><strong>Folder</strong>：内容来自开发者导入的外部资料。</li>
+<li><strong>Archive Memory</strong>：内容来自 Agent 自身，由 Agent
+根据需要主动写入、修改或删除。</li>
+</ul>
+<p>因此，Archive Memory 更像是 Agent 自己维护的长期知识库。</p>
+<p>对于那些<strong>不需要一直放在 Prompt
+中，但未来可能仍然有价值</strong>的信息，Agent 可以将其存入 Archive
+Memory。当后续需要时，再通过检索将相关内容重新加入
+Prompt，而不是长期占用有限的上下文窗口。</p>
+<p>这种设计能够<strong>大幅扩展 Agent 的长期记忆容量，也是 Letta
+长期记忆机制的重要组成部分</strong>。</p>
+<p>不过，我个人认为，<strong>RAG 并不是 Archive Memory
+唯一的实现方式，而是一种工程上的设计取舍。</strong></p>
+<p>由于 Archive Memory 存储的是 Agent
+自己整理的知识，因此也可以采用更符合人类组织知识的结构，例如树状笔记（类似
+CherryTree 或 Obsidian 的层级结构）：</p>
+<ul>
+<li>Agent 自行创建目录节点；</li>
+<li>在节点中维护知识内容；</li>
+<li>提供浏览子节点、返回父节点、搜索节点等工具；</li>
+<li>由 Agent 自己决定知识如何组织，而不是完全依赖向量相似度检索。</li>
+</ul>
+<p>这种方式能够让知识之间具有明确的层次关系，更适合构建结构化记忆。</p>
+<p>当然，这种设计对 Agent
+的规划能力和知识组织能力要求更高。如果模型无法稳定维护这种层级结构，那么采用
+RAG 作为 Archive Memory
+的底层实现反而更加简单、鲁棒，也更容易扩展到海量数据。因此，两种方案各有优缺点，具体采用哪一种，应根据
+Agent 的能力以及应用场景进行权衡。</p>
+<h2 id="个人设计的类-letta-agent-外置框架">5. 个人设计的类 Letta Agent
+外置框架</h2>
+<p>在学习 Letta 的过程中，我也参考其设计理念，尝试设计并实现一套自己的
+Agent 外置框架。目前该框架采用 <strong>LangGraph</strong>
+作为流程编排框架，<strong>整个项目仍在持续设计与开发中，正按照规划逐步实现各个模块。</strong></p>
+<p>整个框架的目标并不是复刻
+Letta，而是借鉴其<strong>「将不同类型的信息进行分层管理（State
+Management）」</strong>这一核心思想，并进一步将 Memory
+从框架本身解耦出来，使其成为一种可自由扩展的外部能力。这样，Agent
+可以更加灵活地管理自身状态，并根据不同场景选择合适的长期记忆实现方式，而不受底层存储结构的限制。</p>
+<p>下面的文件结构是 Claude
+根据整体架构生成的一份初步目录，仅作为框架组织方式的参考。</p>
+<p><img src="/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/image-20260726233831473.png"></p>
+<p>下面是整个框架的流程设计、状态管理以及各个模块的数据结构与实现思路。</p>
+<p><img src="/2026/07/25/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-7/image-20260726232430958.png"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM/" rel="tag"># 从零开始的LLM</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/%E7%AC%AC7%E8%8A%82/" rel="tag"># 第7节</a>
+              <a href="/tags/%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0/" rel="tag"># 持续学习</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/07/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-6-2/" rel="prev" title="从零开始的LLM 6. RAG（检索增强生成）(二)">
+                  <i class="fa fa-angle-left"></i> 从零开始的LLM 6. RAG（检索增强生成）(二)
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
