@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 本文将介绍 A-MEM 的核心原理、API 使用方法，以及如何基于 LangChain 构建一个具备记忆能力的 Agent。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的LLM 9. A-MEM 与 LangChain&#x2F;LangGraph学习">
+<meta property="og:url" content="https://zusda.github.io/2026/08/08/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-9/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 本文将介绍 A-MEM 的核心原理、API 使用方法，以及如何基于 LangChain 构建一个具备记忆能力的 Agent。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/08/08/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-9/image-20260810090352364.png">
+<meta property="og:image" content="https://zusda.github.io/2026/08/08/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-9/image-20260810090631005.png">
+<meta property="article:published_time" content="2026-08-08T15:05:34.000Z">
+<meta property="article:modified_time" content="2026-08-10T11:54:23.649Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="从零开始的LLM">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="持续学习">
+<meta property="article:tag" content="第9节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/08/08/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-9/image-20260810090352364.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/08/08/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-9/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/08/08/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-9/","path":"2026/08/08/从零开始的LLM-9/","title":"从零开始的LLM 9. A-MEM 与 LangChain/LangGraph学习"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>从零开始的LLM 9. A-MEM 与 LangChain/LangGraph学习 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#a-mem%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">1. A-MEM原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#note-%E7%BB%93%E6%9E%84structured-memory-notes"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 Note 结构（Structured
+Memory Notes）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BF%86%E5%85%B3%E8%81%94%E7%94%9F%E6%88%90link-generation"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 记忆关联生成（Link
+Generation）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BF%86%E6%BC%94%E5%8C%96memory-evolution"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 记忆演化（Memory Evolution）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E8%AE%B0%E5%BF%86%E6%A3%80%E7%B4%A2retrieve-relative-memory"><span class="nav-number">2.4.</span> <span class="nav-text">1.4 相关记忆检索（Retrieve
+Relative Memory）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">2.5.</span> <span class="nav-text">1.5 总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#langchain-%E5%92%8C-langgraph-%E5%AD%A6%E4%B9%A0"><span class="nav-number">3.</span> <span class="nav-text">2. LangChain 和 LangGraph 学习</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#langchain"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 LangChain</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#langgraph"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 LangGraph</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#langchain-%E7%9A%84%E6%B6%88%E6%81%AF%E7%B3%BB%E7%BB%9F"><span class="nav-number">3.2.1.</span> <span class="nav-text">2.2.1 LangChain 的消息系统</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%A8%E5%B1%80%E7%8A%B6%E6%80%81state"><span class="nav-number">3.2.2.</span> <span class="nav-text">2.2.2 全局状态（State）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8A%82%E7%82%B9%E5%87%BD%E6%95%B0"><span class="nav-number">3.2.3.</span> <span class="nav-text">2.2.3 节点函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6edge"><span class="nav-number">3.2.4.</span> <span class="nav-text">2.2.4 流程控制（Edge）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E5%A4%84%E7%90%86tool"><span class="nav-number">3.2.5.</span> <span class="nav-text">2.2.5 工具处理（Tool）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#graph%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C%E4%B8%8E%E4%BC%9A%E8%AF%9D%E7%AE%A1%E7%90%86"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 Graph应用运行与会话管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEgraph%E7%8A%B6%E6%80%81%E6%8C%81%E4%B9%85%E5%8C%96"><span class="nav-number">3.3.1.</span> <span class="nav-text">2.3.1 配置Graph状态持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#checkpointer%E6%9C%BA%E5%88%B6"><span class="nav-number">3.3.1.1.</span> <span class="nav-text">checkpointer机制</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81checkpointer%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.3.1.2.</span> <span class="nav-text">常见checkpointer实现</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#thread_id%E6%9C%BA%E5%88%B6"><span class="nav-number">3.3.1.3.</span> <span class="nav-text">thread_id机制</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%9A%E8%AF%9D%E6%A8%A1%E5%BC%8F%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.3.2.</span> <span class="nav-text">2.3.2 会话模式设计</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E4%B8%80%E5%9B%BA%E5%AE%9Athread_id%E5%BC%80%E5%90%AF%E7%9F%AD%E6%9C%9F%E8%AE%B0%E5%BF%86"><span class="nav-number">3.3.2.1.</span> <span class="nav-text">模式一：固定thread_id（开启短期记忆）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E4%BA%8C%E6%AF%8F%E8%BD%AE%E6%96%B0thread_id%E5%85%B3%E9%97%AD%E7%9F%AD%E6%9C%9F%E8%AE%B0%E5%BF%86"><span class="nav-number">3.3.2.2.</span> <span class="nav-text">模式二：每轮新thread_id（关闭短期记忆）</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#graph%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-number">3.3.3.</span> <span class="nav-text">2.3.3 Graph执行流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%93%E5%8D%B0%E6%96%B0%E5%A2%9E%E6%B6%88%E6%81%AF"><span class="nav-number">3.3.4.</span> <span class="nav-text">2.3.4 打印新增消息</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#a-mem-%E4%BD%BF%E7%94%A8%E4%BB%A5%E5%8F%8A-agent-%E5%88%B6%E4%BD%9C"><span class="nav-number">4.</span> <span class="nav-text">3. A-MEM 使用以及 Agent 制作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96-a-mem"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 初始化 A-MEM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E5%AD%98%E8%AE%B0%E5%BF%86"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 保存记忆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%80%E7%B4%A2%E8%AE%B0%E5%BF%86"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 检索记忆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#search_agentic-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">4.4.</span> <span class="nav-text">3.4 search_agentic 源码分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#agent-%E6%8E%A5%E5%85%A5-a-mem"><span class="nav-number">4.5.</span> <span class="nav-text">3.5 Agent 接入 A-MEM</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E8%AF%9D%E5%BC%80%E5%A7%8B%E5%89%8D%E8%AF%BB%E5%8F%96%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86"><span class="nav-number">4.5.1.</span> <span class="nav-text">3.5.1 对话开始前读取长期记忆</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E8%AF%9D%E7%BB%93%E6%9D%9F%E5%90%8E%E4%BF%9D%E5%AD%98%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86"><span class="nav-number">4.5.2.</span> <span class="nav-text">3.5.2 对话结束后保存长期记忆</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-number">5.</span> <span class="nav-text">4. 总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">81</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/08/08/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="从零开始的LLM 9. A-MEM 与 LangChain/LangGraph学习 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从零开始的LLM 9. A-MEM 与 LangChain/LangGraph学习
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-08-08 23:05:34" itemprop="dateCreated datePublished" datetime="2026-08-08T23:05:34+08:00">2026-08-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-08-10 19:54:23" itemprop="dateModified" datetime="2026-08-10T19:54:23+08:00">2026-08-10</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>本文将介绍 A-MEM 的核心原理、API 使用方法，以及如何基于 LangChain
+构建一个具备记忆能力的 Agent。</p>
+<span id="more"></span>
+<p>经过前面的学习，我们已经系统地完成了大语言模型（LLM）的基础部分，主要参考了以下资料：</p>
+<ul>
+<li>《动手学深度学习》</li>
+<li>《蘑菇书》</li>
+<li>《Happy-LLM》</li>
+<li>《Hello-Agents》</li>
+<li>《all-in-rag》</li>
+</ul>
+<p>到这里，可以认为已经具备了继续深入学习 Agent 的基础能力。</p>
+<p>接下来的内容将不再像之前那样按照固定课程循序渐进，而是更多围绕当前
+Agent 领域的研究方向展开。学习内容既会涉及工程实践（如各种 Agent
+框架、工作流、记忆系统等），也会涉及算法与模型层面的探索（如多模态、持续学习等）。</p>
+<ol type="1">
+<li>Generative Agents</li>
+<li>Letta</li>
+<li>A-MEM</li>
+<li>Voyager</li>
+</ol>
+<p>这条路线主要围绕 <strong>Agent 的持续学习（Continual
+Learning）</strong> 展开，也是我目前最感兴趣的方向：<strong>如何让一个
+Agent
+在长期运行过程中不断积累经验、提升能力，而不是每次都从零开始。</strong></p>
+<p>目前来看，大致有两种思路：</p>
+<ol type="1">
+<li><strong>不修改模型本身。</strong> 仅通过
+Prompt、记忆系统（Memory）、RAG、工具调用等机制，使 Agent
+能够不断积累知识和经验，实现能力的持续增长。</li>
+<li><strong>修改模型本身。</strong> 基于 Agent
+长期运行过程中积累的对话、笔记和总结等数据，在合适的时机对模型进行持续训练（Continual
+Fine-tuning），使模型真正将这些经验内化，而不仅仅依赖外部记忆。</li>
+</ol>
+<p>由于这一阶段更多是阅读论文、分析开源项目、验证实验以及整理个人理解，而不是单纯跟着教程学习，因此资料收集、实验和整理都会比之前花费更多时间。</p>
+<hr>
+<p>本章节主要是对 A-MEM 的学习和总结。A-MEM
+是一个挺有创意的设计，我认为「卡片化记忆」这个思路本身非常不错，但真正将这个想法落地，实现成一个可以运行的系统，又是另一件很厉害的事情。当然，A-MEM
+目前也存在一些问题，还有不少可以优化的空间。</p>
+<p>在学习 A-MEM 的过程中，我也重新熟悉了一遍如何使用 LangChain 构造
+Agent。因此，本文不会把重点全部放在 A-MEM
+的理论介绍上，而是会结合实际代码实现，探索如何构建一个带有 Memory 能力的
+Agent。</p>
+<p>除此之外，在调研 Memory 方案的过程中，我发现目前使用较多的方案之一是
+mem0。一个方案能够被大量使用，通常都有其存在的原因。因此，后续在学习
+Voyager 之前，我会先对 mem0
+的设计和实现进行学习，了解它为什么能够得到较广泛的应用。</p>
+<hr>
+<h2 id="a-mem原理">1. A-MEM原理</h2>
+<p>论文链接：https://arxiv.org/abs/2502.12110</p>
+<p>A-MEM（Agentic Memory）的整体结构并不复杂，其核心思想是：</p>
+<p><strong>将每次交互转换为结构化 memory
+note，并通过记忆之间的关联和动态更新，使长期记忆逐渐形成一个可演化的记忆网络。</strong></p>
+<h3 id="note-结构structured-memory-notes">1.1 Note 结构（Structured
+Memory Notes）</h3>
+<p>对于每一个记忆 <span class="math inline">\(m_i\)</span>，A-MEM都会构建一个结构化 memory
+note： <span class="math display">\[
+m_i=\{c_i,t_i,K_i,G_i,X_i,e_i,L_i\}
+\]</span> 其中：</p>
+<ul>
+<li><span class="math inline">\(c_i\)</span>：对话内容，即用户的问题和
+LLM 的回答；</li>
+<li><span class="math inline">\(t_i\)</span>：该次交互发生的时间戳；</li>
+<li><span class="math inline">\(L_i\)</span>：关联记忆列表，保存与当前记忆存在语义关系的其他
+memory id。</li>
+</ul>
+<p>除了原始的交互内容和时间信息外，A-MEM还会通过 LLM
+对当前记忆进行进一步分析，生成额外的结构化信息：</p>
+<p><span class="math display">\[
+K_i,G_i,X_i \leftarrow \text{LLM}(c_i||t_i||P_{s1})
+\]</span> 其中：</p>
+<ul>
+<li><span class="math inline">\(K_i\)</span>：关键词，用于表示当前记忆中的核心概念；</li>
+<li><span class="math inline">\(G_i\)</span>：标签，用于对记忆进行分类；</li>
+<li><span class="math inline">\(X_i\)</span>：内容描述，对当前记忆提供更加丰富的语义信息。</li>
+</ul>
+<p>简单来说：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">关键词、tag、描述 = LLM(对话内容 + 时间戳)</span><br></pre></td></tr></table></figure>
+<p>相比直接保存原始对话，这种方式能够提取出更适合检索的高层语义信息。</p>
+<p>之后，将原始对话内容以及生成的关键词、标签、描述进行拼接，并通过
+Encoder 转换成向量： <span class="math display">\[
+e_i=f_{enc}[\text{concat}(c_i,K_i,G_i,X_i)]
+\]</span> 其中：</p>
+<ul>
+<li><span class="math inline">\(e_i\)</span> 是该 memory note
+的向量表示；</li>
+</ul>
+<p>它融合了原始交互内容以及 LLM 提取出的结构化信息，后续的 memory
+检索和关联发现都会基于该向量进行。</p>
+<h3 id="记忆关联生成link-generation">1.2 记忆关联生成（Link
+Generation）</h3>
+<p>当新的记忆 <span class="math inline">\(m_n\)</span>
+加入系统时，A-MEM首先会寻找与它可能相关的已有记忆。</p>
+<p>首先，通过 embedding （<span class="math inline">\(e_i\)</span>
+）计算新记忆与已有记忆之间的相似度： <span class="math display">\[
+s_{n,j}=\frac{e_n * e_j}{|e_n|*|e_j|}
+\]</span> 取出其中最相似的k个记忆 <span class="math inline">\(m_j\)</span> ，他们组成集合 <span class="math inline">\(M^n_\text{near}\)</span> <span class="math display">\[
+M^n_\text{near}=\{m_j|\text{rank}(s_{n,j})\le k,m_j \in M\}
+\]</span> 这些记忆作为候选关联对象。</p>
+<p>随后，将新记忆 <span class="math inline">\(m_n\)</span>
+和候选记忆集合 <span class="math inline">\(M^n_{near}\)</span> 输入
+LLM，让模型进一步判断它们之间是否存在语义关系，如果 LLM 判断两个 memory
+之间存在关联，则会将对应 memory id 添加到<strong>当前 memory</strong> 的
+<span class="math inline">\(L_n\)</span> 中。： <span class="math display">\[
+L_n \leftarrow \text{LLM}(m_n||M^n_\text{near}||P_{s2})
+\]</span> 整体流程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">新memory</span><br><span class="line">    ↓</span><br><span class="line">Embedding相似度检索</span><br><span class="line">    ↓</span><br><span class="line">获取候选memory</span><br><span class="line">    ↓</span><br><span class="line">LLM判断关系</span><br><span class="line">    ↓</span><br><span class="line">建立memory link</span><br></pre></td></tr></table></figure>
+<p>这里可以看到：</p>
+<ul>
+<li>Embedding 负责快速筛选可能相关的 memory；</li>
+<li>LLM 负责进一步理解语义关系并决定是否建立连接。</li>
+</ul>
+<p>相比单纯的向量检索，memory link 可以让不同记忆之间形成显式关系。</p>
+<h3 id="记忆演化memory-evolution">1.3 记忆演化（Memory Evolution）</h3>
+<p>除了建立新的关联，A-MEM还会根据新产生的 memory <strong>对已有相关
+memory 进行更新</strong>。</p>
+<p>对于候选集合 <span class="math inline">\(M^n_{near}\)</span>
+中的每一个记忆 <span class="math inline">\(m_j\)</span>： <span class="math display">\[
+m^*_j \leftarrow \text{LLM}(m_n||m_j||P_{s3})
+\]</span></p>
+<p>LLM 会分析新旧 memory 之间的关系，并更新已有 memory
+的内容，包括：</p>
+<ul>
+<li>内容描述；</li>
+<li>关键词；</li>
+<li>标签。</li>
+</ul>
+<blockquote>
+<p>例如：</p>
+<p>已有 memory：用户正在学习机器学习。</p>
+<p>新增 memory：用户最近开始学习 PyTorch。</p>
+<p>经过更新后，memory 可以变成：用户正在学习机器学习，并开始深入学习
+PyTorch。</p>
+</blockquote>
+<hr>
+<p>这里我认为也是 A-MEM 一个可以进一步改进的地方。</p>
+<p>目前 A-MEM主要采用<strong>更新机制</strong>，即通过新信息优化已有
+memory，但是没有进一步处理：</p>
+<ul>
+<li>两条 memory 高度重复时，是否应该合并；</li>
+<li>新旧 memory 发生冲突时，如何判断哪个信息更加可靠；</li>
+<li>长期无效或者过时的 memory 是否应该删除。</li>
+</ul>
+<p>因此，可以进一步加入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">memory merge（记忆合并）</span><br><span class="line">memory conflict resolution（冲突解决）</span><br><span class="line">memory forgetting（记忆遗忘）</span><br></pre></td></tr></table></figure>
+<p>等机制，使长期记忆管理更加完善。</p>
+<h3 id="相关记忆检索retrieve-relative-memory">1.4 相关记忆检索（Retrieve
+Relative Memory）</h3>
+<p>在每次 LLM 回复之前，A-MEM都会执行一次 memory retrieval。</p>
+<p>具体流程如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">用户问题</span><br><span class="line">    ↓</span><br><span class="line">Embedding编码</span><br><span class="line">    ↓</span><br><span class="line">向量相似度搜索</span><br><span class="line">    ↓</span><br><span class="line">获取Top-k相关memory</span><br><span class="line">    ↓</span><br><span class="line">加入Prompt</span><br><span class="line">    ↓</span><br><span class="line">LLM生成回答</span><br></pre></td></tr></table></figure>
+<p>具体来说：</p>
+<ol type="1">
+<li>将用户当前问题转换成向量；</li>
+<li>与已有 memory 的 embedding 计算相似度；</li>
+<li>获取最相关的 k 条 memory；</li>
+<li>将检索到的 memory 与用户问题一起输入 LLM。</li>
+</ol>
+<h3 id="总结">1.5 总结</h3>
+<p>A-MEM的核心并不是提出一种新的向量检索方法，而是<strong>重新设计了长期
+memory 的组织方式</strong>。</p>
+<p>A-MEM 与传统的历史聊天记录存储方案（例如 Letta 的 recall
+memory）最大的区别在于：</p>
+<p><strong>传统方案</strong>更接近“<strong>历史聊天记录数据库 +
+向量检索</strong>”，而 A-MEM
+更关注如何将历史交互转换为可组织、可关联、可演化的长期记忆。</p>
+<p>传统 recall memory 的流程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">历史聊天记录</span><br><span class="line">      ↓</span><br><span class="line">Embedding编码</span><br><span class="line">      ↓</span><br><span class="line">向量检索</span><br><span class="line">      ↓</span><br><span class="line">找到相关历史对话</span><br><span class="line">      ↓</span><br><span class="line">加入Prompt</span><br><span class="line">      ↓</span><br><span class="line">LLM生成回答</span><br></pre></td></tr></table></figure>
+<p>这种方式本质上是对过去对话的检索。当用户再次提到相关内容时，系统通过相似度找到之前的聊天记录，并将其提供给
+LLM。</p>
+<p>而 A-MEM 的流程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">用户交互</span><br><span class="line">      ↓</span><br><span class="line">生成结构化memory note</span><br><span class="line">      ↓</span><br><span class="line">建立memory link</span><br><span class="line">      ↓</span><br><span class="line">更新已有memory</span><br><span class="line">      ↓</span><br><span class="line">形成memory网络</span><br><span class="line">      ↓</span><br><span class="line">检索相关memory</span><br><span class="line">      ↓</span><br><span class="line">LLM生成回答</span><br></pre></td></tr></table></figure>
+<p>A-MEM 不只是保存“过去发生了什么”，而是进一步提取：</p>
+<ul>
+<li>关键词；</li>
+<li>标签；</li>
+<li>内容描述；</li>
+<li>记忆之间的关联关系。</li>
+</ul>
+<p>因此，memory
+不再是一堆独立的历史记录，而是逐渐形成一个具有结构和关系的知识网络。</p>
+<blockquote>
+<p>这里要提一点。可能初学者不太区分<strong>长期记忆（Long-term
+Memory）</strong>和<strong>短期记忆（Short-term Memory）</strong>。</p>
+<p>A-MEM主要针对的是长期记忆，因此采用类似 RAG
+的方式，通过向量检索获取与当前问题相关的历史 memory 是合理的。</p>
+<p>而短期记忆主要指当前会话中的上下文（多轮对话历史）。由于这些信息通常距离当前问题较近，不需要额外进行复杂的检索，可以直接根据上下文窗口大小进行裁剪，并放入
+Prompt 中。</p>
+</blockquote>
+<h2 id="langchain-和-langgraph-学习">2. LangChain 和 LangGraph 学习</h2>
+<p>首先需要说明LangChain 和 LangGraph 两者之间的关系。</p>
+<p>简单来说：</p>
+<ul>
+<li><strong>LangChain 主要负责提供构建 LLM
+应用的基础组件。</strong></li>
+<li><strong>LangGraph 主要负责定义这些组件之间的执行流程。</strong></li>
+</ul>
+<p>二者通常配合使用。</p>
+<p>可以简单理解：</p>
+<blockquote>
+<p>LangChain 提供 Agent 的各种“零件”，LangGraph
+负责把这些零件按照一定流程组织起来。</p>
+</blockquote>
+<h3 id="langchain">2.1 LangChain</h3>
+<p>LangChain 是一个用于构建 LLM
+应用的开发框架，主要提供各种基础能力，例如：</p>
+<p>定义模型：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain_ollama <span class="keyword">import</span> ChatOllama</span><br><span class="line">llm = ChatOllama(model=<span class="string">&quot;qwen2.5:7b&quot;</span>, temperature=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<p>调用模型：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">llm.invoke(messages)</span><br></pre></td></tr></table></figure>
+<p>定义工具：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@tool</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">search_memory</span>(<span class="params">query:<span class="built_in">str</span></span>):</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>绑定工具：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">llm.bind_tools(tools)</span><br></pre></td></tr></table></figure>
+<p>还有其他向量库等各种零件工具。</p>
+<h3 id="langgraph">2.2 LangGraph</h3>
+<p>LangGraph 主要负责 Agent 的流程编排。</p>
+<p>它提供：</p>
+<ul>
+<li>State（全局状态）</li>
+<li>Node（节点）</li>
+<li>Edge（节点连接）</li>
+<li>Conditional Edge（条件分支）</li>
+</ul>
+<h4 id="langchain-的消息系统">2.2.1 LangChain 的消息系统</h4>
+<p>LangChain 使用统一的消息抽象：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BaseMessage</span><br></pre></td></tr></table></figure>
+<p><code>BaseMessage</code> 是所有消息类型的基类。</p>
+<p>常见消息：</p>
+<table>
+<thead>
+<tr>
+<th>消息类型</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HumanMessage</td>
+<td>用户输入</td>
+</tr>
+<tr>
+<td>AIMessage</td>
+<td>LLM输出</td>
+</tr>
+<tr>
+<td>SystemMessage</td>
+<td>系统提示</td>
+</tr>
+<tr>
+<td>ToolMessage</td>
+<td>工具执行结果</td>
+</tr>
+</tbody>
+</table>
+<p>一次完整 Agent 流程如下。</p>
+<hr>
+<p><strong>a. 用户输入</strong></p>
+<p>用户：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">帮我查北京天气</span><br></pre></td></tr></table></figure>
+<p>转换为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HumanMessage(</span><br><span class="line">    content=<span class="string">&quot;帮我查北京天气&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>此时状态：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">messages=[</span><br><span class="line">    HumanMessage(<span class="string">&quot;帮我查北京天气&quot;</span>)</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<hr>
+<p><strong>b. LLM 判断调用工具</strong></p>
+<p>LLM 根据当前绑定的工具，决定调用天气查询工具：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">AIMessage(</span><br><span class="line">    content=<span class="string">&quot;&quot;</span>,</span><br><span class="line">    tool_calls=[</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="string">&quot;name&quot;</span>:<span class="string">&quot;weather&quot;</span>,</span><br><span class="line">            <span class="string">&quot;args&quot;</span>:&#123;</span><br><span class="line">                <span class="string">&quot;city&quot;</span>:<span class="string">&quot;北京&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>注意：</p>
+<p>这里的 AIMessage 不是最终回答。</p>
+<p>它表示：</p>
+<blockquote>
+<p>LLM 请求执行 weather 工具。</p>
+</blockquote>
+<p>此时：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">messages=[</span><br><span class="line">    HumanMessage(<span class="string">&quot;帮我查北京天气&quot;</span>),</span><br><span class="line"></span><br><span class="line">    AIMessage(</span><br><span class="line">        tool_calls=[</span><br><span class="line">            weather(<span class="string">&quot;北京&quot;</span>)</span><br><span class="line">        ]</span><br><span class="line">    )</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<hr>
+<p><strong>c. ToolNode 执行工具</strong></p>
+<p>ToolNode 读取：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AIMessage.tool_calls</span><br></pre></td></tr></table></figure>
+<p>找到对应工具并执行。</p>
+<p>工具返回：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ToolMessage(</span><br><span class="line">    content=<span class="string">&quot;北京今天晴，25度&quot;</span>,</span><br><span class="line">    tool_call_id=<span class="string">&quot;xxx&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>状态：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">messages=[</span><br><span class="line">    HumanMessage(...),</span><br><span class="line"></span><br><span class="line">    AIMessage(</span><br><span class="line">        tool_calls=[weather]</span><br><span class="line">    ),</span><br><span class="line"></span><br><span class="line">    ToolMessage(</span><br><span class="line">        content=<span class="string">&quot;北京今天晴，25度&quot;</span></span><br><span class="line">    )</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<hr>
+<p><strong>d. LLM 生成最终答案</strong></p>
+<p>LLM 根据工具返回结果继续生成：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">AIMessage(</span><br><span class="line">    content=<span class="string">&quot;北京今天晴，气温25度。&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>最终：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">messages=[</span><br><span class="line">    HumanMessage,</span><br><span class="line"></span><br><span class="line">    AIMessage(tool_call),</span><br><span class="line"></span><br><span class="line">    ToolMessage,</span><br><span class="line"></span><br><span class="line">    AIMessage(answer)</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<h4 id="全局状态state">2.2.2 全局状态（State）</h4>
+<p>LangGraph 中，所有节点共享一个状态对象（State）。</p>
+<p>例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">AgentState</span>(<span class="title class_ inherited__">TypedDict</span>):</span><br><span class="line">    messages: <span class="type">Sequence</span>[BaseMessage]</span><br></pre></td></tr></table></figure>
+<p>这里使用 Python 的 <code>TypedDict</code> 定义 State 的结构，即
+<strong>State 本质上是一个字典</strong>，其中 <code>messages</code>
+字段保存由多个 <code>BaseMessage</code> 对象组成的消息序列，例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;messages&quot;</span>: [</span><br><span class="line">        HumanMessage(...),</span><br><span class="line">        AIMessage(...)</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果希望 LangGraph 在更新 <code>messages</code>
+时自动合并新旧消息，而不是直接覆盖，可以使用 <code>Annotated</code> 指定
+reducer：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> Annotated, <span class="type">Sequence</span>, TypedDict</span><br><span class="line"><span class="keyword">from</span> langgraph.graph.message <span class="keyword">import</span> add_messages</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AgentState</span>(<span class="title class_ inherited__">TypedDict</span>):</span><br><span class="line">    messages: Annotated[</span><br><span class="line">        <span class="type">Sequence</span>[BaseMessage],</span><br><span class="line">        add_message</span><br><span class="line">    ]</span><br></pre></td></tr></table></figure>
+<p>其中，<code>Annotated</code> 为 <code>messages</code> 附加了
+<code>add_messages</code> 这一更新规则。也就是说，当节点返回新的
+<code>messages</code> 时，<strong>不会直接覆盖原有消息</strong>，而是由
+<code>add_messages</code>
+将新旧消息进行合并，从而保留之前的消息。例如原来有
+<code>[HumanMessage]</code>，节点返回 <code>[AIMessage]</code>，经过
+<code>add_messages</code> 后会变成
+<code>[HumanMessage, AIMessage]</code>。</p>
+<p>我们也可以自定义 reducer，例如只保留最近 50 条消息：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">limited_messages</span>(<span class="params"></span></span><br><span class="line"><span class="params">    old: <span class="type">Sequence</span>[BaseMessage],</span></span><br><span class="line"><span class="params">    new: <span class="type">Sequence</span>[BaseMessage]</span></span><br><span class="line"><span class="params"></span>):</span><br><span class="line">    messages = <span class="built_in">list</span>(old) + <span class="built_in">list</span>(new)</span><br><span class="line">    <span class="keyword">return</span> messages[-<span class="number">50</span>:]</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AgentState</span>(<span class="title class_ inherited__">TypedDict</span>):</span><br><span class="line">    messages: Annotated[</span><br><span class="line">        <span class="type">Sequence</span>[BaseMessage],</span><br><span class="line">        limited_messages</span><br><span class="line">    ]</span><br></pre></td></tr></table></figure>
+<hr>
+<p>定义好 State ，然后就是最开始的一步，创建图</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment"># 5. 构建 LangGraph 图</span></span><br><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line">graph = StateGraph(AgentState)</span><br></pre></td></tr></table></figure>
+<h4 id="节点函数">2.2.3 节点函数</h4>
+<p>LangGraph 中的 Node 本质上就是一个普通 Python 函数。</p>
+<p>节点函数主要负责：</p>
+<ol type="1">
+<li>接收当前全局状态（State）；</li>
+<li>根据任务进行处理；</li>
+<li>返回需要更新的状态字段。</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">retrieve_context</span>(<span class="params">state: AgentState</span>) -&gt; AgentState:</span><br><span class="line">    ...</span><br><span class="line">    system_note = SystemMessage(</span><br><span class="line">        content=<span class="string">f&quot;以下是与当前问题相关的历史记忆，可参考但不必照搬:\n<span class="subst">&#123;context_text&#125;</span>&quot;</span></span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: [system_note]&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: [system_note]&#125;</span><br></pre></td></tr></table></figure>
+<p>并不是直接修改全局状态，而是告诉 LangGraph：</p>
+<blockquote>
+<p>当前节点需要更新 <code>messages</code> 字段。</p>
+</blockquote>
+<p>LangGraph 会将节点的返回值识别为 <strong>State
+Update</strong>，然后根据 <code>AgentState</code> 中定义的 reducer
+处理新旧状态，最后更新全局 State，并将更新后的 State
+传递给下一节点。</p>
+<p>节点也可以直接通过 <code>state["messages"]</code>
+修改状态，例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">retrieve_context</span>(<span class="params">state: AgentState</span>):</span><br><span class="line">    state[<span class="string">&quot;messages&quot;</span>].append(system_note)</span><br><span class="line">    <span class="keyword">return</span> state</span><br></pre></td></tr></table></figure>
+<p>但通常不推荐这样做。</p>
+<p>LangGraph 的设计是让节点通过 <code>return</code> 返回 <strong>State
+Update</strong>，再由 LangGraph 统一处理状态更新。这样可以：</p>
+<ul>
+<li>由 reducer 统一决定新旧状态如何合并；</li>
+<li>避免节点直接修改共享 State；</li>
+<li>使节点的输入、输出更加明确，便于维护和调试。</li>
+</ul>
+<p>因此，更推荐：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: [system_note]&#125;</span><br></pre></td></tr></table></figure>
+<p>而不是直接修改：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">state[<span class="string">&quot;messages&quot;</span>].append(system_note)</span><br></pre></td></tr></table></figure>
+<p>另外，节点不需要返回完整的
+<code>AgentState</code>，只需要<strong>返回需要更新的字段</strong>即可。</p>
+<hr>
+<p>定义节点函数后，需要将其<strong>添加到 LangGraph 图</strong>中：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">graph.add_node(</span><br><span class="line">    <span class="string">&quot;retrieve_context&quot;</span>,</span><br><span class="line">    retrieve_context</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>其中：</p>
+<ul>
+<li><code>"retrieve_context"</code>：节点名称，用于后续定义边（Edge）时引用；</li>
+<li><code>retrieve_context</code>：实际执行的 Python 函数。</li>
+</ul>
+<h4 id="流程控制edge">2.2.4 流程控制（Edge）</h4>
+<p>Edge 用于定义 LangGraph 中节点之间的执行关系，可以简单理解为：</p>
+<blockquote>
+<p>指定一个节点执行完成后，下一步进入哪个节点。</p>
+</blockquote>
+<p>首先定义入口节点，注意这里填写的是<strong>节点名称</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">graph.set_entry_point(<span class="string">&quot;retrieve_context&quot;</span>)</span><br></pre></td></tr></table></figure>
+<hr>
+<p><strong>普通边</strong></p>
+<p>添加普通单向边：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">graph.add_edge(<span class="string">&quot;retrieve_context&quot;</span>, <span class="string">&quot;agent&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>即 <code>retrieve_context</code> 节点执行完成后，进入
+<code>agent</code> 节点。</p>
+<hr>
+<p><strong>条件边（Conditional Edge）</strong></p>
+<p>除了固定流向外，LangGraph 也支持根据条件动态选择下一节点：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">graph.add_conditional_edges(</span><br><span class="line">    <span class="string">&quot;agent&quot;</span>,</span><br><span class="line">    tools_condition,</span><br><span class="line">    &#123;<span class="string">&quot;tools&quot;</span>: <span class="string">&quot;tools&quot;</span>, <span class="string">&quot;__end__&quot;</span>: <span class="string">&quot;persist&quot;</span>&#125;,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>其中：</p>
+<ul>
+<li><code>"agent"</code>：表示从哪个节点开始判断；</li>
+<li><code>tools_condition</code>：条件判断函数；</li>
+<li>字典：定义条件函数返回值对应的目标节点。</li>
+</ul>
+<p><strong>条件函数的返回值必须是字符串</strong>，并且该字符串需要存在于映射表中。</p>
+<p>例如，条件函数执行完后返回如下字符：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="string">&quot;tools&quot;</span></span><br></pre></td></tr></table></figure>
+<p>会根据 <code>&#123;"tools": "tools", "__end__": "persist"&#125;,</code>
+进入tool节点。</p>
+<h4 id="工具处理tool">2.2.5 工具处理（Tool）</h4>
+<p>LangGraph 提供了预构建工具节点：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langgraph.prebuilt <span class="keyword">import</span> ToolNode, tools_condition</span><br></pre></td></tr></table></figure>
+<p>其中：</p>
+<ul>
+<li><code>ToolNode</code>：负责执行工具调用；</li>
+<li><code>tools_condition</code>：负责判断是否需要调用工具。</li>
+</ul>
+<hr>
+<p><strong>定义工具</strong></p>
+<p>首先通过 LangChain 的 <code>@tool</code> 装饰器定义工具：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@tool</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">save_memory</span>(<span class="params">content: <span class="built_in">str</span>, tags: <span class="built_in">str</span> = <span class="string">&quot;&quot;</span>, category: <span class="built_in">str</span> = <span class="string">&quot;General&quot;</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;把一条重要信息主动写入长期记忆(A-MEM)。tags 用逗号分隔，如 &quot;项目,决策&quot;。&quot;&quot;&quot;</span></span><br><span class="line">	...</span><br><span class="line">    <span class="keyword">return</span> <span class="string">f&quot;已写入记忆，memory_id=<span class="subst">&#123;memory_id&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@tool</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">search_memory</span>(<span class="params">query: <span class="built_in">str</span>, k: <span class="built_in">int</span> = <span class="number">5</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;在长期记忆(A-MEM)中检索与 query 语义相关的历史笔记，k 为返回条数。&quot;&quot;&quot;</span></span><br><span class="line">	...</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;\n&quot;</span>.join(lines)</span><br></pre></td></tr></table></figure>
+<p><code>@tool</code>
+会根据函数名称、参数类型、描述信息等<strong>自动生成 Tool
+Schema</strong>，使 LLM 能够理解：</p>
+<ul>
+<li>工具名称；</li>
+<li>工具作用；</li>
+<li>参数格式。</li>
+</ul>
+<p>然后将工具保存：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tools = [save_memory, search_memory]</span><br></pre></td></tr></table></figure>
+<hr>
+<p><strong>绑定工具到 LLM</strong></p>
+<p>LLM 通过 <code>bind_tools()</code> 将工具信息提供给模型：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">llm = ChatOllama(</span><br><span class="line">    model=<span class="string">&quot;qwen2.5:7b&quot;</span>,</span><br><span class="line">    temperature=<span class="number">0</span></span><br><span class="line">).bind_tools(tools)</span><br></pre></td></tr></table></figure>
+<p>此时工具的名称、描述、参数结构等信息会被 LangChain
+添加到模型输入中。</p>
+<p>在真正发送给模型前，LangChain 会根据模型对应的 Chat
+Template，将消息和工具定义转换成模型能够理解的格式。</p>
+<p><img src="/2026/08/08/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-9/image-20260810090352364.png" style="zoom:80%;"></p>
+<p>现代 LLM 通常通过特殊 token 和结构化消息格式处理工具调用，例如：</p>
+<p><img src="/2026/08/08/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-9/image-20260810090631005.png" style="zoom:67%;"></p>
+<p>模型通过这些信息知道：</p>
+<ul>
+<li>当前有哪些工具可以调用；</li>
+<li>每个工具的作用；</li>
+<li>工具需要哪些参数；</li>
+<li>如何生成符合格式的 <code>tool_calls</code>。</li>
+</ul>
+<hr>
+<p><strong>创建工具节点</strong></p>
+<p>通过：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">graph.add_node(</span><br><span class="line">    <span class="string">&quot;tools&quot;</span>,</span><br><span class="line">    ToolNode(tools)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>添加工具节点。</p>
+<p><code>ToolNode(tools)</code> 可以理解为：</p>
+<blockquote>
+<p>一个专门执行 LLM 工具调用请求的节点。</p>
+</blockquote>
+<p>它主要负责：</p>
+<ol type="1">
+<li>获取 LLM 输出中的 <code>tool_calls</code>；</li>
+<li>根据工具名称找到对应函数；</li>
+<li>执行工具；</li>
+<li>将结果转换为 <code>ToolMessage</code>。</li>
+</ol>
+<p>例如 LLM 输出：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">AIMessage(</span><br><span class="line">    tool_calls=[</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;search_memory&quot;</span>,</span><br><span class="line">            <span class="string">&quot;args&quot;</span>: &#123;</span><br><span class="line">                <span class="string">&quot;query&quot;</span>: <span class="string">&quot;项目资料&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>ToolNode 接收到后，会转换并执行：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">search_memory(query=<span class="string">&quot;项目资料&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>然后返回：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ToolMessage(</span><br><span class="line">    content=<span class="string">&quot;检索结果...&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<hr>
+<p><strong>tools_condition 判断工具调用</strong></p>
+<p>在 Agent 流程中，LLM 节点执行完成后，需要判断下一步应该：</p>
+<ul>
+<li>调用工具；</li>
+<li>还是直接生成最终答案。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langgraph.prebuilt <span class="keyword">import</span> ToolNode, tools_condition</span><br><span class="line"><span class="comment"># tools_condition: 若 LLM 触发了 tool_calls -&gt; &quot;tools&quot;，否则 -&gt; &quot;__end__&quot;</span></span><br><span class="line">graph.add_conditional_edges(</span><br><span class="line">    <span class="string">&quot;agent&quot;</span>,</span><br><span class="line">    tools_condition,</span><br><span class="line">    &#123;<span class="string">&quot;tools&quot;</span>: <span class="string">&quot;tools&quot;</span>, <span class="string">&quot;__end__&quot;</span>: <span class="string">&quot;persist&quot;</span>&#125;,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p><code>tools_condition</code> 的作用：</p>
+<blockquote>
+<p>检查最后一条 <code>AIMessage</code> 是否包含
+<code>tool_calls</code>，并根据结果返回对应的路由名称。</p>
+</blockquote>
+<hr>
+<p>如果 LLM 决定调用工具：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">AIMessage(</span><br><span class="line">    content=<span class="string">&quot;&quot;</span>,</span><br><span class="line">    tool_calls=[</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;search_memory&quot;</span>,</span><br><span class="line">            <span class="string">&quot;args&quot;</span>: &#123;</span><br><span class="line">                <span class="string">&quot;query&quot;</span>: <span class="string">&quot;项目资料&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>此时：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tools_condition(state)</span><br></pre></td></tr></table></figure>
+<p>返回：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;tools&quot;</span></span><br></pre></td></tr></table></figure>
+<hr>
+<p>如果 LLM 不需要调用工具，直接生成回答：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">AIMessage(</span><br><span class="line">    content=<span class="string">&quot;答案是...&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>由于不存在<code>tool_calls</code>，因此：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tools_condition(state)</span><br></pre></td></tr></table></figure>
+<p>返回：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;__end__&quot;</span></span><br></pre></td></tr></table></figure>
+<p>进入结束流程。</p>
+<p>需要注意，<code>tools_condition</code>
+<strong>不会执行工具</strong>，它只负责判断下一步流程。</p>
+<p>实际执行工具的是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ToolNode(tools)</span><br></pre></td></tr></table></figure>
+<h3 id="graph应用运行与会话管理">2.3 Graph应用运行与会话管理</h3>
+<p>在完成 Graph 构建后，主程序主要负责 <strong>初始化 Graph
+应用</strong>、<strong>配置会话状态</strong>、<strong>处理用户交互</strong>以及<strong>执行
+Agent 流程</strong>。</p>
+<h4 id="配置graph状态持久化">2.3.1 配置Graph状态持久化</h4>
+<p>首先，需要为 Graph 添加状态保存能力：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langgraph.checkpoint.memory <span class="keyword">import</span> MemorySaver</span><br><span class="line"></span><br><span class="line">app = graph.<span class="built_in">compile</span>(</span><br><span class="line">    checkpointer=MemorySaver()</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：如果不配置 <code>checkpointer=MemorySaver()</code>，Graph
+执行过程中的状态不会被保存，每次调用 <code>invoke()</code>
+都会从初始状态开始，无法保留历史对话。</p>
+</blockquote>
+<hr>
+<h5 id="checkpointer机制">checkpointer机制</h5>
+<p><code>checkpointer</code> 是 LangGraph 中用于<strong>保存和恢复 Graph
+状态（state）</strong>的组件，可以理解为 Graph 的"存档系统"。</p>
+<p>在 LangGraph 中，节点之间通过 <code>state</code> 传递数据，例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">AgentState</span>(<span class="title class_ inherited__">TypedDict</span>):</span><br><span class="line">    messages: Annotated[<span class="type">Sequence</span>[BaseMessage], add_messages]</span><br></pre></td></tr></table></figure>
+<p>其中 <code>messages</code> 保存当前会话产生的消息。</p>
+<p>如果没有配置 <code>checkpointer</code>，这些状态只存在于当前一次
+Graph 执行过程中。当 <code>invoke()</code>
+结束后，状态不会被保存，下一次调用无法继续之前的会话。</p>
+<p>配置 <code>checkpointer</code> 后，LangGraph 会在执行过程中保存当前
+state 的 checkpoint，并与 <code>thread_id</code> 关联。当下一次使用相同
+<code>thread_id</code> 调用 Graph 时，会自动恢复对应的 state。</p>
+<hr>
+<h5 id="常见checkpointer实现">常见checkpointer实现</h5>
+<p>LangGraph提供了多种状态存储方式：</p>
+<table>
+<colgroup>
+<col style="width: 23%">
+<col style="width: 43%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr>
+<th>实现</th>
+<th>说明</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MemorySaver</code></td>
+<td>保存在内存中，程序退出后丢失</td>
+<td>本地开发、调试</td>
+</tr>
+<tr>
+<td><code>SqliteSaver</code></td>
+<td>保存到SQLite文件</td>
+<td>单机应用、小规模持久化</td>
+</tr>
+<tr>
+<td><code>PostgresSaver</code></td>
+<td>保存到PostgreSQL</td>
+<td>生产环境、多实例部署</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h5 id="thread_id机制">thread_id机制</h5>
+<p><code>checkpointer</code>
+需要通过唯一标识区分不同会话，这个标识就是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">config[<span class="string">&quot;configurable&quot;</span>][<span class="string">&quot;thread_id&quot;</span>]</span><br></pre></td></tr></table></figure>
+<p>这里的 <code>"thread_id"</code> 是 LangGraph checkpoint
+机制规定的固定字段，而不是自定义名称。</p>
+<p><code>checkpointer</code> 在保存和读取 state 时，会从：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">config[<span class="string">&quot;configurable&quot;</span>]</span><br></pre></td></tr></table></figure>
+<p>中获取：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">thread_id</span><br></pre></td></tr></table></figure>
+<p>并将其作为当前会话状态的索引。</p>
+<p>因此：</p>
+<ul>
+<li>相同 <code>thread_id</code>：恢复之前保存的状态；</li>
+<li>不同 <code>thread_id</code>：创建新的独立状态。</li>
+</ul>
+<h4 id="会话模式设计">2.3.2 会话模式设计</h4>
+<p>基于 <code>thread_id</code>，可以实现两种不同的会话模式。</p>
+<hr>
+<h5 id="模式一固定thread_id开启短期记忆">模式一：固定thread_id（开启短期记忆）</h5>
+<p>固定使用一个 session：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">thread_id = FIXED_THREAD_ID</span><br></pre></td></tr></table></figure>
+<p>此时，之前的消息会一直保存在 <code>messages</code> 中。</p>
+<p>例如：</p>
+<p>第一次调用：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">messages=[</span><br><span class="line">    HumanMessage(<span class="string">&quot;你好&quot;</span>),</span><br><span class="line">    AIMessage(<span class="string">&quot;你好&quot;</span>)</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>第二次调用：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">messages=[</span><br><span class="line">    HumanMessage(<span class="string">&quot;你好&quot;</span>),</span><br><span class="line">    AIMessage(<span class="string">&quot;你好&quot;</span>),</span><br><span class="line">    HumanMessage(<span class="string">&quot;介绍一下自己&quot;</span>)</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>新的消息会追加到已有消息列表中，并作为当前 Graph state 继续传递。</p>
+<p>这种模式适用于：</p>
+<ul>
+<li>多轮聊天机器人；</li>
+<li>需要上下文理解的 Agent；</li>
+<li>普通对话场景。</li>
+</ul>
+<hr>
+<h5 id="模式二每轮新thread_id关闭短期记忆">模式二：每轮新thread_id（关闭短期记忆）</h5>
+<p>每次生成新的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">thread_id = uuid.uuid4().<span class="built_in">hex</span></span><br></pre></td></tr></table></figure>
+<p>此时每轮对话都是独立 session，不会携带之前的
+<code>messages</code>。</p>
+<p>这种方式适合测试长期记忆能力：</p>
+<ul>
+<li>不依赖短期上下文；</li>
+<li>通过 Memory / RAG 检索历史信息；</li>
+<li>验证 Agent 是否真正使用长期记忆。</li>
+</ul>
+<hr>
+<p>实际代码中，可以通过开关控制两种模式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    user_input = <span class="built_in">input</span>(<span class="string">&quot;你: &quot;</span>).strip()</span><br><span class="line">    <span class="keyword">if</span> user_input.lower() <span class="keyword">in</span> (<span class="string">&quot;exit&quot;</span>, <span class="string">&quot;quit&quot;</span>, <span class="string">&quot;退出&quot;</span>):</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 根据开关生成 thread_id</span></span><br><span class="line">    <span class="keyword">if</span> USE_PERSISTENT_THREAD:</span><br><span class="line">        thread_id = FIXED_THREAD_ID</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        thread_id = uuid.uuid4().<span class="built_in">hex</span>   <span class="comment"># 每次随机生成新 ID</span></span><br></pre></td></tr></table></figure>
+<p>随后生成 Graph 配置：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">config = &#123;<span class="string">&quot;configurable&quot;</span>: &#123;<span class="string">&quot;thread_id&quot;</span>: thread_id&#125;&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="graph执行流程">2.3.3 Graph执行流程</h4>
+<p>在调用 Graph 前，需要先获取当前 thread 已保存的消息。</p>
+<p>这里主要用于：</p>
+<ul>
+<li>判断本轮新增消息；</li>
+<li>打印 Agent 执行过程中的工具调用和返回结果。</li>
+</ul>
+<p>代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 记录本轮开始前的消息 ID（用于打印新增内容）</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    prev_snapshot = app.get_state(config)</span><br><span class="line">    <span class="keyword">if</span> prev_snapshot.values:</span><br><span class="line">        prev_messages = prev_snapshot.values.get(<span class="string">&quot;messages&quot;</span>, [])</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        prev_messages = []</span><br><span class="line"></span><br><span class="line">    prev_ids = &#123;m.<span class="built_in">id</span> <span class="keyword">for</span> m <span class="keyword">in</span> prev_messages&#125;</span><br><span class="line"><span class="keyword">except</span> Exception:</span><br><span class="line">    <span class="comment"># 如果 thread_id 从未使用过，get_state 可能报错，视为空历史</span></span><br><span class="line">    prev_ids = <span class="built_in">set</span>()</span><br></pre></td></tr></table></figure>
+<p>然后将用户输入传入 Graph：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">result = app.invoke(</span><br><span class="line">    &#123;<span class="string">&quot;messages&quot;</span>: [HumanMessage(content=user_input)]&#125;,</span><br><span class="line">    config=config,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p><code>result</code> 是 <strong>这一次 <code>invoke()</code>
+执行结束后返回的最终 state（Graph状态快照）</strong>。</p>
+<p><code>result["messages"]</code>中包含整个 Graph
+执行过程产生的消息，包括：</p>
+<ul>
+<li>用户消息；</li>
+<li>AI 回复；</li>
+<li>工具调用消息；</li>
+<li>工具执行结果。</li>
+</ul>
+<h4 id="打印新增消息">2.3.4 打印新增消息</h4>
+<p>由于：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">result[<span class="string">&quot;messages&quot;</span>]</span><br></pre></td></tr></table></figure>
+<p>包含历史消息，因此需要过滤出本轮新增内容：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">new_messages = [m <span class="keyword">for</span> m <span class="keyword">in</span> result[<span class="string">&quot;messages&quot;</span>] <span class="keyword">if</span> m.<span class="built_in">id</span> <span class="keyword">not</span> <span class="keyword">in</span> prev_ids]</span><br></pre></td></tr></table></figure>
+<p>然后根据消息类型进行打印：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 打印本轮新增消息（工具调用等）</span></span><br><span class="line"><span class="keyword">for</span> m <span class="keyword">in</span> new_messages:</span><br><span class="line">    role = <span class="built_in">type</span>(m).__name__</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(m, AIMessage) <span class="keyword">and</span> m.tool_calls:</span><br><span class="line">        <span class="keyword">for</span> call <span class="keyword">in</span> m.tool_calls:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;[<span class="subst">&#123;role&#125;</span>] 调用工具: <span class="subst">&#123;call[<span class="string">&#x27;name&#x27;</span>]&#125;</span>(<span class="subst">&#123;call[<span class="string">&#x27;args&#x27;</span>]&#125;</span>)&quot;</span>)</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">isinstance</span>(m, ToolMessage):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;[<span class="subst">&#123;role&#125;</span>] 工具结果: <span class="subst">&#123;m.content&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;[<span class="subst">&#123;role&#125;</span>] <span class="subst">&#123;m.content&#125;</span>&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>()</span><br></pre></td></tr></table></figure>
+<p>例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[HumanMessage] 查询天气</span><br><span class="line"></span><br><span class="line">[AIMessage] 调用工具:</span><br><span class="line">weather_api(&#123;<span class="string">&#x27;city&#x27;</span>:<span class="string">&#x27;Tokyo&#x27;</span>&#125;)</span><br><span class="line"></span><br><span class="line">[ToolMessage] 东京今天晴天</span><br><span class="line"></span><br><span class="line">[AIMessage] 今天东京天气晴朗</span><br></pre></td></tr></table></figure>
+<p>代码中 <code>role = type(m).__name__</code>
+用于获取消息类型名称。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">m = AIMessage(content=<span class="string">&quot;hello&quot;</span>)</span><br><span class="line"><span class="built_in">type</span>(m)          <span class="comment"># → &lt;class &#x27;langchain_core.messages.ai.AIMessage&#x27;&gt;  （这是类对象，不是字符串）</span></span><br><span class="line"><span class="built_in">type</span>(m).__name__ <span class="comment"># → &quot;AIMessage&quot;  （这才是字符串，类名本身）</span></span><br></pre></td></tr></table></figure>
+<h2 id="a-mem-使用以及-agent-制作">3. A-MEM 使用以及 Agent 制作</h2>
+<p>在第 2 章节中，已经介绍了 Agent 的整体实现流程。本章节主要补充 A-MEM
+的实际使用方式，以及如何将其接入 Agent 工作流。</p>
+<p>A-MEM 官方仓库： https://github.com/agiresearch/A-mem</p>
+<p>安装:</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/agiresearch/A-mem.git</span><br><span class="line"><span class="built_in">cd</span> A-mem &amp;&amp; pip install .</span><br></pre></td></tr></table></figure>
+<p>安装完成后导入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> agentic_memory.memory_system <span class="keyword">import</span> AgenticMemorySystem</span><br></pre></td></tr></table></figure>
+<p>虽然前面介绍了 A-MEM
+的核心思想，包括记忆生成、记忆关联以及检索机制，但实际使用时，A-MEM
+已经通过 API 封装好了大部分细节，我们主要关注以下几个接口：</p>
+<ul>
+<li>初始化记忆系统；</li>
+<li>添加记忆；</li>
+<li>检索记忆。</li>
+</ul>
+<h3 id="初始化-a-mem">3.1 初始化 A-MEM</h3>
+<p>首先创建 A-MEM 记忆系统：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">memory_system = AgenticMemorySystem(</span><br><span class="line">    model_name=<span class="string">&quot;paraphrase-multilingual-MiniLM-L12-v2&quot;</span>,</span><br><span class="line">    llm_backend=<span class="string">&quot;ollama&quot;</span>,</span><br><span class="line">    llm_model=<span class="string">&quot;qwen2.5:7b&quot;</span>,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>其中：</p>
+<p><code>model_name</code></p>
+<ul>
+<li>用于 ChromaDB 向量检索的 <strong>embedding 模型</strong>；</li>
+<li>不是 LLM，仅负责文本向量化；</li>
+<li>默认使用 <code>sentence-transformers</code> 加载。</li>
+</ul>
+<p><code>llm_backend</code></p>
+<ul>
+<li>指定生成记忆时调用的 LLM 后端。</li>
+</ul>
+<p><code>llm_model</code></p>
+<ul>
+<li>指定具体使用的模型名称，需要与 Ollama
+中已经下载的模型名称保持一致。</li>
+</ul>
+<blockquote>
+<p>第一次运行时 <code>paraphrase-multilingual-MiniLM-L12-v2</code>
+会通过 <code>sentence-transformers</code> 自动从 HuggingFace Hub
+下载模型权重，并缓存到：<code>~/.cache/huggingface</code>。该模型大小约几十
+MB。</p>
+</blockquote>
+<p>另外需要注意，默认情况下 A-MEM 使用的是内存版
+ChromaRetriever，并没有启用持久化存储。</p>
+<p>因此：</p>
+<ul>
+<li>程序运行期间，记忆可以正常保存和检索；</li>
+<li>程序退出后，记忆数据会丢失。</li>
+</ul>
+<h3 id="保存记忆">3.2 保存记忆</h3>
+<p>A-MEM 提供 <code>add_note()</code>
+接口用于向记忆库中添加新的记忆。调用方式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">memory_system.add_note(</span><br><span class="line">    content=content,</span><br><span class="line">    tags=tag_list,</span><br><span class="line">    category=category</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>主要参数：</p>
+<ul>
+<li><code>content</code>：记忆内容。</li>
+<li><code>tags</code>：标签信息。</li>
+<li><code>category</code>：记忆类别。</li>
+</ul>
+<p>在 Agent 中，可以封装成 Tool，让 LLM 根据上下文主动决定是否保存：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@tool</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">save_memory</span>(<span class="params">content: <span class="built_in">str</span>, tags: <span class="built_in">str</span> = <span class="string">&quot;&quot;</span>, category: <span class="built_in">str</span> = <span class="string">&quot;General&quot;</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;把一条重要信息主动写入长期记忆(A-MEM)。tags 用逗号分隔，如 &quot;项目,决策&quot;。&quot;&quot;&quot;</span></span><br><span class="line">    tag_list = [t.strip() <span class="keyword">for</span> t <span class="keyword">in</span> tags.split(<span class="string">&quot;,&quot;</span>) <span class="keyword">if</span> t.strip()]</span><br><span class="line">    memory_id = memory_system.add_note(content=content, tags=tag_list, category=category)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">f&quot;已写入记忆，memory_id=<span class="subst">&#123;memory_id&#125;</span>&quot;</span></span><br></pre></td></tr></table></figure>
+<h3 id="检索记忆">3.3 检索记忆</h3>
+<p>A-MEM 使用 <code>search_agentic()</code> 接口检索相关记忆。</p>
+<p>调用方式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">results = memory_system.search_agentic(query, k=k)</span><br></pre></td></tr></table></figure>
+<p>其中 <code>query</code> 是当前查询内容，<code>k</code>
+是初始检索数量。</p>
+<p>同样，将其封装成 Agent Tool：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@tool</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">search_memory</span>(<span class="params">query: <span class="built_in">str</span>, k: <span class="built_in">int</span> = <span class="number">5</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;在长期记忆(A-MEM)中检索与 query 语义相关的历史笔记，k 为返回条数。&quot;&quot;&quot;</span></span><br><span class="line">    results = memory_system.search_agentic(query, k=k)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> results:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;未检索到相关记忆。&quot;</span></span><br><span class="line">    lines = [<span class="string">f&quot;- [<span class="subst">&#123;r[<span class="string">&#x27;id&#x27;</span>]&#125;</span>] <span class="subst">&#123;r[<span class="string">&#x27;content&#x27;</span>]&#125;</span> (tags=<span class="subst">&#123;r.get(<span class="string">&#x27;tags&#x27;</span>)&#125;</span>)&quot;</span> <span class="keyword">for</span> r <span class="keyword">in</span> results]</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;\n&quot;</span>.join(lines)</span><br></pre></td></tr></table></figure>
+<h3 id="search_agentic-源码分析">3.4 search_agentic 源码分析</h3>
+<p>按照论文中的设计，A-MEM 的检索过程应该是：</p>
+<p>首先通过 embedding 相似度找到当前问题相关的 Top-K
+记忆，然后根据这些记忆之间建立的 link
+关系继续扩展，将关联记忆加入结果集合。</p>
+<p>因此理论上：</p>
+<blockquote>
+<p>search_agentic 返回的结果不应该只有 k 条，而应该包含初始检索得到的 k
+条记忆，以及这些记忆关联的其他记忆。</p>
+</blockquote>
+<p>但是查看实际源码后发现，当前实现与论文描述存在一定差异。</p>
+<p>源码首先通过 ChromaDB 获取相似度最高的 k 条记忆：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">results = <span class="variable language_">self</span>.retriever.search(query, k)</span><br></pre></td></tr></table></figure>
+<p>然后将这些记忆加入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">memories.append(memory_dict)</span><br></pre></td></tr></table></figure>
+<p>之后遍历这些记忆，根据：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">links = memory.get(<span class="string">&#x27;links&#x27;</span>, [])</span><br></pre></td></tr></table></figure>
+<p>获取关联记忆最多k条，并继续加入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">memories.append(...)</span><br></pre></td></tr></table></figure>
+<p>最后：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">return memories[:k]</span><br></pre></td></tr></table></figure>
+<p>直接截取前 k 条返回。</p>
+<p>因此实际流程是：</p>
+<ol type="1">
+<li>根据向量相似度获取 k 条候选记忆；</li>
+<li>尝试添加关联记忆；</li>
+<li>最终只返回前 k 条。</li>
+</ol>
+<p>这意味着：</p>
+<ul>
+<li>如果返回数量不足 k，可能包含部分关联记忆；</li>
+<li>如果记忆数量足够，前 k 条通常仍然是最初的相似度检索结果；</li>
+<li>后续添加的关联记忆大概率会因为 <code>[:k]</code> 被截断。</li>
+</ul>
+<p>所以当前版本的 <code>search_agentic()</code> 实际效果更接近：</p>
+<blockquote>
+<p>基于向量相似度检索，并尝试补充关联记忆，但最终返回数量仍受到 k
+限制。</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">search_agentic</span>(<span class="params">self, query: <span class="built_in">str</span>, k: <span class="built_in">int</span> = <span class="number">5</span></span>) -&gt; <span class="type">List</span>[<span class="type">Dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>]]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Search for memories using ChromaDB retrieval.&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> <span class="variable language_">self</span>.memories:</span><br><span class="line">        <span class="keyword">return</span> []</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># Get results from ChromaDB</span></span><br><span class="line">        results = <span class="variable language_">self</span>.retriever.search(query, k)</span><br><span class="line">       ...</span><br><span class="line">            </span><br><span class="line">        <span class="comment"># Process ChromaDB results</span></span><br><span class="line">        <span class="keyword">for</span> i, doc_id <span class="keyword">in</span> <span class="built_in">enumerate</span>(results[<span class="string">&#x27;ids&#x27;</span>][<span class="number">0</span>][:k]):</span><br><span class="line">            ...</span><br><span class="line">                <span class="comment"># Create result dictionary with all metadata fields</span></span><br><span class="line">                memory_dict = &#123;</span><br><span class="line">                    <span class="string">&#x27;id&#x27;</span>: doc_id,</span><br><span class="line">                    <span class="string">&#x27;content&#x27;</span>: metadata.get(<span class="string">&#x27;content&#x27;</span>, <span class="string">&#x27;&#x27;</span>),</span><br><span class="line">                    <span class="string">&#x27;context&#x27;</span>: metadata.get(<span class="string">&#x27;context&#x27;</span>, <span class="string">&#x27;&#x27;</span>),</span><br><span class="line">                    <span class="string">&#x27;keywords&#x27;</span>: metadata.get(<span class="string">&#x27;keywords&#x27;</span>, []),</span><br><span class="line">                    <span class="string">&#x27;tags&#x27;</span>: metadata.get(<span class="string">&#x27;tags&#x27;</span>, []),</span><br><span class="line">                    <span class="string">&#x27;timestamp&#x27;</span>: metadata.get(<span class="string">&#x27;timestamp&#x27;</span>, <span class="string">&#x27;&#x27;</span>),</span><br><span class="line">                    <span class="string">&#x27;category&#x27;</span>: metadata.get(<span class="string">&#x27;category&#x27;</span>, <span class="string">&#x27;Uncategorized&#x27;</span>),</span><br><span class="line">                    <span class="string">&#x27;is_neighbor&#x27;</span>: <span class="literal">False</span></span><br><span class="line">                &#125;</span><br><span class="line">                ...</span><br><span class="line">                memories.append(memory_dict)</span><br><span class="line">                seen_ids.add(doc_id)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Add linked memories (neighbors)</span></span><br><span class="line">        neighbor_count = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> memory <span class="keyword">in</span> <span class="built_in">list</span>(memories):  <span class="comment"># Use a copy to avoid modification during iteration</span></span><br><span class="line">            <span class="keyword">if</span> neighbor_count &gt;= k:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># Get links from metadata</span></span><br><span class="line">            links = memory.get(<span class="string">&#x27;links&#x27;</span>, [])</span><br><span class="line">            ...</span><br><span class="line">            <span class="keyword">for</span> link_id <span class="keyword">in</span> links:</span><br><span class="line">                <span class="keyword">if</span> link_id <span class="keyword">not</span> <span class="keyword">in</span> seen_ids <span class="keyword">and</span> neighbor_count &lt; k:</span><br><span class="line">                    neighbor = <span class="variable language_">self</span>.memories.get(link_id)</span><br><span class="line">                    <span class="keyword">if</span> neighbor:</span><br><span class="line">                        memories.append(&#123;</span><br><span class="line">                            <span class="string">&#x27;id&#x27;</span>: link_id,</span><br><span class="line">                            <span class="string">&#x27;content&#x27;</span>: neighbor.content,</span><br><span class="line">                            <span class="string">&#x27;context&#x27;</span>: neighbor.context,</span><br><span class="line">                            <span class="string">&#x27;keywords&#x27;</span>: neighbor.keywords,</span><br><span class="line">                            <span class="string">&#x27;tags&#x27;</span>: neighbor.tags,</span><br><span class="line">                            <span class="string">&#x27;timestamp&#x27;</span>: neighbor.timestamp,</span><br><span class="line">                            <span class="string">&#x27;category&#x27;</span>: neighbor.category,</span><br><span class="line">                            <span class="string">&#x27;is_neighbor&#x27;</span>: <span class="literal">True</span></span><br><span class="line">                        &#125;)</span><br><span class="line">                        seen_ids.add(link_id)</span><br><span class="line">                        neighbor_count += <span class="number">1</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> memories[:k]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="agent-接入-a-mem">3.5 Agent 接入 A-MEM</h3>
+<p>在 Agent
+流程中，我们会在<strong>每次对话开始前</strong>，进行一次<strong>长期记忆的读取</strong>，通过当前问题检索
+A-MEM 中相关的历史记忆，并将检索结果加入上下文。
+在<strong>每次对话结束后</strong>，我们会<strong>将本轮对话的内容保存</strong>到记忆库中，形成新的长期记忆。</p>
+<h4 id="对话开始前读取长期记忆">3.5.1 对话开始前读取长期记忆</h4>
+<p>在 LangGraph 中增加一个节点，用于在 Agent 执行前检索相关记忆：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">retrieve_context</span>(<span class="params">state: AgentState</span>) -&gt; AgentState:</span><br><span class="line">    last_user_msg = <span class="literal">None</span></span><br><span class="line">    <span class="keyword">for</span> m <span class="keyword">in</span> <span class="built_in">reversed</span>(state[<span class="string">&quot;messages&quot;</span>]):</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">isinstance</span>(m, HumanMessage):</span><br><span class="line">            last_user_msg = m.content</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> last_user_msg:</span><br><span class="line">        <span class="keyword">return</span> &#123;&#125;                     <span class="comment"># 不是 return state</span></span><br><span class="line">    <span class="comment"># LangGraph 里空更新表示&quot;这个 channel 不变&quot;</span></span><br><span class="line"></span><br><span class="line">    results = memory_system.search_agentic(last_user_msg, k=<span class="number">5</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> results:</span><br><span class="line">        <span class="keyword">return</span> &#123;&#125;                     <span class="comment"># 不是 return state</span></span><br><span class="line"></span><br><span class="line">    context_text = <span class="string">&quot;\n&quot;</span>.join(<span class="string">f&quot;- <span class="subst">&#123;r[<span class="string">&#x27;content&#x27;</span>]&#125;</span>&quot;</span> <span class="keyword">for</span> r <span class="keyword">in</span> results)</span><br><span class="line">    system_note = SystemMessage(</span><br><span class="line">        content=<span class="string">f&quot;以下是与当前问题相关的历史记忆，可参考但不必照搬:\n<span class="subst">&#123;context_text&#125;</span>&quot;</span></span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: [system_note]&#125;</span><br></pre></td></tr></table></figure>
+<p>该节点主要完成两件事情：</p>
+<ol type="1">
+<li>获取当前对话中的用户输入；</li>
+<li>调用 A-MEM 检索相关长期记忆，并作为 <code>SystemMessage</code>
+添加到当前消息列表中。</li>
+</ol>
+<p>如果当前节点没有需要修改的 State，只需要返回空字典即可。</p>
+<h4 id="对话结束后保存长期记忆">3.5.2 对话结束后保存长期记忆</h4>
+<p>在 Agent 完成回答后，将本轮对话保存到 A-MEM：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">persist_turn</span>(<span class="params">state: AgentState</span>) -&gt; AgentState:</span><br><span class="line">    last_ai = state[<span class="string">&quot;messages&quot;</span>][-<span class="number">1</span>]</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(last_ai, AIMessage) <span class="keyword">and</span> <span class="keyword">not</span> <span class="built_in">getattr</span>(last_ai, <span class="string">&quot;tool_calls&quot;</span>, <span class="literal">None</span>):</span><br><span class="line">        last_user_msg = <span class="string">&quot;&quot;</span></span><br><span class="line">        <span class="keyword">for</span> m <span class="keyword">in</span> <span class="built_in">reversed</span>(state[<span class="string">&quot;messages&quot;</span>]):</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">isinstance</span>(m, HumanMessage):</span><br><span class="line">                last_user_msg = m.content</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">        memory_system.add_note(</span><br><span class="line">            content=<span class="string">f&quot;Q: <span class="subst">&#123;last_user_msg&#125;</span>\nA: <span class="subst">&#123;last_ai.content&#125;</span>&quot;</span>,</span><br><span class="line">            tags=[<span class="string">&quot;conversation&quot;</span>],</span><br><span class="line">            category=<span class="string">&quot;Dialogue&quot;</span>,</span><br><span class="line">        )</span><br><span class="line">    <span class="keyword">return</span> &#123;&#125;                          <span class="comment"># 不是 return state</span></span><br></pre></td></tr></table></figure>
+<p>其他的节点构造，以及完整的节点连接等，可以参考以下完整agent代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">A-MEM + LangGraph Agent</span></span><br><span class="line"><span class="string">=======================</span></span><br><span class="line"><span class="string">集成 A-MEM (Agentic Memory) 作为长期记忆系统的 LangGraph agent 示例。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">A-MEM 仓库: https://github.com/agiresearch/A-mem</span></span><br><span class="line"><span class="string">安装:</span></span><br><span class="line"><span class="string">    git clone https://github.com/agiresearch/A-mem.git</span></span><br><span class="line"><span class="string">    cd A-mem &amp;&amp; pip install .</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">依赖:</span></span><br><span class="line"><span class="string">    pip install langgraph langchain-openai langchain-core</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> Annotated, <span class="type">Sequence</span>, TypedDict</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> langchain_core.messages <span class="keyword">import</span> (</span><br><span class="line">    AIMessage,</span><br><span class="line">    BaseMessage,</span><br><span class="line">    HumanMessage,</span><br><span class="line">    SystemMessage, ToolMessage,</span><br><span class="line">)</span><br><span class="line"><span class="keyword">from</span> langchain_core.tools <span class="keyword">import</span> tool</span><br><span class="line"><span class="keyword">from</span> langchain_openai <span class="keyword">import</span> ChatOpenAI</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> langgraph.graph <span class="keyword">import</span> END, StateGraph</span><br><span class="line"><span class="keyword">from</span> langgraph.graph.message <span class="keyword">import</span> add_messages</span><br><span class="line"><span class="keyword">from</span> langgraph.prebuilt <span class="keyword">import</span> ToolNode, tools_condition</span><br><span class="line"></span><br><span class="line"><span class="comment"># A-MEM 官方 API：https://github.com/agiresearch/A-mem</span></span><br><span class="line"><span class="keyword">from</span> agentic_memory.memory_system <span class="keyword">import</span> AgenticMemorySystem</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment"># 1. 初始化 A-MEM 记忆系统</span></span><br><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line"></span><br><span class="line">memory_system = AgenticMemorySystem(</span><br><span class="line">    model_name=<span class="string">&quot;paraphrase-multilingual-MiniLM-L12-v2&quot;</span>,  <span class="comment"># ChromaDB 用的 embedding 模型（本地，非LLM，不用改）</span></span><br><span class="line">    llm_backend=<span class="string">&quot;ollama&quot;</span>,            <span class="comment"># openai -&gt; ollama</span></span><br><span class="line">    llm_model=<span class="string">&quot;qwen2.5:7b&quot;</span>,          <span class="comment"># gpt-4o-mini -&gt; qwen2.5:7b（要跟 ollama pull 的名字一致）</span></span><br><span class="line">)</span><br><span class="line"><span class="comment"># &quot;paraphrase-multilingual-MiniLM-L12-v2&quot;</span></span><br><span class="line"><span class="comment"># 第一次用的时候，sentence-transformers 库自动从 HuggingFace Hub 下载一次模型权重（几十 MB，缓存到 ~/.cache/huggingface）</span></span><br><span class="line"><span class="comment"># 用的默认就是纯内存版 ChromaRetriever，根本没有走持久化路径，程序一退出数据就没了。</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment"># 2. 把 A-MEM 的读写能力包装成 LangChain Tool，供 agent 在推理中主动调用</span></span><br><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line"><span class="meta">@tool</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">save_memory</span>(<span class="params">content: <span class="built_in">str</span>, tags: <span class="built_in">str</span> = <span class="string">&quot;&quot;</span>, category: <span class="built_in">str</span> = <span class="string">&quot;General&quot;</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;把一条重要信息主动写入长期记忆(A-MEM)。tags 用逗号分隔，如 &quot;项目,决策&quot;。&quot;&quot;&quot;</span></span><br><span class="line">    tag_list = [t.strip() <span class="keyword">for</span> t <span class="keyword">in</span> tags.split(<span class="string">&quot;,&quot;</span>) <span class="keyword">if</span> t.strip()]</span><br><span class="line">    memory_id = memory_system.add_note(content=content, tags=tag_list, category=category)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">f&quot;已写入记忆，memory_id=<span class="subst">&#123;memory_id&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@tool</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">search_memory</span>(<span class="params">query: <span class="built_in">str</span>, k: <span class="built_in">int</span> = <span class="number">5</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;在长期记忆(A-MEM)中检索与 query 语义相关的历史笔记，k 为返回条数。&quot;&quot;&quot;</span></span><br><span class="line">    results = memory_system.search_agentic(query, k=k)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> results:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;未检索到相关记忆。&quot;</span></span><br><span class="line">    lines = [<span class="string">f&quot;- [<span class="subst">&#123;r[<span class="string">&#x27;id&#x27;</span>]&#125;</span>] <span class="subst">&#123;r[<span class="string">&#x27;content&#x27;</span>]&#125;</span> (tags=<span class="subst">&#123;r.get(<span class="string">&#x27;tags&#x27;</span>)&#125;</span>)&quot;</span> <span class="keyword">for</span> r <span class="keyword">in</span> results]</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;\n&quot;</span>.join(lines)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">tools = [save_memory, search_memory]</span><br><span class="line"><span class="comment"># llm = ChatOpenAI(model=&quot;gpt-4o-mini&quot;, temperature=0).bind_tools(tools)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> langchain_ollama <span class="keyword">import</span> ChatOllama</span><br><span class="line"></span><br><span class="line">llm = ChatOllama(model=<span class="string">&quot;qwen2.5:7b&quot;</span>, temperature=<span class="number">0</span>).bind_tools(tools)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment"># 3. LangGraph 状态定义</span></span><br><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment"># class AgentState(TypedDict):</span></span><br><span class="line"><span class="comment">#     messages: Annotated[Sequence[BaseMessage], add_messages]</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">limited_messages</span>(<span class="params"></span></span><br><span class="line"><span class="params">    old: <span class="type">Sequence</span>[BaseMessage],</span></span><br><span class="line"><span class="params">    new: <span class="type">Sequence</span>[BaseMessage]</span></span><br><span class="line"><span class="params"></span>):</span><br><span class="line">    messages = <span class="built_in">list</span>(old) + <span class="built_in">list</span>(new)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> messages[-<span class="number">50</span>:]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AgentState</span>(<span class="title class_ inherited__">TypedDict</span>):</span><br><span class="line">    messages: Annotated[</span><br><span class="line">        <span class="type">Sequence</span>[BaseMessage],</span><br><span class="line">        limited_messages</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment"># 4. 节点定义</span></span><br><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">retrieve_context</span>(<span class="params">state: AgentState</span>) -&gt; AgentState:</span><br><span class="line">    last_user_msg = <span class="literal">None</span></span><br><span class="line">    <span class="keyword">for</span> m <span class="keyword">in</span> <span class="built_in">reversed</span>(state[<span class="string">&quot;messages&quot;</span>]):</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">isinstance</span>(m, HumanMessage):</span><br><span class="line">            last_user_msg = m.content</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> last_user_msg:</span><br><span class="line">        <span class="keyword">return</span> &#123;&#125;                     <span class="comment"># 不是 return state</span></span><br><span class="line">    <span class="comment"># LangGraph 里空更新表示&quot;这个 channel 不变&quot;</span></span><br><span class="line"></span><br><span class="line">    results = memory_system.search_agentic(last_user_msg, k=<span class="number">5</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> results:</span><br><span class="line">        <span class="keyword">return</span> &#123;&#125;                     <span class="comment"># 不是 return state</span></span><br><span class="line"></span><br><span class="line">    context_text = <span class="string">&quot;\n&quot;</span>.join(<span class="string">f&quot;- <span class="subst">&#123;r[<span class="string">&#x27;content&#x27;</span>]&#125;</span>&quot;</span> <span class="keyword">for</span> r <span class="keyword">in</span> results)</span><br><span class="line">    system_note = SystemMessage(</span><br><span class="line">        content=<span class="string">f&quot;以下是与当前问题相关的历史记忆，可参考但不必照搬:\n<span class="subst">&#123;context_text&#125;</span>&quot;</span></span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: [system_note]&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">call_model</span>(<span class="params">state: AgentState</span>) -&gt; AgentState:</span><br><span class="line">    response = llm.invoke(state[<span class="string">&quot;messages&quot;</span>])</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: [response]&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">persist_turn</span>(<span class="params">state: AgentState</span>) -&gt; AgentState:</span><br><span class="line">    last_ai = state[<span class="string">&quot;messages&quot;</span>][-<span class="number">1</span>]</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(last_ai, AIMessage) <span class="keyword">and</span> <span class="keyword">not</span> <span class="built_in">getattr</span>(last_ai, <span class="string">&quot;tool_calls&quot;</span>, <span class="literal">None</span>):</span><br><span class="line">        last_user_msg = <span class="string">&quot;&quot;</span></span><br><span class="line">        <span class="keyword">for</span> m <span class="keyword">in</span> <span class="built_in">reversed</span>(state[<span class="string">&quot;messages&quot;</span>]):</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">isinstance</span>(m, HumanMessage):</span><br><span class="line">                last_user_msg = m.content</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">        memory_system.add_note(</span><br><span class="line">            content=<span class="string">f&quot;Q: <span class="subst">&#123;last_user_msg&#125;</span>\nA: <span class="subst">&#123;last_ai.content&#125;</span>&quot;</span>,</span><br><span class="line">            tags=[<span class="string">&quot;conversation&quot;</span>],</span><br><span class="line">            category=<span class="string">&quot;Dialogue&quot;</span>,</span><br><span class="line">        )</span><br><span class="line">    <span class="keyword">return</span> &#123;&#125;                          <span class="comment"># 不是 return state</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment"># 5. 构建 LangGraph 图</span></span><br><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line">graph = StateGraph(AgentState)</span><br><span class="line"></span><br><span class="line">graph.add_node(<span class="string">&quot;retrieve_context&quot;</span>, retrieve_context)</span><br><span class="line">graph.add_node(<span class="string">&quot;agent&quot;</span>, call_model)</span><br><span class="line">graph.add_node(<span class="string">&quot;tools&quot;</span>, ToolNode(tools))</span><br><span class="line">graph.add_node(<span class="string">&quot;persist&quot;</span>, persist_turn)</span><br><span class="line"></span><br><span class="line">graph.set_entry_point(<span class="string">&quot;retrieve_context&quot;</span>)</span><br><span class="line">graph.add_edge(<span class="string">&quot;retrieve_context&quot;</span>, <span class="string">&quot;agent&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># tools_condition: 若 LLM 触发了 tool_calls -&gt; &quot;tools&quot;，否则 -&gt; &quot;__end__&quot;</span></span><br><span class="line">graph.add_conditional_edges(</span><br><span class="line">    <span class="string">&quot;agent&quot;</span>,</span><br><span class="line">    tools_condition,</span><br><span class="line">    &#123;<span class="string">&quot;tools&quot;</span>: <span class="string">&quot;tools&quot;</span>, <span class="string">&quot;__end__&quot;</span>: <span class="string">&quot;persist&quot;</span>&#125;,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">graph.add_edge(<span class="string">&quot;tools&quot;</span>, <span class="string">&quot;agent&quot;</span>)</span><br><span class="line">graph.add_edge(<span class="string">&quot;persist&quot;</span>, END)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> langgraph.checkpoint.memory <span class="keyword">import</span> MemorySaver</span><br><span class="line"></span><br><span class="line">app = graph.<span class="built_in">compile</span>(checkpointer=MemorySaver())</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment"># 6. 运行示例</span></span><br><span class="line"><span class="comment"># ---------------------------------------------------------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> uuid  <span class="comment"># 确保在文件顶部已导入</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># ============ 你可以在下面两行修改 ============</span></span><br><span class="line">    <span class="comment"># USE_PERSISTENT_THREAD = True   # True: 使用固定 thread_id，False: 每次新 thread_id</span></span><br><span class="line">    USE_PERSISTENT_THREAD = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    FIXED_THREAD_ID = <span class="string">&quot;cli-session-1&quot;</span></span><br><span class="line">    <span class="comment"># =============================================</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># print(&quot;Agent 已启动，记忆文件: my_agent.amem&quot;)</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;输入 &#x27;exit&#x27; 或 &#x27;quit&#x27; 退出。\n&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        user_input = <span class="built_in">input</span>(<span class="string">&quot;你: &quot;</span>).strip()</span><br><span class="line">        <span class="keyword">if</span> user_input.lower() <span class="keyword">in</span> (<span class="string">&quot;exit&quot;</span>, <span class="string">&quot;quit&quot;</span>, <span class="string">&quot;退出&quot;</span>):</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 根据开关生成 thread_id</span></span><br><span class="line">        <span class="keyword">if</span> USE_PERSISTENT_THREAD:</span><br><span class="line">            thread_id = FIXED_THREAD_ID</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            thread_id = uuid.uuid4().<span class="built_in">hex</span>   <span class="comment"># 每次随机生成新 ID</span></span><br><span class="line"></span><br><span class="line">        config = &#123;<span class="string">&quot;configurable&quot;</span>: &#123;<span class="string">&quot;thread_id&quot;</span>: thread_id&#125;&#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 记录本轮开始前的消息 ID（用于打印新增内容）</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            prev_snapshot = app.get_state(config)</span><br><span class="line">            <span class="keyword">if</span> prev_snapshot.values:</span><br><span class="line">                prev_messages = prev_snapshot.values.get(<span class="string">&quot;messages&quot;</span>, [])</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                prev_messages = []</span><br><span class="line"></span><br><span class="line">            prev_ids = &#123;m.<span class="built_in">id</span> <span class="keyword">for</span> m <span class="keyword">in</span> prev_messages&#125;</span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">            <span class="comment"># 如果 thread_id 从未使用过，get_state 可能报错，视为空历史</span></span><br><span class="line">            prev_ids = <span class="built_in">set</span>()</span><br><span class="line"></span><br><span class="line">        result = app.invoke(</span><br><span class="line">            &#123;<span class="string">&quot;messages&quot;</span>: [HumanMessage(content=user_input)]&#125;,</span><br><span class="line">            config=config,</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 打印本轮新增消息（工具调用等）</span></span><br><span class="line">        new_messages = [m <span class="keyword">for</span> m <span class="keyword">in</span> result[<span class="string">&quot;messages&quot;</span>] <span class="keyword">if</span> m.<span class="built_in">id</span> <span class="keyword">not</span> <span class="keyword">in</span> prev_ids]</span><br><span class="line">        <span class="keyword">for</span> m <span class="keyword">in</span> new_messages:</span><br><span class="line">            role = <span class="built_in">type</span>(m).__name__</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">isinstance</span>(m, AIMessage) <span class="keyword">and</span> m.tool_calls:</span><br><span class="line">                <span class="keyword">for</span> call <span class="keyword">in</span> m.tool_calls:</span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">f&quot;[<span class="subst">&#123;role&#125;</span>] 调用工具: <span class="subst">&#123;call[<span class="string">&#x27;name&#x27;</span>]&#125;</span>(<span class="subst">&#123;call[<span class="string">&#x27;args&#x27;</span>]&#125;</span>)&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> <span class="built_in">isinstance</span>(m, ToolMessage):</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;[<span class="subst">&#123;role&#125;</span>] 工具结果: <span class="subst">&#123;m.content&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;[<span class="subst">&#123;role&#125;</span>] <span class="subst">&#123;m.content&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="总结-1">4. 总结</h2>
+<p>虽然当前 A-MEM 提供的 API
+实现仍然存在一些不足，例如检索逻辑与论文描述存在一定差异、默认存储方式不适合长期使用等问题，但其整体设计思想仍然具有较高的参考价值。</p>
+<p>其中，基于卡片化的记忆表示方式、记忆之间的关联关系以及通过 Agent
+主动管理长期记忆的思路，都为构建具有长期记忆能力的 Agent
+提供了一种较好的设计方向。</p>
+<p>如果需要将 A-MEM
+应用于实际生产环境，可能需要根据具体业务需求重新设计和实现对应的记忆管理模块，包括记忆存储、检索策略、关联关系维护以及生命周期管理等部分，而不是直接依赖当前提供的
+API。</p>
+<p>总体来说，A-MEM 更像是一个验证长期记忆 Agent
+思路的研究实现，其核心价值在于提出了一种较新的记忆组织方式，而<strong>实际工程落地仍需要进一步优化</strong>。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM/" rel="tag"># 从零开始的LLM</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0/" rel="tag"># 持续学习</a>
+              <a href="/tags/%E7%AC%AC9%E8%8A%82/" rel="tag"># 第9节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/08/03/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-8/" rel="prev" title="从零开始的LLM 8.LLM中的蒸馏（知识内化）">
+                  <i class="fa fa-angle-left"></i> 从零开始的LLM 8.LLM中的蒸馏（知识内化）
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
