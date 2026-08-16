@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 本文将介绍 mem0 的原理以及简单的agent制作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的LLM 10. mem0原理及API使用">
+<meta property="og:url" content="https://zusda.github.io/2026/08/13/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-10/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 本文将介绍 mem0 的原理以及简单的agent制作。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/08/13/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-10/image-20260814141222893.png">
+<meta property="og:image" content="https://zusda.github.io/2026/08/13/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-10/image-20260815234028147.png">
+<meta property="article:published_time" content="2026-08-13T13:23:32.000Z">
+<meta property="article:modified_time" content="2026-08-16T06:19:00.936Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="从零开始的LLM">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="第10节">
+<meta property="article:tag" content="持续学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/08/13/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-10/image-20260814141222893.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/08/13/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-10/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/08/13/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-10/","path":"2026/08/13/从零开始的LLM-10/","title":"从零开始的LLM 10. mem0原理及API使用"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>从零开始的LLM 10. mem0原理及API使用 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mem0-%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">1. Mem0 原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E5%8F%96%E9%98%B6%E6%AE%B5extraction-phase"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 提取阶段（Extraction Phase）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BD%93%E5%89%8D%E6%B6%88%E6%81%AF%E5%AF%B9current-message-pair"><span class="nav-number">2.1.1.</span> <span class="nav-text">1.1.1 当前消息对（Current
+Message Pair）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E8%AF%9D%E6%80%BB%E7%BB%93conversation-summary-summary-context"><span class="nav-number">2.1.2.</span> <span class="nav-text">1.1.2
+对话总结（Conversation Summary &#x2F; Summary Context）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E8%BF%91%E7%9A%84%E5%8E%86%E5%8F%B2%E6%B6%88%E6%81%AFrecent-messages"><span class="nav-number">2.1.3.</span> <span class="nav-text">1.1.3 最近的历史消息（Recent
+Messages）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#extraction-prompt"><span class="nav-number">2.1.4.</span> <span class="nav-text">1.1.4 Extraction Prompt</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E9%98%B6%E6%AE%B5update-phase"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 更新阶段（Update Phase）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mem0-graph-memory"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 Mem0 Graph Memory</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#graph-%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84"><span class="nav-number">2.3.1.</span> <span class="nav-text">1.3.1 Graph 的基本结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#node%E5%AE%9E%E4%BD%93%E8%8A%82%E7%82%B9"><span class="nav-number">2.3.2.</span> <span class="nav-text">1.3.2 Node（实体节点）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#relationship%E5%85%B3%E7%B3%BB"><span class="nav-number">2.3.3.</span> <span class="nav-text">1.3.3 Relationship（关系）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#graph-memory-%E7%9A%84%E6%9E%84%E5%BB%BA"><span class="nav-number">2.3.4.</span> <span class="nav-text">1.3.4 Graph Memory 的构建</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#step-1entity-extraction"><span class="nav-number">2.3.4.1.</span> <span class="nav-text">Step 1：Entity Extraction</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#step-2relationship-extraction"><span class="nav-number">2.3.4.2.</span> <span class="nav-text">Step 2：Relationship
+Extraction</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#step-3%E5%88%A4%E6%96%ADentity-%E6%98%AF%E5%90%A6%E5%B7%B2%E7%BB%8F%E5%AD%98%E5%9C%A8"><span class="nav-number">2.3.4.3.</span> <span class="nav-text">Step 3：判断Entity
+是否已经存在</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mem0-%E7%9A%84%E8%AE%B0%E5%BF%86%E6%A3%80%E7%B4%A2retrieval"><span class="nav-number">2.4.</span> <span class="nav-text">1.4 Mem0 的记忆检索（Retrieval）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%B8%80entity-centric-retrieval"><span class="nav-number">2.4.1.</span> <span class="nav-text">方法一：Entity-centric
+Retrieval</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%BA%8Crelation-centric-retrieval"><span class="nav-number">2.4.2.</span> <span class="nav-text">方法二：Relation-centric
+Retrieval</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%8C%E8%BD%A8%E6%A3%80%E7%B4%A2%E7%BB%93%E6%9E%9C%E8%9E%8D%E5%90%88"><span class="nav-number">2.4.3.</span> <span class="nav-text">双轨检索结果融合</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mem0-v3-pipeline-%E7%89%88%E6%9C%AC%E5%8F%98%E5%8A%A8"><span class="nav-number">3.</span> <span class="nav-text">2. mem0 v3 pipeline 版本变动</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E4%BB%8E-memory-graph-%E8%BD%AC%E5%90%91-memory-centric"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 整体架构：从
+Memory + Graph 转向 Memory-centric</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#memory-%E5%86%99%E5%85%A5%E4%BB%8E-%E6%8F%90%E5%8F%96-%E6%9B%B4%E6%96%B0-%E5%8F%98%E4%B8%BA-%E5%A2%9E%E9%87%8F%E7%B4%AF%E7%A7%AF"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 Memory 写入：从 “提取
++ 更新” 变为 “增量累积”</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#v2%E6%8F%90%E5%8F%96%E5%90%8E%E5%86%8D%E8%BF%9B%E8%A1%8C%E6%9B%B4%E6%96%B0%E5%88%A4%E6%96%AD"><span class="nav-number">3.2.1.</span> <span class="nav-text">v2：提取后再进行更新判断</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#v3%E6%8F%90%E5%8F%96%E5%90%8E%E7%9B%B4%E6%8E%A5-add"><span class="nav-number">3.2.2.</span> <span class="nav-text">v3：提取后直接 ADD</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E5%88%A0%E9%99%A4%E6%9C%BA%E5%88%B6"><span class="nav-number">3.2.3.</span> <span class="nav-text">手动删除机制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#graph-memory%E4%BB%8E-entity-entity-%E8%BD%AC%E5%8F%98%E4%B8%BA-entity-memory"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 Graph
+Memory：从 Entity → Entity 转变为 Entity → Memory</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#v2entity-entity"><span class="nav-number">3.3.1.</span> <span class="nav-text">v2：Entity → Entity</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#v3entity-memory"><span class="nav-number">3.3.2.</span> <span class="nav-text">v3：Entity → Memory</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#entity-%E7%9A%84%E6%8F%90%E5%8F%96%E4%B8%8E%E5%AD%98%E5%82%A8"><span class="nav-number">3.4.</span> <span class="nav-text">2.4 Entity 的提取与存储</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%80%E7%B4%A2hybrid-search-entity-aware-ranking"><span class="nav-number">3.5.</span> <span class="nav-text">2.5 检索：Hybrid Search
++ Entity-aware Ranking</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#v2-v3-%E7%9A%84%E6%A0%B8%E5%BF%83%E5%8F%98%E5%8C%96%E6%80%BB%E7%BB%93"><span class="nav-number">3.6.</span> <span class="nav-text">2.6 v2 → v3 的核心变化总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mem0-%E4%BD%BF%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">3. mem0 使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96-memory"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 初始化 Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#llm%E8%AE%B0%E5%BF%86%E6%8A%BD%E5%8F%96%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.2.1.</span> <span class="nav-text">1. llm：记忆抽取模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#embedderembedding-%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.2.2.</span> <span class="nav-text">2. embedder：Embedding
+模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#vector_store%E5%90%91%E9%87%8F%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">4.2.3.</span> <span class="nav-text">3.
+vector_store：向量数据库</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%B8%A6%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%E7%9A%84-agent"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 构建一个带长期记忆的 Agent</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#main-%E5%87%BD%E6%95%B0"><span class="nav-number">4.4.</span> <span class="nav-text">3.4 Main 函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">5.</span> <span class="nav-text">4. 其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-qdrant"><span class="nav-number">5.1.</span> <span class="nav-text">4.1 安装 Qdrant</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">82</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/08/13/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-10/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="从零开始的LLM 10. mem0原理及API使用 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从零开始的LLM 10. mem0原理及API使用
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-08-13 21:23:32" itemprop="dateCreated datePublished" datetime="2026-08-13T21:23:32+08:00">2026-08-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-08-16 14:19:00" itemprop="dateModified" datetime="2026-08-16T14:19:00+08:00">2026-08-16</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>本文将介绍 mem0 的原理以及简单的agent制作。</p>
+<span id="more"></span>
+<p>经过前面的学习，我们已经系统地完成了大语言模型（LLM）的基础部分，主要参考了以下资料：</p>
+<ul>
+<li>《动手学深度学习》</li>
+<li>《蘑菇书》</li>
+<li>《Happy-LLM》</li>
+<li>《Hello-Agents》</li>
+<li>《all-in-rag》</li>
+</ul>
+<p>到这里，可以认为已经具备了继续深入学习 Agent 的基础能力。</p>
+<p>接下来的内容将不再像之前那样按照固定课程循序渐进，而是更多围绕当前
+Agent 领域的研究方向展开。学习内容既会涉及工程实践（如各种 Agent
+框架、工作流、记忆系统等），也会涉及算法与模型层面的探索（如多模态、持续学习等）。</p>
+<ol type="1">
+<li>Generative Agents</li>
+<li>Letta</li>
+<li>A-MEM</li>
+<li>Voyager</li>
+</ol>
+<p>这条路线主要围绕 <strong>Agent 的持续学习（Continual
+Learning）</strong> 展开，也是我目前最感兴趣的方向：<strong>如何让一个
+Agent
+在长期运行过程中不断积累经验、提升能力，而不是每次都从零开始。</strong></p>
+<p>目前来看，大致有两种思路：</p>
+<ol type="1">
+<li><strong>不修改模型本身。</strong> 仅通过
+Prompt、记忆系统（Memory）、RAG、工具调用等机制，使 Agent
+能够不断积累知识和经验，实现能力的持续增长。</li>
+<li><strong>修改模型本身。</strong> 基于 Agent
+长期运行过程中积累的对话、笔记和总结等数据，在合适的时机对模型进行持续训练（Continual
+Fine-tuning），使模型真正将这些经验内化，而不仅仅依赖外部记忆。</li>
+</ol>
+<p>由于这一阶段更多是阅读论文、分析开源项目、验证实验以及整理个人理解，而不是单纯跟着教程学习，因此资料收集、实验和整理都会比之前花费更多时间。</p>
+<hr>
+<p>相比之前学习的 A-MEM，mem0
+在实际应用中的知名度和社区活跃度都更高，整体也更加成熟。本章节会花一些时间先了解
+mem0 的核心原理，然后再基于 mem0 实现一个简单的 Agent。不过mem0的v2和v3
+pipeline版本实现有非常大的不同，我们先讲论文中v2的实现，再分析v3的不同。</p>
+<p>和之前的 A-MEM 类似，这次我们同样会把重点放在“记忆系统是如何融入
+Agent”这件事情上。不过这次不再使用
+LangGraph，整体实现会更加简单，也更方便我们直接理解 mem0
+的使用方式。</p>
+<hr>
+<h2 id="mem0-原理">1. Mem0 原理</h2>
+<p>论文地址：https://arxiv.org/abs/2504.19413</p>
+<p>Mem0
+的核心目标是：<strong>从对话中提取长期有价值的信息，并将这些信息持续写入、更新到长期记忆中，同时支持后续检索。</strong></p>
+<p>从整体流程来看，可以将 Mem0 理解为三个主要部分：</p>
+<ol type="1">
+<li><strong>Extraction：从对话中提取 candidate memories</strong></li>
+<li><strong>Update：将 candidate memories 与已有 memories
+进行比较并更新</strong></li>
+<li><strong>Retrieval：从长期记忆中检索与当前 query
+相关的信息</strong></li>
+</ol>
+<h3 id="提取阶段extraction-phase">1.1 提取阶段（Extraction Phase）</h3>
+<p>Mem0 的记忆提取通常以一对消息作为当前输入，即：</p>
+<ul>
+<li>一条 user message</li>
+<li>一条 assistant response</li>
+</ul>
+<p>可以表示为：</p>
+<p><span class="math display">\[
+(m_{t-1},m_t)
+\]</span></p>
+<p>其中，<span class="math inline">\(m_t\)</span> 表示当前消息，<span class="math inline">\(m_{t-1}\)</span>
+表示紧邻当前消息的上一条消息。</p>
+<p>但是，仅仅将当前消息对交给 LLM 并不足以判断哪些信息值得长期保存。</p>
+<p>因此，Mem0 会进一步提供一些<strong>历史上下文信息</strong>，共同构成
+extraction 的输入。</p>
+<h4 id="当前消息对current-message-pair">1.1.1 当前消息对（Current
+Message Pair）</h4>
+<p>当前消息对：</p>
+<p><span class="math display">\[
+(m_{t-1},m_t)
+\]</span></p>
+<p>通常可以理解为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">User: 我最近开始学习 LangGraph。</span><br><span class="line"></span><br><span class="line">Assistant: LangGraph 可以用于构建有状态的 Agent 工作流……</span><br></pre></td></tr></table></figure>
+<p>这部分是当前 extraction
+最重要的信息来源，因为新的长期记忆通常与当前对话内容直接相关。</p>
+<h4 id="对话总结conversation-summary-summary-context">1.1.2
+对话总结（Conversation Summary / Summary Context）</h4>
+<p>如果每次提取记忆时，都把整个 conversation history 放进 LLM
+prompt，那么随着对话不断增长，prompt 会越来越长。</p>
+<p>因此，Mem0
+会维护一种<strong>对历史对话的压缩表示</strong>，用于在不保留全部原始消息的情况下，为
+LLM 提供更长期的上下文。</p>
+<p>例如，一个较长的 conversation 可能包含：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">第1轮</span><br><span class="line">User: 我叫 Bob。</span><br><span class="line"></span><br><span class="line">第2轮</span><br><span class="line">User: 我是一名程序员。</span><br><span class="line"></span><br><span class="line">第3轮</span><br><span class="line">User: 我主要使用 Python。</span><br><span class="line"></span><br><span class="line">第4轮</span><br><span class="line">User: 最近开始学习 LangGraph。</span><br><span class="line"></span><br><span class="line">第5轮</span><br><span class="line">User: 我还在研究 A-MEM。</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">第30轮</span><br><span class="line">User: ToolNode 是干什么的？</span><br></pre></td></tr></table></figure>
+<p>经过 summary 后，可以形成类似：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">用户 Bob 是一名程序员，主要使用 Python，</span><br><span class="line">近期正在学习 LangGraph，并研究 A-MEM、Agent Memory</span><br><span class="line">以及 ToolNode 等相关技术。</span><br></pre></td></tr></table></figure>
+<p>这个 summary 的作用并不是直接充当最终
+memory，而是作为<strong>历史上下文压缩信息</strong>，帮助 extraction LLM
+理解当前对话所处的背景。</p>
+<p>因此，可以将它理解为：</p>
+<blockquote>
+<p><strong>Summary 解决的是“历史太长，无法全部放入 extraction
+prompt”的问题。</strong></p>
+</blockquote>
+<p>需要注意的是，<strong>S 是针对当前 conversation history
+生成的总结信息</strong>，其作用是压缩当前 conversation
+中的历史内容。因此，当开始一个新的 conversation 时，通常会对应新的
+conversation context / summary，而不会直接继承上一段 conversation 的
+S。</p>
+<p>换句话说，S 主要用于帮助 extraction 阶段理解<strong>当前 conversation
+的历史背景</strong>，而不是一个跨 conversation 永久保存的长期
+memory。</p>
+<h4 id="最近的历史消息recent-messages">1.1.3 最近的历史消息（Recent
+Messages）</h4>
+<p>除了 summary 之外，Mem0 还可以提供最近的一部分历史消息：</p>
+<p><span class="math display">\[
+{m_{t-n},m_{t-n+1},...,m_{t-2}}
+\]</span></p>
+<p>这些消息用于保留<strong>比 summary
+更具体、更细粒度的近期上下文</strong>。</p>
+<p>例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">最近历史消息：</span><br><span class="line"></span><br><span class="line">User: 我最近开始研究 Agent Memory。</span><br><span class="line">Assistant: Agent Memory 可以分为短期记忆和长期记忆……</span><br><span class="line"></span><br><span class="line">User: 我现在正在看 A-MEM。</span><br><span class="line">Assistant: A-MEM 使用类似记忆网络的方式组织长期记忆……</span><br></pre></td></tr></table></figure>
+<p>这些信息可以帮助 LLM 判断当前消息中的内容是否与最近的对话有关。</p>
+<h4 id="extraction-prompt">1.1.4 Extraction Prompt</h4>
+<p>最终，Mem0 会将这些上下文共同提供给 LLM：</p>
+<p><span class="math display">\[
+P=
+\left(
+S,
+{m_{t-n},...,m_{t-2}},
+(m_{t-1},m_t)
+\right)
+\]</span></p>
+<p>其中：</p>
+<ul>
+<li><span class="math inline">\(S\)</span>：历史 conversation 的
+summary/context</li>
+<li><span class="math inline">\({m_{t-n},...,m_{t-2}}\)</span>：最近的一部分历史消息</li>
+<li><span class="math inline">\((m_{t-1},m_t)\)</span>：当前消息对</li>
+</ul>
+<p>然后通过 LLM：</p>
+<p><span class="math display">\[
+\phi(P)\rightarrow\Omega
+\]</span></p>
+<p>提取出一组值得考虑保存的候选记忆： <span class="math display">\[
+\Omega={\omega_1,\omega_2,...,\omega_n}
+\]</span> 这些 <span class="math inline">\(\omega_i\)</span>
+可以称为：</p>
+<blockquote>
+<p><strong>candidate facts / candidate memories</strong></p>
+</blockquote>
+<p>例如当前对话：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">User:</span><br><span class="line">我叫 Bob，是一名 Python 程序员。</span><br><span class="line">最近开始学习 LangGraph。</span><br></pre></td></tr></table></figure>
+<p>LLM 可能提取：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Bob 是一名程序员</span><br><span class="line">Bob 使用 Python</span><br><span class="line">Bob 正在学习 LangGraph</span><br></pre></td></tr></table></figure>
+<p>此时这些内容还只是<strong>候选记忆</strong>，并不意味着已经直接写入长期记忆数据库。</p>
+<p>因此：</p>
+<blockquote>
+<p><strong>Extraction
+的任务是“发现可能值得保存的记忆”，而不是直接决定数据库最终应该保存什么。</strong></p>
+</blockquote>
+<p>最终是否 ADD、UPDATE、DELETE 或 NOOP，要在下一阶段决定。</p>
+<h3 id="更新阶段update-phase">1.2 更新阶段（Update Phase）</h3>
+<p>Extraction 得到： <span class="math display">\[
+\Omega={\omega_1,\omega_2,...,\omega_n}
+\]</span> 之后，Mem0 需要判断：</p>
+<blockquote>
+<p>这些新的 candidate memories 与数据库中已有的 memories
+是什么关系？</p>
+</blockquote>
+<p>因为不能简单地把每一次对话产生的新信息全部 <code>ADD</code>
+到数据库。</p>
+<p>否则：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">User: 我使用 Python。</span><br><span class="line">→ ADD</span><br><span class="line"></span><br><span class="line">User: 我主要使用 Python。</span><br><span class="line">→ ADD</span><br><span class="line"></span><br><span class="line">User: 我经常使用 Python。</span><br><span class="line">→ ADD</span><br></pre></td></tr></table></figure>
+<p>最终数据库可能出现大量语义重复的 memory。</p>
+<p>因此，对于每一个 candidate fact，Mem0 会首先从已有 memory
+中检索语义上最相关的 memories（向量相似检索）。</p>
+<p>可以抽象为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">candidate fact</span><br><span class="line">      ↓</span><br><span class="line">向量相似度检索</span><br><span class="line">      ↓</span><br><span class="line">Top-k existing memories</span><br><span class="line">      ↓</span><br><span class="line">LLM 判断如何处理</span><br></pre></td></tr></table></figure>
+<p>对于每一个 candidate fact，Mem0 会将其与检索到的相关 existing
+memories 一起交给 LLM，由 LLM 判断应该对长期记忆执行哪一种操作：</p>
+<table>
+<colgroup>
+<col style="width: 14%">
+<col style="width: 85%">
+</colgroup>
+<thead>
+<tr>
+<th>操作</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ADD</strong></td>
+<td>数据库中不存在语义等价的 memory，因此创建新的 memory</td>
+</tr>
+<tr>
+<td><strong>UPDATE</strong></td>
+<td>已存在相关 memory，但新的信息可以对其进行补充或完善，因此更新已有
+memory</td>
+</tr>
+<tr>
+<td><strong>DELETE</strong></td>
+<td>新信息与已有 memory 发生冲突，使原 memory
+失效，因此删除或标记其为无效</td>
+</tr>
+<tr>
+<td><strong>NOOP</strong></td>
+<td>新信息不会对现有 knowledge base 产生实际变化，因此不做任何修改</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="mem0-graph-memory">1.3 Mem0 Graph Memory</h3>
+<p>前面的 <strong>Extraction + Update</strong> 主要解决的是：</p>
+<blockquote>
+<p>从对话中提取长期记忆，并判断这些记忆应该如何写入或修改。</p>
+</blockquote>
+<p>在此基础上，Mem0 还提供 <strong>Graph
+Memory</strong>，用于将记忆中的<strong>实体（Entity）及其关系（Relationship）结构化组织起来</strong>。</p>
+<p>也就是说，普通 Memory 主要关注：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">“Bob 正在学习 LangGraph”</span><br></pre></td></tr></table></figure>
+<p>而 Graph Memory 会进一步将它结构化为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Bob ──learns──&gt; LangGraph</span><br></pre></td></tr></table></figure>
+<p>因此，Graph Memory 的核心就是：</p>
+<blockquote>
+<p><strong>将记忆中的信息表示成由 Node 和 Edge
+构成的知识图谱，从而利用实体之间的关系进行存储、更新和检索。</strong></p>
+</blockquote>
+<h4 id="graph-的基本结构">1.3.1 Graph 的基本结构</h4>
+<p>Mem0 的 Graph Memory 可以抽象表示为： <span class="math display">\[
+G=(V,E,L)
+\]</span> 其中：</p>
+<ul>
+<li><span class="math inline">\(V\)</span>：<strong>Nodes</strong>，表示实体（Entities）</li>
+<li><span class="math inline">\(E\)</span>：<strong>Edges</strong>，表示实体之间的关系（Relationships）</li>
+<li><span class="math inline">\(L\)</span>：<strong>Labels</strong>，表示实体的语义类型等标签信息</li>
+</ul>
+<h4 id="node实体节点">1.3.2 Node（实体节点）</h4>
+<p>Node 对应 Graph 中的一个
+<strong>Entity</strong>，例如：<code>Bob</code>、<code>Python</code>、<code>LangGraph</code>、<code>Google</code></p>
+<p>每个 Node 主要包含：</p>
+<ol type="1">
+<li><strong>Entity Type</strong>：实体类型，例如
+<code>Bob → Person</code>、<code>Google → Organization</code></li>
+<li><strong>Embedding
+Vector</strong>：实体的向量表示，用于语义匹配和检索</li>
+<li><strong>Metadata</strong>：实体的其他元数据，例如创建时间等</li>
+</ol>
+<p>因此，一个 Node 可以抽象表示为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">v=(entity_type, embedding, metadata)</span><br></pre></td></tr></table></figure>
+<h4 id="relationship关系">1.3.3 Relationship（关系）</h4>
+<p>在 Graph 中，<strong>Relationship 对应连接两个 Node 的
+Edge</strong>，用于表示两个 Entity 之间存在的语义关系。</p>
+<p>一个 Relationship 可以表示为： <span class="math display">\[
+(v_s,r,v_d)
+\]</span> 其中：</p>
+<ul>
+<li><span class="math inline">\(v_s\)</span>：source
+node，即关系的起点</li>
+<li><span class="math inline">\(r\)</span>：relationship，即两个实体之间的关系</li>
+<li><span class="math inline">\(v_d\)</span>：destination
+node，即关系的终点</li>
+</ul>
+<p>例如： <span class="math display">\[
+(Bob,\ learns,\ LangGraph)
+\]</span> 其中：</p>
+<ul>
+<li><code>Bob</code> 是 source entity</li>
+<li><code>learns</code> 是 relationship</li>
+<li><code>LangGraph</code> 是 destination entity</li>
+</ul>
+<p>在构建 Relationship 时，Mem0 会将关系转换成文本形式，例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Bob learns LangGraph</span><br></pre></td></tr></table></figure>
+<p>并对该文本进行
+embedding，得到关系的向量表示，用于后续的关系语义检索。</p>
+<p>Relationship
+不仅记录了<strong>两个实体之间是什么关系</strong>，还具有对应的文本表示和向量表示，从而可以参与后续的语义检索。</p>
+<h4 id="graph-memory-的构建">1.3.4 Graph Memory 的构建</h4>
+<p>当新的 memory 被写入 Graph Memory
+时，需要将其进一步结构化为实体和关系。</p>
+<p>整体可以理解为两个步骤。</p>
+<h5 id="step-1entity-extraction">Step 1：Entity Extraction</h5>
+<p>首先从新的文本 memory 中提取实体：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Alice works at Google and lives in San Francisco.</span><br></pre></td></tr></table></figure>
+<p>可能提取：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Alice → Person</span><br><span class="line">Google → Organization</span><br><span class="line">San Francisco → City</span><br></pre></td></tr></table></figure>
+<p>这些实体成为 graph 中的候选 nodes。</p>
+<h5 id="step-2relationship-extraction">Step 2：Relationship
+Extraction</h5>
+<p>然后从这些实体之间提取关系：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(Alice, works_at, Google)</span><br><span class="line"></span><br><span class="line">(Alice, lives_in, San Francisco)</span><br></pre></td></tr></table></figure>
+<p>这里有一个非常重要的点：</p>
+<blockquote>
+<p><strong>关系</strong>主要是<strong>在当前这次新提取出来的 entities
+之间</strong>建立的。</p>
+</blockquote>
+<p>也就是说，并不是把整个知识图谱中的所有实体两两组合，再让 LLM
+判断关系。</p>
+<h5 id="step-3判断entity-是否已经存在">Step 3：判断Entity
+是否已经存在</h5>
+<p>系统首先需要判断：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Alice 是否已经存在？</span><br><span class="line">Google 是否已经存在？</span><br></pre></td></tr></table></figure>
+<p>根据检查结果，可能出现：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">两个 entity 都不存在</span><br><span class="line">→ 创建 Alice + Google</span><br><span class="line">→ 建立关系</span><br><span class="line"></span><br><span class="line">Alice 已存在，Google 不存在</span><br><span class="line">→ 复用 Alice</span><br><span class="line">→ 创建 Google</span><br><span class="line">→ 建立关系</span><br><span class="line"></span><br><span class="line">Alice 不存在，Google 已存在</span><br><span class="line">→ 创建 Alice</span><br><span class="line">→ 复用 Google</span><br><span class="line">→ 建立关系</span><br><span class="line"></span><br><span class="line">两个都存在</span><br><span class="line">→ 直接使用已有 nodes</span><br><span class="line">→ 建立或更新 relationship</span><br></pre></td></tr></table></figure>
+<p>因此，<strong>entity matching / existence checking</strong>
+是避免知识图谱中产生重复节点的重要步骤。</p>
+<blockquote>
+<p>Relationship Conflict Detection</p>
+<p>当新的 relationship 到来时，还需要考虑它是否与已有 relationship
+冲突。Graph Memory 会进行 conflict detection，并由 LLM-based resolver
+判断已有关系是否已经过时。</p>
+<p>过时的关系不一定被物理删除，而可以被标记为 <code>obsolete</code> /
+<code>invalid</code>，从而保留历史信息。</p>
+</blockquote>
+<h3 id="mem0-的记忆检索retrieval">1.4 Mem0 的记忆检索（Retrieval）</h3>
+<p>当用户提出新的 query 时，Mem0 需要从长期 memory
+中找到与当前问题最相关的信息。</p>
+<p>Graph Memory 中采用的是一种<strong>双轨检索策略（dual retrieval
+strategy）</strong>。</p>
+<p>可以简单理解为：</p>
+<p><img src="/2026/08/13/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-10/image-20260814141222893.png"></p>
+<h4 id="方法一entity-centric-retrieval">方法一：Entity-centric
+Retrieval</h4>
+<p>第一条路径是：</p>
+<blockquote>
+<p><strong>先从 query 中找到关键 Entity，再围绕这些 Entity
+在图中进行扩展，最终找到与这些 Entity 相关的 Memories。</strong></p>
+</blockquote>
+<p>例如 query：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Bob 最近在学习什么？</span><br></pre></td></tr></table></figure>
+<p>首先从 query 中识别：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Bob</span><br></pre></td></tr></table></figure>
+<p>然后对 Bob 进行 entity-level 的语义检索，找到最相关的 entity。</p>
+<p>之后进一步查看这些 entity 的邻居关系，例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Bob</span><br><span class="line"> ├── uses ──&gt; Python</span><br><span class="line"> ├── learns ──&gt; LangGraph</span><br><span class="line"> └── studies ──&gt; A-MEM</span><br></pre></td></tr></table></figure>
+<p>最终，方法一返回的是<strong>与命中 Entity 及其一阶关系相关entity的
+memories 构成的候选结果集合</strong>，并对结果进行去重和排序。</p>
+<blockquote>
+<p>entity
+会记录其来源的memory。所以一个entity里面可能来自多条不同memory，但是都全部作为结果返回。会由后续的LLM进行判断是否相关。</p>
+</blockquote>
+<h4 id="方法二relation-centric-retrieval">方法二：Relation-centric
+Retrieval</h4>
+<p>第二条路径则不依赖于先找到某个实体，而是直接从<strong>关系三元组</strong>出发。</p>
+<p>例如知识图谱中存在：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(Bob, uses, Python)</span><br><span class="line">(Bob, learns, LangGraph)</span><br><span class="line">(Bob, studies, A-MEM)</span><br><span class="line">(Alice, works_at, Google)</span><br></pre></td></tr></table></figure>
+<p>每个 Relationship 在构建时都会形成对应的文本表示，例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Bob uses Python</span><br><span class="line">Bob learns LangGraph</span><br><span class="line">Bob studies A-MEM</span><br><span class="line">Alice works_at Google</span><br></pre></td></tr></table></figure>
+<p>系统将 query 转换为 embedding，并与 Graph 中各个 Relationship
+的文本表示进行相似度匹配，得到与 query 最相关的 Top-k
+Relationships，并返回这些关系对应的文本描述。</p>
+<h4 id="双轨检索结果融合">双轨检索结果融合</h4>
+<p>两种检索方式会<strong>并行执行</strong>，分别得到 Entity-centric 和
+Relation-centric 的检索结果。Mem0
+将两路结果进行合并、去重并统一排序，最终选取得分最高的 Top-k
+结果，作为提供给 Agent / LLM 的相关记忆上下文。</p>
+<h2 id="mem0-v3-pipeline-版本变动">2. mem0 v3 pipeline 版本变动</h2>
+<p>目前通过 <code>pip install mem0ai</code> 安装的最新 mem0 版本，其默认
+Pipeline 已经采用 <strong>v3</strong>；而 mem0 论文中介绍的 Pipeline
+主要对应 <strong>v2</strong>。</p>
+<p>v3 相比 v2
+在记忆写入、图数据组织以及检索方式等方面都进行了较大调整。因此，本节单独介绍
+v2 → v3 的主要变化。</p>
+<p>其中最显著的变化是：<strong>v3 不再使用 Neo4j
+等外部图数据库，而是直接移除了原有的 Graph
+Memory，并将部分图结构能力合并到 Memory Store 中。</strong></p>
+<h3 id="整体架构从-memory-graph-转向-memory-centric">2.1 整体架构：从
+Memory + Graph 转向 Memory-centric</h3>
+<p>v2 的整体架构可以理解为两部分：<strong>Memory Store</strong> +
+<strong>Graph Memory</strong></p>
+<p>其中：</p>
+<ul>
+<li><strong>Memory Store</strong>：负责存储和检索 memory；</li>
+<li><strong>Graph Memory</strong>：负责提取 Entity，并通过
+Entity-to-Entity 的关系构建 Knowledge Graph。</li>
+</ul>
+<p>v3 则移除了独立的 Graph
+Memory，直接用同一个数据库存储memory和entity：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Memory Store</span><br><span class="line">    ├── Memory</span><br><span class="line">    └── Entity → Memory 关联索引</span><br></pre></td></tr></table></figure>
+<p>也就是说，v3 不再维护一个独立的 Entity-to-Entity Knowledge
+Graph，而是将 Entity 作为 Memory 的检索辅助结构。</p>
+<p>同时，原有图数据库相关代码被大幅移除，包括
+<code>mem0/graphs/</code>、<code>graph_memory.py</code>
+等，Neo4j、Memgraph、Kuzu、Apache AGE、Neptune 等外部图数据库也不再属于
+OSS SDK 的 Graph Memory 实现。</p>
+<hr>
+<h3 id="memory-写入从-提取-更新-变为-增量累积">2.2 Memory 写入：从 “提取
++ 更新” 变为 “增量累积”</h3>
+<p>这是 v3 在 Memory 层面最重要的变化之一。</p>
+<h4 id="v2提取后再进行更新判断">v2：提取后再进行更新判断</h4>
+<p>v2 的写入过程大致需要经过两个阶段：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">新消息</span><br><span class="line">   ↓</span><br><span class="line">LLM 提取候选 facts</span><br><span class="line">   ↓</span><br><span class="line">对每个 fact 检索已有 memories</span><br><span class="line">   ↓</span><br><span class="line">LLM 判断如何处理</span><br><span class="line">   ↓</span><br><span class="line">ADD / UPDATE / DELETE / NOOP</span><br></pre></td></tr></table></figure>
+<p>也就是说，v2 不仅负责发现新的 memory，还会主动判断新信息与已有 memory
+之间的关系，并决定是否修改或删除已有 memory。</p>
+<h4 id="v3提取后直接-add">v3：提取后直接 ADD</h4>
+<p>v3 则将这一过程简化为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">新消息</span><br><span class="line">   ↓</span><br><span class="line">ADDITIVE_EXTRACTION_PROMPT</span><br><span class="line">   ↓</span><br><span class="line">提取新的 memories</span><br><span class="line">   ↓</span><br><span class="line">ADD</span><br></pre></td></tr></table></figure>
+<p>主要变化包括：</p>
+<ul>
+<li>使用 <code>ADDITIVE_EXTRACTION_PROMPT</code> 直接提取新的
+memory；</li>
+<li>不再执行 v2 中的 <code>UPDATE / DELETE / NOOP</code> 判断；</li>
+<li>新旧 memory 不再通过覆盖的方式更新，而是通过
+<code>linked_memory_ids</code> 建立关联；</li>
+<li>摘要 <code>S</code>、recent messages 和当前 message pair
+等输入信息的整体构造逻辑没有发生根本变化，主要变化集中在<strong>提取之后的
+Memory 处理阶段</strong>。</li>
+</ul>
+<p>因此，v3 的核心思想可以概括为：</p>
+<blockquote>
+<p><strong>不主动覆盖旧 memory，而是持续增加新的
+memory，并通过关联关系表达新旧信息之间的联系。</strong></p>
+</blockquote>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">旧 memory：</span><br><span class="line">&quot;用户喜欢 Python&quot;</span><br><span class="line"></span><br><span class="line">新 memory：</span><br><span class="line">&quot;用户现在更喜欢 Rust&quot;</span><br><span class="line"></span><br><span class="line">v2：</span><br><span class="line">可能判断 UPDATE，从而修改旧 memory。</span><br><span class="line"></span><br><span class="line">v3：</span><br><span class="line">保留两条 memory，并通过 linked_memory_ids 建立关联。</span><br></pre></td></tr></table></figure>
+<p>这样做的好处是避免错误覆盖历史信息。例如，“喜欢 Python” → “喜欢
+Rust”并不一定意味着前者是错误的，也可能只是用户偏好随时间发生了变化。</p>
+<p>因此，v3
+更倾向于<strong>保留完整历史信息，以支持时间维度上的推理</strong>。</p>
+<p>其代价也很明显：Memory 不再通过 UPDATE / DELETE
+自动控制规模，因此会持续累积，需要额外的删除和管理机制。</p>
+<h4 id="手动删除机制">手动删除机制</h4>
+<p>v3 仍然提供显式的 Memory 管理能力，例如：</p>
+<ul>
+<li><code>delete(memory_id)</code>：删除指定 memory；</li>
+<li><code>delete_all(filters)</code>：根据条件批量删除；</li>
+<li><code>delete_linked=True</code>：删除某条 memory 时，同时沿
+<code>linked_memory_ids</code> 关联链删除相关的旧 memory，避免被替代的旧
+memory 在后续检索中重新出现。</li>
+</ul>
+<hr>
+<h3 id="graph-memory从-entity-entity-转变为-entity-memory">2.3 Graph
+Memory：从 Entity → Entity 转变为 Entity → Memory</h3>
+<p>v3 最大的架构变化之一，是<strong>彻底取消了 v2 中基于 Knowledge Graph
+的 Entity-to-Entity 关系组织方式</strong>。</p>
+<h4 id="v2entity-entity">v2：Entity → Entity</h4>
+<p>v2 中，Entity 是 Knowledge Graph 的节点。</p>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Alice ──works_at──&gt; OpenAI</span><br><span class="line">OpenAI ──located_in──&gt; San Francisco</span><br></pre></td></tr></table></figure>
+<p>通过这种带有语义关系类型的边：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(source entity, relation, destination entity)</span><br></pre></td></tr></table></figure>
+<p>将多个 Entity 连接起来，形成 Knowledge Graph。</p>
+<p>因此，v2 的核心结构可以概括为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Entity → Entity</span><br></pre></td></tr></table></figure>
+<h4 id="v3entity-memory">v3：Entity → Memory</h4>
+<p>v3 不再维护这种 Entity-to-Entity 的显式关系，而是建立：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Entity → Memory</span><br></pre></td></tr></table></figure>
+<p>即：</p>
+<blockquote>
+<p>Entity 不再作为一个具有复杂关系的 Knowledge Graph
+节点，而主要<strong>作为 Memory 的检索索引</strong>。</p>
+</blockquote>
+<p>例如：（"python" 是作为例子的entity）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Python → &#123;</span><br><span class="line">    memory_ids: [</span><br><span class="line">        mem_001,</span><br><span class="line">        mem_017,</span><br><span class="line">        mem_032</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的 Memory 就是包含或提取出该 Entity 的源记忆。</p>
+<p>因此，v3 的结构更接近一个<strong>Entity → Memory
+的倒排索引</strong>。</p>
+<hr>
+<h3 id="entity-的提取与存储">2.4 Entity 的提取与存储</h3>
+<p>v3 中，Entity 不再通过 Graph Memory 和 LLM 构建 Knowledge
+Graph，而是使用 <strong>spaCy</strong> 从每条 Memory
+的文本中提取实体。</p>
+<p>这里需要特别注意：</p>
+<blockquote>
+<p><strong>v3 的 Entity 提取不是通过 LLM 完成的，而是使用 spaCy
+进行实体识别。</strong></p>
+</blockquote>
+<p>spaCy 主要用于从 Memory 中识别：</p>
+<ul>
+<li>专有名词；</li>
+<li>引用文本；</li>
+<li>复合名词短语等实体信息。</li>
+</ul>
+<p>提取出的 Entity 随后被存储到与 Memory Store 配合使用的独立 Entity
+collection 中：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;collection&#125;_entities</span><br></pre></td></tr></table></figure>
+<p>并建立：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Entity → Memory IDs</span><br></pre></td></tr></table></figure>
+<p>的关联。</p>
+<h3 id="检索hybrid-search-entity-aware-ranking">2.5 检索：Hybrid Search
++ Entity-aware Ranking</h3>
+<p>v3 的检索不再依赖 v2 的 Graph
+Retrieval，而是将多种检索方式进行融合，主要包括：</p>
+<ol type="1">
+<li><strong>稠密检索（向量/语义）</strong>：将 query 转换为
+embedding，与 Memory Store 中已有 memory 的 embedding
+进行相似度匹配，找到语义上最相关的 memory。</li>
+<li><strong>稀疏检索（关键词）</strong>：利用 query
+中的关键词、实体等信息，对 memory
+文本进行关键词匹配，弥补纯向量检索可能遗漏的结果。</li>
+<li><strong>Entity-aware Ranking</strong>：从 query 中提取关键
+entity，并利用已经建立的 <strong>Entity → Memory</strong>
+关联，找到与这些 entity 相关的 memory。</li>
+</ol>
+<p>最终综合 <strong>semantic similarity、entity information 以及
+metadata 等信息</strong> 对候选 memory
+进行排序，选择排名靠前的结果。</p>
+<p><img src="/2026/08/13/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-10/image-20260815234028147.png"></p>
+<h3 id="v2-v3-的核心变化总结">2.6 v2 → v3 的核心变化总结</h3>
+<p>v2 → v3 的核心变化主要有以下四点：</p>
+<ol type="1">
+<li><strong>Memory 写入</strong>：从
+<code>ADD / UPDATE / DELETE / NOOP</code> 转变为以 <strong>ADD
+为主的累积式记忆</strong>，通过 <code>linked_memory_ids</code> 关联新旧
+memory。</li>
+<li><strong>Graph Memory</strong>：移除 Neo4j 等外部图数据库，不再维护
+<strong>Entity → Entity</strong> 的 Knowledge Graph，改为 <strong>Entity
+→ Memory</strong> 的关联机制。</li>
+<li><strong>Entity 提取</strong>：从原来的 Graph Memory 机制转变为使用
+<strong>spaCy（非 LLM）</strong> 提取 Entity，并建立 Entity Index。</li>
+<li><strong>Memory 检索</strong>：从原来的 Graph Retrieval 转变为
+<strong>Hybrid Search + Entity-aware Ranking</strong>。</li>
+</ol>
+<p>总体来说，v3 的设计目标是：</p>
+<blockquote>
+<p><strong>简化架构、降低延迟、减少旧记忆被错误覆盖的风险，同时保留
+Entity 对 Memory 检索的辅助能力。</strong></p>
+</blockquote>
+<hr>
+<h2 id="mem0-使用">3. mem0 使用</h2>
+<p>首先安装 <code>mem0ai</code>：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pip install mem0ai</span><br><span class="line">pip install &quot;mem0ai[extras]&quot;</span><br></pre></td></tr></table></figure>
+<h3 id="初始化-memory">3.1 初始化 Memory</h3>
+<p>安装完成后，可以通过两种方式使用 Mem0。</p>
+<p><strong>方式一：<code>MemoryClient</code>——托管 Platform
+API</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> mem0 <span class="keyword">import</span> MemoryClient</span><br><span class="line">client = MemoryClient(api_key=<span class="string">&quot;your-api-key&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p><code>MemoryClient</code> 本质上是一个 HTTP Client，实际的
+<strong>memory extraction、update、storage 和 retrieval</strong> 都由
+Mem0 官方云端完成。</p>
+<p><strong>方式二：<code>Memory</code>——开源自托管</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> mem0 <span class="keyword">import</span> Memory</span><br><span class="line">m = Memory()</span><br></pre></td></tr></table></figure>
+<p>这种方式运行在本地进程中，<strong>LLM、Embedding
+模型以及向量数据库都由用户自行配置和管理</strong>。</p>
+<h3 id="配置">3.2 配置</h3>
+<p>以 <strong>Ollama + Qdrant</strong> 为例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">ollama_client = OllamaClient(host=<span class="string">&quot;http://localhost:11434&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">config = &#123;</span><br><span class="line">    <span class="string">&quot;llm&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;provider&quot;</span>: <span class="string">&quot;ollama&quot;</span>,</span><br><span class="line">        <span class="string">&quot;config&quot;</span>: &#123;</span><br><span class="line">            <span class="string">&quot;model&quot;</span>: <span class="string">&quot;qwen2.5:7b&quot;</span>,</span><br><span class="line">            <span class="string">&quot;temperature&quot;</span>: <span class="number">0.1</span>,</span><br><span class="line">            <span class="string">&quot;max_tokens&quot;</span>: <span class="number">2000</span>,</span><br><span class="line">            <span class="string">&quot;ollama_base_url&quot;</span>: <span class="string">&quot;http://localhost:11434&quot;</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;embedder&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;provider&quot;</span>: <span class="string">&quot;ollama&quot;</span>,</span><br><span class="line">        <span class="string">&quot;config&quot;</span>: &#123;</span><br><span class="line">            <span class="string">&quot;model&quot;</span>: <span class="string">&quot;qwen3-embedding:0.6b&quot;</span>,</span><br><span class="line">            <span class="string">&quot;ollama_base_url&quot;</span>: <span class="string">&quot;http://localhost:11434&quot;</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;vector_store&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;provider&quot;</span>: <span class="string">&quot;qdrant&quot;</span>,</span><br><span class="line">        <span class="string">&quot;config&quot;</span>: &#123;</span><br><span class="line">            <span class="string">&quot;collection_name&quot;</span>: <span class="string">&quot;zusda_memories&quot;</span>,</span><br><span class="line">            <span class="string">&quot;host&quot;</span>: <span class="string">&quot;localhost&quot;</span>,</span><br><span class="line">            <span class="string">&quot;port&quot;</span>: <span class="number">6333</span>,</span><br><span class="line">            <span class="string">&quot;embedding_model_dims&quot;</span>: <span class="number">1024</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>整个配置主要由三个部分组成：</p>
+<h4 id="llm记忆抽取模型">1. <code>llm</code>：记忆抽取模型</h4>
+<p>负责 Mem0 pipeline 中的 <strong>Memory Extraction</strong>，即通过
+LLM 从对话中提取 candidate memories。</p>
+<p>在 v3 中，这里主要对应 <code>ADDITIVE_EXTRACTION_PROMPT</code> 的 LLM
+调用，用于生成新的 memory。</p>
+<h4 id="embedderembedding-模型">2. <code>embedder</code>：Embedding
+模型</h4>
+<p>负责将每条 memory 文本转换成向量，供后续的 <strong>Dense
+Retrieval</strong> 使用。</p>
+<h4 id="vector_store向量数据库">3.
+<code>vector_store</code>：向量数据库</h4>
+<p>负责 memory 的向量存储和检索，这里使用 Qdrant。</p>
+<p>其中：</p>
+<ul>
+<li><code>collection_name</code>：Qdrant 中存储 memory 的 collection
+名称。</li>
+<li><code>embedding_model_dims</code>：向量维度，<strong>必须与
+Embedding 模型实际输出的维度一致</strong>，否则写入 Qdrant
+时会出现维度不匹配。</li>
+</ul>
+<p>例如可以通过 Ollama 确认实际维度：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> ollama</span><br><span class="line"></span><br><span class="line">response = ollama.embed(</span><br><span class="line">    model=<span class="string">&quot;qwen3-embedding:0.6b&quot;</span>,</span><br><span class="line">    <span class="built_in">input</span>=<span class="string">&quot;测试文本&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">len</span>(response[<span class="string">&quot;embeddings&quot;</span>][<span class="number">0</span>]))</span><br></pre></td></tr></table></figure>
+<p>确认维度后，再将其设置到：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;embedding_model_dims&quot;</span>: <span class="number">1024</span></span><br></pre></td></tr></table></figure>
+<p>最后根据配置实例化 Mem0：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">memory = Memory.from_config(config)</span><br></pre></td></tr></table></figure>
+<h3 id="构建一个带长期记忆的-agent">3.3 构建一个带长期记忆的 Agent</h3>
+<p>一个最简单的 Mem0 Agent 可以按照以下流程工作：</p>
+<p><strong>用户输入 → 检索长期记忆 → 注入 Prompt → LLM 回答 → 将对话写入
+Mem0</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">USER_ID = <span class="string">&quot;zusda&quot;</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">chat_with_memory</span>(<span class="params">user_input: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="comment"># 1. 回答前搜索长期记忆，使用 memory.search()</span></span><br><span class="line">    relevant = memory.search(</span><br><span class="line">        query=user_input,</span><br><span class="line">        filters=&#123;<span class="string">&quot;user_id&quot;</span>: USER_ID&#125;,</span><br><span class="line">        limit=<span class="number">5</span></span><br><span class="line">    )</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 2. 将相关记忆加入 Prompt</span></span><br><span class="line">    memories_str = <span class="string">&quot;\n&quot;</span>.join(</span><br><span class="line">        <span class="string">f&quot;- <span class="subst">&#123;m[<span class="string">&#x27;memory&#x27;</span>]&#125;</span>&quot;</span></span><br><span class="line">        <span class="keyword">for</span> m <span class="keyword">in</span> relevant[<span class="string">&quot;results&quot;</span>]</span><br><span class="line">    )</span><br><span class="line">    system_prompt = (</span><br><span class="line">        <span class="string">&quot;你是一个有长期记忆的助手，回答时结合下面的用户记忆。\n&quot;</span></span><br><span class="line">        <span class="string">f&quot;用户记忆：\n<span class="subst">&#123;memories_str&#125;</span>&quot;</span></span><br><span class="line">    )</span><br><span class="line">    messages = [</span><br><span class="line">        &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;system&quot;</span>, <span class="string">&quot;content&quot;</span>: system_prompt&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: user_input&#125;,</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 3. 调用 LLM 生成回复</span></span><br><span class="line">    response = ollama_client.chat(</span><br><span class="line">        model=<span class="string">&quot;qwen2.5:7b&quot;</span>,</span><br><span class="line">        messages=messages,</span><br><span class="line">    )</span><br><span class="line">    assistant_reply = response[<span class="string">&quot;message&quot;</span>][<span class="string">&quot;content&quot;</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 4. 将本轮对话写入 Mem0，使用 memory.append()</span></span><br><span class="line">    messages.append(&#123;</span><br><span class="line">        <span class="string">&quot;role&quot;</span>: <span class="string">&quot;assistant&quot;</span>,</span><br><span class="line">        <span class="string">&quot;content&quot;</span>: assistant_reply</span><br><span class="line">    &#125;)</span><br><span class="line">    memory.add(</span><br><span class="line">        messages,</span><br><span class="line">        user_id=USER_ID</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> assistant_reply</span><br></pre></td></tr></table></figure>
+<p>其中最关键的是两个操作：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">memory.search(...)</span><br></pre></td></tr></table></figure>
+<p>负责<strong>检索已有的长期记忆</strong>；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">memory.add(...)</span><br></pre></td></tr></table></figure>
+<p>负责将<strong>本轮对话交给 Mem0 的 memory pipeline
+处理并写入记忆库</strong>。</p>
+<p>因此，整个 Agent 可以简单理解为：</p>
+<h3 id="main-函数">3.4 Main 函数</h3>
+<p>最后通过循环实现一个简单的命令行 Agent：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        text = <span class="built_in">input</span>(<span class="string">&quot;You: &quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> text.lower() <span class="keyword">in</span> (<span class="string">&quot;exit&quot;</span>, <span class="string">&quot;quit&quot;</span>):</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;AI:&quot;</span>, chat_with_memory(text))</span><br></pre></td></tr></table></figure>
+<p>这样，一个最基本的 <strong>Mem0 + Ollama + Qdrant 长期记忆
+Agent</strong> 就搭建完成了。</p>
+<h2 id="其他">4. 其他</h2>
+<h3 id="安装-qdrant">4.1 安装 Qdrant</h3>
+<p>如果使用 Docker 部署 Qdrant，首先拉取镜像：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull qdrant/qdrant</span><br></pre></td></tr></table></figure>
+<p>然后启动 Qdrant 容器：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -p <span class="number">6333</span>:<span class="number">6333</span> -p <span class="number">6334</span>:<span class="number">6334</span> -v C:\Users\admin\qdrant_storage:/qdrant/storage qdrant/qdrant</span><br></pre></td></tr></table></figure>
+<p>其中：</p>
+<ul>
+<li><code>6333</code>：Qdrant HTTP API 端口</li>
+<li><code>6334</code>：Qdrant gRPC 端口</li>
+<li><code>-v</code>：将宿主机目录挂载到容器中的
+<code>/qdrant/storage</code>，用于持久化数据。</li>
+</ul>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\admin\qdrant_storage</span><br></pre></td></tr></table></figure>
+<p>表示 Windows 本地的一个磁盘目录。Qdrant
+的数据会通过目录映射保存到该位置。</p>
+<p>如果不使用 <code>-v</code> 进行持久化，Qdrant
+数据只保存在容器内部。<strong>删除容器后，容器中的数据也会随之丢失。</strong></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM/" rel="tag"># 从零开始的LLM</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/%E7%AC%AC10%E8%8A%82/" rel="tag"># 第10节</a>
+              <a href="/tags/%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0/" rel="tag"># 持续学习</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/08/08/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-9/" rel="prev" title="从零开始的LLM 9. A-MEM 与 LangChain/LangGraph学习">
+                  <i class="fa fa-angle-left"></i> 从零开始的LLM 9. A-MEM 与 LangChain/LangGraph学习
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
