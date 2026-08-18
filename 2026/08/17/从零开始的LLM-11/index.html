@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 本文将介绍 Voyager 的原理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的LLM 11. Voyager原理学习">
+<meta property="og:url" content="https://zusda.github.io/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 本文将介绍 Voyager 的原理。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/voyager_flowchart_v5.png">
+<meta property="og:image" content="https://zusda.github.io/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/image-20260817154453708.png">
+<meta property="og:image" content="https://zusda.github.io/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/image-20260817161331060.png">
+<meta property="og:image" content="https://zusda.github.io/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/voyager_flowchart_v5.png">
+<meta property="article:published_time" content="2026-08-17T07:29:13.000Z">
+<meta property="article:modified_time" content="2026-08-18T05:35:20.791Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="从零开始的LLM">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="持续学习">
+<meta property="article:tag" content="第11节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/voyager_flowchart_v5.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/","path":"2026/08/17/从零开始的LLM-11/","title":"从零开始的LLM 11. Voyager原理学习"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>从零开始的LLM 11. Voyager原理学习 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#voyager-%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text">1. Voyager 介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#voyager-%E7%9A%84%E4%B8%89%E4%B8%AA%E6%A0%B8%E5%BF%83%E7%BB%84%E6%88%90%E9%83%A8%E5%88%86"><span class="nav-number">3.</span> <span class="nav-text">2. Voyager 的三个核心组成部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#automatic-curriculum-%E8%87%AA%E5%8A%A8%E8%AF%BE%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">3. Automatic Curriculum ——
+自动课程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%83%E8%A7%A3%E5%86%B3%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 它解决什么问题？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#automatic-curriculum-%E7%9A%84%E8%BE%93%E5%85%A5"><span class="nav-number">5.</span> <span class="nav-text">4. Automatic Curriculum 的输入</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#directives-%E6%80%BB%E4%BD%93%E7%9B%AE%E6%A0%87%E4%B8%8E%E7%BA%A6%E6%9D%9F"><span class="nav-number">5.1.</span> <span class="nav-text">4.1 Directives —— 总体目标与约束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#agent-current-state-%E5%BD%93%E5%89%8D%E7%8A%B6%E6%80%81"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 Agent Current State ——
+当前状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#previously-completed-failed-tasks"><span class="nav-number">5.3.</span> <span class="nav-text">4.3 Previously Completed &#x2F;
+Failed Tasks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gpt-3.5-self-ask"><span class="nav-number">5.4.</span> <span class="nav-text">4.4 GPT-3.5 Self-Ask</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#skill-library-%E6%8A%80%E8%83%BD%E5%BA%93"><span class="nav-number">6.</span> <span class="nav-text">5. Skill Library —— 技能库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#skill-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">6.1.</span> <span class="nav-text">5.1 Skill 是什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#skill-%E7%9A%84%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84"><span class="nav-number">6.2.</span> <span class="nav-text">5.2 Skill 的存储结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0-skilladd_new_skill"><span class="nav-number">6.3.</span> <span class="nav-text">5.3 添加
+Skill：add_new_skill</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%80%E7%B4%A2-skillretrieve_skills"><span class="nav-number">6.4.</span> <span class="nav-text">5.4 检索
+Skill：retrieve_skills</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gpt-4-%E7%94%9F%E6%88%90-skill-%E6%89%80%E9%9C%80-%E7%9A%84%E8%BE%93%E5%85%A5"><span class="nav-number">7.</span> <span class="nav-text">6. GPT-4 生成 Skill 所需
+的输入</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#code-generation-guidelines"><span class="nav-number">7.1.</span> <span class="nav-text">6.1 Code Generation Guidelines</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#control-primitive-apis-relevant-skills"><span class="nav-number">7.2.</span> <span class="nav-text">6.2 Control Primitive
+APIs + Relevant Skills</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#control-primitive-apis"><span class="nav-number">7.2.1.</span> <span class="nav-text">6.2.1 Control Primitive APIs</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#relevant-skills"><span class="nav-number">7.2.2.</span> <span class="nav-text">6.2.2 Relevant Skills</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#previous-code-feedback-errors-critique"><span class="nav-number">7.3.</span> <span class="nav-text">6.3 Previous Code +
+Feedback + Errors + Critique</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#current-state"><span class="nav-number">7.4.</span> <span class="nav-text">6.4 Current State</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#chain-of-thought-prompting"><span class="nav-number">7.5.</span> <span class="nav-text">6.5 Chain-of-Thought Prompting</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81prompt"><span class="nav-number">7.6.</span> <span class="nav-text">6.6 源码prompt</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%AD%E4%BB%A3%E5%BC%8F%E6%8F%90%E7%A4%BA%E6%9C%BA%E5%88%B6"><span class="nav-number">8.</span> <span class="nav-text">7. 迭代式提示机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%8D%E9%A6%88%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%AD%A3%E5%B8%B8%E4%BD%86%E7%8E%AF%E5%A2%83%E6%9D%A1%E4%BB%B6%E4%B8%8D%E6%BB%A1%E8%B6%B3"><span class="nav-number">8.1.</span> <span class="nav-text">7.1
+环境反馈（代码执行正常，但环境条件不满足）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E9%94%99%E8%AF%AF%E4%BB%A3%E7%A0%81%E8%BF%90%E8%A1%8C%E5%BC%82%E5%B8%B8"><span class="nav-number">8.2.</span> <span class="nav-text">7.2 执行错误（代码运行异常）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E6%88%91%E9%AA%8C%E8%AF%81%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%AD%A3%E5%B8%B8%E4%BD%86%E4%BB%BB%E5%8A%A1%E7%9B%AE%E6%A0%87%E6%9C%AA%E8%BE%BE%E6%88%90"><span class="nav-number">8.3.</span> <span class="nav-text">7.3
+自我验证（代码执行正常，但任务目标未达成）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E4%B8%AA%E7%BB%84%E4%BB%B6%E5%A6%82%E4%BD%95%E5%BD%A2%E6%88%90%E5%AE%8C%E6%95%B4%E9%97%AD%E7%8E%AF"><span class="nav-number">9.</span> <span class="nav-text">8. 三个组件如何形成完整闭环？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#voyager-%E7%9A%84%E4%BA%AE%E7%82%B9"><span class="nav-number">10.</span> <span class="nav-text">9. Voyager 的亮点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E-voyager-%E5%88%B0-codeact"><span class="nav-number">10.1.</span> <span class="nav-text">9.1 从 Voyager 到 CodeAct</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#voyager-%E7%9A%84-skill-library"><span class="nav-number">10.2.</span> <span class="nav-text">9.2 Voyager 的 Skill Library</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#openhands%E4%BB%A3%E7%A0%81-agent-%E7%9A%84%E5%AE%9E%E9%99%85%E8%90%BD%E5%9C%B0"><span class="nav-number">10.3.</span> <span class="nav-text">9.3 OpenHands：代码 Agent
+的实际落地</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">83</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="从零开始的LLM 11. Voyager原理学习 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从零开始的LLM 11. Voyager原理学习
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-08-17 15:29:13" itemprop="dateCreated datePublished" datetime="2026-08-17T15:29:13+08:00">2026-08-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-08-18 13:35:20" itemprop="dateModified" datetime="2026-08-18T13:35:20+08:00">2026-08-18</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>本文将介绍 Voyager 的原理。</p>
+<span id="more"></span>
+<p>经过前面的学习，我们已经系统地完成了大语言模型（LLM）的基础部分，主要参考了以下资料：</p>
+<ul>
+<li>《动手学深度学习》</li>
+<li>《蘑菇书》</li>
+<li>《Happy-LLM》</li>
+<li>《Hello-Agents》</li>
+<li>《all-in-rag》</li>
+</ul>
+<p>到这里，可以认为已经具备了继续深入学习 Agent 的基础能力。</p>
+<p>接下来的内容将不再像之前那样按照固定课程循序渐进，而是更多围绕当前
+Agent 领域的研究方向展开。学习内容既会涉及工程实践（如各种 Agent
+框架、工作流、记忆系统等），也会涉及算法与模型层面的探索（如多模态、持续学习等）。</p>
+<ol type="1">
+<li>Generative Agents</li>
+<li>Letta</li>
+<li>A-MEM</li>
+<li>Voyager</li>
+</ol>
+<p>这条路线主要围绕 <strong>Agent 的持续学习（Continual
+Learning）</strong> 展开，也是我目前最感兴趣的方向：<strong>如何让一个
+Agent
+在长期运行过程中不断积累经验、提升能力，而不是每次都从零开始。</strong></p>
+<p>目前来看，大致有两种思路：</p>
+<ol type="1">
+<li><strong>不修改模型本身。</strong> 仅通过
+Prompt、记忆系统（Memory）、RAG、工具调用等机制，使 Agent
+能够不断积累知识和经验，实现能力的持续增长。</li>
+<li><strong>修改模型本身。</strong> 基于 Agent
+长期运行过程中积累的对话、笔记和总结等数据，在合适的时机对模型进行持续训练（Continual
+Fine-tuning），使模型真正将这些经验内化，而不仅仅依赖外部记忆。</li>
+</ol>
+<p>由于这一阶段更多是阅读论文、分析开源项目、验证实验以及整理个人理解，而不是单纯跟着教程学习，因此资料收集、实验和整理都会比之前花费更多时间。</p>
+<hr>
+<h2 id="voyager-介绍">1. Voyager 介绍</h2>
+<p><strong>Voyager</strong> 是一个基于 <strong>GPT-4 的 Minecraft
+开放世界探索智能体（embodied agent）</strong>。</p>
+<p>它的核心目标并不是让 GPT-4 单纯回答 Minecraft 相关问题，而是让
+GPT-4：</p>
+<blockquote>
+<p><strong>通过生成并执行代码，在 Minecraft
+世界中自主探索、学习技能，并逐渐完成更加复杂的任务。</strong></p>
+</blockquote>
+<p>Voyager 的整体工作过程可以概括为：</p>
+<p><img src="/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/voyager_flowchart_v5.png" style="zoom: 33%;"></p>
+<ol type="1">
+<li><strong>生成任务</strong> → 检索相关 Skill → GPT-4 生成代码</li>
+<li><strong>执行代码</strong></li>
+<li><strong>Execution Error</strong> → 修改代码 → 重新执行</li>
+<li><strong>执行成功</strong> → Self-Verification</li>
+<li><strong>验证成功</strong> → 保存 Skill → 生成下一任务</li>
+<li><strong>验证失败</strong> → 根据 Critique 修改代码 → 重新执行</li>
+</ol>
+<p>因此，Voyager 的核心不是单纯的“让 LLM 玩
+Minecraft”，而是建立一个能够<strong>持续探索、积累技能并逐渐变强</strong>的闭环。</p>
+<p>由于 Voyager 的具体实现与 Minecraft
+环境高度绑定，其代码本身并不具有通用性，因此这里主要学习它背后的<strong>系统设计思想和核心机制</strong>。</p>
+<h2 id="voyager-的三个核心组成部分">2. Voyager 的三个核心组成部分</h2>
+<p>Voyager 由三个核心组件组成：</p>
+<table>
+<colgroup>
+<col style="width: 41%">
+<col style="width: 30%">
+<col style="width: 27%">
+</colgroup>
+<thead>
+<tr>
+<th>组件</th>
+<th>作用</th>
+<th>核心问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Automatic Curriculum</strong></td>
+<td>自动提出下一个探索目标</td>
+<td><strong>下一步做什么？</strong></td>
+</tr>
+<tr>
+<td><strong>Skill Library</strong></td>
+<td>保存已经学会的可复用技能</td>
+<td><strong>已经学会了什么？</strong></td>
+</tr>
+<tr>
+<td><strong>Iterative Prompting Mechanism</strong></td>
+<td>生成、执行和不断改进代码</td>
+<td><strong>怎么完成当前任务？</strong></td>
+</tr>
+</tbody>
+</table>
+<p>三者形成一个循环：</p>
+<p><img src="/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/image-20260817154453708.png" style="zoom:80%;"></p>
+<p>可以简单理解为：</p>
+<ul>
+<li><strong>Automatic Curriculum</strong>：决定
+<strong>做什么</strong></li>
+<li><strong>Iterative Prompting</strong>：决定
+<strong>怎么做</strong></li>
+<li><strong>Skill Library</strong>：保存
+<strong>学会了什么</strong></li>
+</ul>
+<hr>
+<h2 id="automatic-curriculum-自动课程">3. Automatic Curriculum ——
+自动课程</h2>
+<h3 id="它解决什么问题">3.1 它解决什么问题？</h3>
+<p>Minecraft 是开放世界，不存在固定的任务清单，例如：</p>
+<blockquote>
+<p>挖木 → 做木镐 → 挖石 → 做石镐 → 挖铁</p>
+</blockquote>
+<p>Voyager 需要<strong>自主生成任务序列</strong>。</p>
+<p>其总体目标是：</p>
+<blockquote>
+<p><strong>尽可能多地发现游戏中的多样化元素。</strong></p>
+</blockquote>
+<p>同时，下一项任务不能太难，否则当前 Agent
+可能没有足够的资源或技能完成任务。</p>
+<p>因此，Automatic Curriculum 的核心就是：</p>
+<blockquote>
+<p><strong>根据 Agent
+当前的状态和探索进度，自动决定下一步应该做什么。</strong></p>
+</blockquote>
+<h2 id="automatic-curriculum-的输入">4. Automatic Curriculum 的输入</h2>
+<p>GPT-4
+在决定下一个任务时，并不是凭空生成任务，而是会获得多方面的信息。</p>
+<p>Automatic Curriculum 在生成下一任务时，LLM 的 Prompt
+需要以下输入信息：</p>
+<ol type="1">
+<li><strong>Directives</strong>：总体探索目标和约束</li>
+<li><strong>Current State</strong>：智能体当前 Minecraft 状态</li>
+<li><strong>Completed / Failed Tasks</strong>：之前完成和失败的任务</li>
+<li><strong>Additional Context</strong>：由 GPT-3.5
+根据当前状态和探索进度进行 self-ask 得到的问答结果</li>
+</ol>
+<hr>
+<h3 id="directives-总体目标与约束">4.1 Directives —— 总体目标与约束</h3>
+<p>首先告诉 GPT-4 Voyager 的总体目标。</p>
+<p>例如：</p>
+<blockquote>
+<p>“My ultimate goal is to discover as many diverse things as
+possible.”</p>
+</blockquote>
+<p>同时还会加入约束：</p>
+<blockquote>
+<p>“The next task should not be too hard since I may not have the
+necessary resources or have learned enough skills to complete it
+yet.”</p>
+</blockquote>
+<p>也就是说：</p>
+<p><strong>任务既要推动探索，又不能一下子难到当前智能体无法完成。</strong></p>
+<h3 id="agent-current-state-当前状态">4.2 Agent Current State ——
+当前状态</h3>
+<p>Voyager 会把<strong>当前 Minecraft 状态</strong>提供给
+GPT-4，例如：</p>
+<ul>
+<li>inventory：背包</li>
+<li>equipment：装备</li>
+<li>nearby blocks：附近方块</li>
+<li>nearby entities：附近实体</li>
+<li>biome：生物群系</li>
+<li>time：游戏时间</li>
+<li>health：生命值</li>
+<li>hunger：饥饿值</li>
+<li>position：当前位置</li>
+</ul>
+<p>例如 GPT-4 可以知道：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Inventory:</span><br><span class="line">Wood: 10</span><br><span class="line">Stone: 5</span><br><span class="line">Iron: 0</span><br><span class="line"></span><br><span class="line">Equipment:</span><br><span class="line">Wooden Pickaxe</span><br><span class="line"></span><br><span class="line">Biome:</span><br><span class="line">Plains</span><br><span class="line"></span><br><span class="line">Health:</span><br><span class="line">20</span><br><span class="line"></span><br><span class="line">Position:</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>这样 GPT-4 就能够判断：</p>
+<blockquote>
+<p><strong>当前已经有什么？当前还缺什么？下一步适合做什么？</strong></p>
+</blockquote>
+<p>从而生成一个与当前状态匹配的任务。</p>
+<h3 id="previously-completed-failed-tasks">4.3 Previously Completed /
+Failed Tasks</h3>
+<p>Voyager 还会告诉 GPT-4：</p>
+<ul>
+<li>已经完成过什么任务</li>
+<li>哪些任务失败过</li>
+</ul>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Completed:</span><br><span class="line">- collect wood</span><br><span class="line">- craft wooden pickaxe</span><br><span class="line">- collect stone</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Failed:</span><br><span class="line">- craft iron chestplate</span><br></pre></td></tr></table></figure>
+<p>这些信息能够反映 Voyager
+当前的<strong>探索进度和能力边界（capabilities frontier）</strong>。</p>
+<p>例如：</p>
+<blockquote>
+<p>木头和石头相关能力已经掌握，但是铁相关能力还没有完全掌握。</p>
+</blockquote>
+<p>因此，GPT-4
+可以根据之前的执行情况生成更加合适的后续任务，而不是盲目提出一个当前难以完成的高级任务。</p>
+<h3 id="gpt-3.5-self-ask">4.4 GPT-3.5 Self-Ask</h3>
+<p>Voyager 还会利用 GPT-3.5 根据当前状态和探索进度：</p>
+<ol type="1">
+<li>自己提出问题</li>
+<li>自己回答问题</li>
+</ol>
+<p>例如可以围绕当前状态产生一些辅助性问题：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">What resources are currently available?</span><br><span class="line">What can be crafted with these resources?</span><br><span class="line">What should be explored next?</span><br></pre></td></tr></table></figure>
+<p>这些问答结果可以作为额外上下文，帮助后续的任务生成。</p>
+<p>这里使用 GPT-3.5 而不是
+GPT-4，主要是为了<strong>降低成本</strong>。</p>
+<hr>
+<p><img src="/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/image-20260817161331060.png" style="zoom:80%;"></p>
+<h2 id="skill-library-技能库">5. Skill Library —— 技能库</h2>
+<p>Automatic Curriculum 解决：<strong>下一步做什么？</strong></p>
+<p>Skill Library
+解决：<strong>以前学会的东西怎么保存和复用？</strong></p>
+<p>这是 Voyager 非常重要的一部分。</p>
+<h3 id="skill-是什么">5.1 Skill 是什么？</h3>
+<p>Voyager
+并不是简单地把“我会做石镐”保存成一句自然语言描述，而是把技能表示为：<strong>可执行代码（executable
+code）</strong>。</p>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">craftStoneShovel()</span><br></pre></td></tr></table></figure>
+<p>或者：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">combatZombieWithSword()</span><br></pre></td></tr></table></figure>
+<p>因此，一个 Skill 本质上是：</p>
+<blockquote>
+<p><strong>能够完成某个具体任务的一段可执行程序。</strong></p>
+</blockquote>
+<p>Skill 可以进一步组合：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">collectWood()</span><br><span class="line">    ↓</span><br><span class="line">craftWoodenPickaxe()</span><br><span class="line">    ↓</span><br><span class="line">collectStone()</span><br><span class="line">    ↓</span><br><span class="line">craftStonePickaxe()</span><br><span class="line">    ↓</span><br><span class="line">collectIron()</span><br><span class="line">    ↓</span><br><span class="line">craftIronPickaxe()</span><br></pre></td></tr></table></figure>
+<p>后面的复杂任务可以直接调用之前已经学会的
+Skill，而不需要每次都从零开始。</p>
+<p>论文中的：</p>
+<blockquote>
+<p>skills scaffold temporally extended actions</p>
+</blockquote>
+<p>其中 <strong>scaffold</strong> 可以理解为：</p>
+<blockquote>
+<p><strong>为更复杂的行为提供基础和支撑。</strong></p>
+</blockquote>
+<h3 id="skill-的存储结构">5.2 Skill 的存储结构</h3>
+<p>一份 Skill 主要涉及 <strong>4 类持久化存储</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">U.f_mkdir(<span class="string">f&quot;<span class="subst">&#123;ckpt_dir&#125;</span>/skill/code&quot;</span>)          <span class="comment"># 保存 .js 完整代码</span></span><br><span class="line">U.f_mkdir(<span class="string">f&quot;<span class="subst">&#123;ckpt_dir&#125;</span>/skill/description&quot;</span>)   <span class="comment"># 保存 .txt 自然语言描述</span></span><br><span class="line">U.f_mkdir(<span class="string">f&quot;<span class="subst">&#123;ckpt_dir&#125;</span>/skill/vectordb&quot;</span>)      <span class="comment"># 保存 Chroma 向量库</span></span><br><span class="line"><span class="string">f&quot;<span class="subst">&#123;ckpt_dir&#125;</span>/skill/skills.json&quot;</span>              <span class="comment"># 保存 Skill 映射关系</span></span><br></pre></td></tr></table></figure>
+<p>对应关系：</p>
+<ul>
+<li><code>code/</code>：保存 <code>program_code</code>，即 LLM
+生成并执行验证通过的完整 <strong>JS 函数代码</strong></li>
+<li><code>description/</code>：保存 LLM
+根据代码和函数名生成的<strong>自然语言描述</strong></li>
+<li><code>vectordb/</code>：保存 <strong><code>description</code> 的
+embedding 向量</strong>，用于语义检索</li>
+<li><code>skills.json</code>：保存 <code>self.skills</code>，记录
+<code>program_name → code + description</code>
+的<strong>映射</strong></li>
+</ul>
+<p><code>skills.json</code> 主要用于保存 Skill
+的<strong>代码和描述映射</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    program_name: &#123;</span><br><span class="line">        <span class="string">&quot;code&quot;</span>: ...,</span><br><span class="line">        <span class="string">&quot;description&quot;</span>: ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="添加-skilladd_new_skill">5.3 添加
+Skill：<code>add_new_skill</code></h3>
+<p>主要流程：</p>
+<ol type="1">
+<li><strong>过滤</strong>：排除不值得复用的一次性任务，例如往箱子存杂物。</li>
+<li><strong>生成描述</strong>：调用
+<code>generate_skill_description</code>，让 LLM 根据代码和函数名生成
+<code>skill_description</code>。</li>
+<li><strong>处理重名</strong>：如果 <code>program_name</code>
+已存在，则删除 Vector DB 中旧条目；旧代码文件可以改名为
+<code>xxxV2.js</code> 留档，但 <code>self.skills</code>
+只保留最新版本。</li>
+<li><strong>更新</strong>：将新的 description 加入 Vector DB，并更新
+<code>self.skills[program_name]</code>。</li>
+<li><strong>持久化</strong>：代码、描述、<code>skills.json</code> 和
+Vector DB 分别保存。</li>
+</ol>
+<h3 id="检索-skillretrieve_skills">5.4 检索
+Skill：<code>retrieve_skills</code></h3>
+<ol type="1">
+<li><code>query</code> 是当前任务的自然语言描述。</li>
+<li><code>k = min(库中现有技能数, retrieval_top_k)</code>，避免库中
+Skill 较少时出错。</li>
+<li><code>similarity_search_with_score(query, k=k)</code>：将
+<code>query</code> 转成 embedding，与 Skill Description 的 embedding
+计算相似度，取 Top-K。</li>
+<li>根据 <code>doc.metadata["name"]</code> 反查
+<code>self.skills[name]["code"]</code>，返回真正的 Skill Code。</li>
+</ol>
+<h2 id="gpt-4-生成-skill-所需-的输入">6. GPT-4 生成 Skill 所需
+的输入</h2>
+<p>Skill Library 生成新 Skill 时，LLM Prompt 需要以下输入信息：</p>
+<ol type="1">
+<li><strong>代码生成规范（Guidelines）</strong>：要求 Skill
+具有通用性和可复用性，便于后续组合成更复杂的 Skill。</li>
+<li><strong>Primitive APIs + 相关已有
+Skill</strong>：提供最基础的执行操作 API，以及从 Skill Library
+中检索出的相关已有 Skill，供 GPT-4 复用和组合。</li>
+<li><strong>上一轮代码及执行反馈</strong>：包括上一轮生成的代码、环境反馈、执行错误和
+Critique，用于迭代改进。</li>
+<li><strong>当前环境状态（Current
+State）</strong>：包括背包、装备、附近方块/实体、生物群系、时间、生命值、饥饿值和位置。</li>
+<li><strong>Chain-of-Thought</strong>：要求 GPT-4
+在生成代码前进行任务分析和步骤规划。</li>
+</ol>
+<p>这样和前面的：</p>
+<h3 id="code-generation-guidelines">6.1 Code Generation Guidelines</h3>
+<p>首先要求 GPT-4 生成的 Skill
+具有<strong>通用性、可复用性和模块化特征</strong>，因为生成的 Skill
+后续还会被其他更复杂的 Skill 调用。</p>
+<p>也就是说，不应该只针对当前任务编写一次性的代码，而应该尽可能将其设计成可以被后续任务重复调用的技能。</p>
+<p>例如，Prompt 可以要求：</p>
+<blockquote>
+<p>The code should be generic, reusable, and modular, as it may be
+reused by other skills in the future. Avoid writing code that only works
+for the current specific situation.</p>
+</blockquote>
+<h3 id="control-primitive-apis-relevant-skills">6.2 Control Primitive
+APIs + Relevant Skills</h3>
+<h4 id="control-primitive-apis">6.2.1 Control Primitive APIs</h4>
+<p>Voyager 提供底层控制 API。</p>
+<p>例如可以理解为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">移动</span><br><span class="line">攻击</span><br><span class="line">跳跃</span><br><span class="line">挖掘</span><br><span class="line">放置</span><br><span class="line">交互</span><br><span class="line">聊天</span><br></pre></td></tr></table></figure>
+<p>这些属于比较底层的 <strong>control primitives</strong>。</p>
+<p>GPT-4 可以利用这些 API 编写更高级的 Skill。</p>
+<h4 id="relevant-skills">6.2.2 Relevant Skills</h4>
+<p>Voyager 会从 Skill Library 中检索与当前任务相关的技能，并把它们放进
+GPT-4 的 prompt。</p>
+<p>例如当前任务：</p>
+<blockquote>
+<p>制作铁胸甲</p>
+</blockquote>
+<p>GPT-4 可能已经拥有：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">collectWood()</span><br><span class="line">craftPickaxe()</span><br><span class="line">collectStone()</span><br><span class="line">collectIron()</span><br></pre></td></tr></table></figure>
+<p>那么 GPT-4
+就可以直接组合这些已有技能，而不是重新学习所有底层操作。</p>
+<p>这实际上形成了：</p>
+<blockquote>
+<p><strong>Skill Library → In-context Learning → 更复杂的新
+Skill</strong></p>
+</blockquote>
+<h3 id="previous-code-feedback-errors-critique">6.3 Previous Code +
+Feedback + Errors + Critique</h3>
+<p>如果上一轮代码失败了，GPT-4 还会看到：</p>
+<ul>
+<li>上一轮生成的代码</li>
+<li>环境反馈</li>
+<li>execution error</li>
+<li>critique</li>
+</ul>
+<p>然后根据这些信息进行修改。</p>
+<p>因此技能生成并不是：</p>
+<blockquote>
+<p>GPT-4 → 一次生成 → 完成</p>
+</blockquote>
+<p>而是：</p>
+<blockquote>
+<p>GPT-4 生成代码 → 执行 → 发现问题 → 修改代码 → 再次执行</p>
+</blockquote>
+<h3 id="current-state">6.4 Current State</h3>
+<p>同样会提供 Minecraft 当前状态：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Inventory</span><br><span class="line">Equipment</span><br><span class="line">Nearby blocks</span><br><span class="line">Nearby entities</span><br><span class="line">Biome</span><br><span class="line">Time</span><br><span class="line">Health</span><br><span class="line">Hunger</span><br><span class="line">Position</span><br></pre></td></tr></table></figure>
+<p>因为代码必须适应<strong>当前真实环境</strong>。</p>
+<h3 id="chain-of-thought-prompting">6.5 Chain-of-Thought Prompting</h3>
+<p>在生成代码之前，让 GPT-4 先进行任务分析和推理。</p>
+<p>可以简单理解为：</p>
+<blockquote>
+<p><strong>任务 → 分析所需资源 → 分析可使用的 API / Skill → 规划执行步骤
+→ 生成代码</strong></p>
+</blockquote>
+<p>因此，并不是直接要求：</p>
+<blockquote>
+<p>“Write code.”</p>
+</blockquote>
+<p>而是让 GPT-4：</p>
+<blockquote>
+<p><strong>先思考如何完成任务，再生成代码。</strong></p>
+</blockquote>
+<p>这里的 <strong>CoT</strong> 更接近于在<strong>同一次 LLM
+调用中先进行推理，再生成代码</strong>，而不是先输出一个完整的分步骤计划，再针对每一步单独调用
+LLM 生成代码并执行。</p>
+<p>因此：<strong>有 CoT ≠ 有显式的 Plan-then-Act Pipeline</strong></p>
+<p>CoT 主要用于提升<strong>单次代码生成的质量</strong>，例如让 GPT-4
+在生成代码前先分析需要哪些资源、应该使用哪些 Primitive APIs、哪些已有
+Skill，以及任务的执行步骤。</p>
+<p>例如，Prompt 可以要求 GPT-4：</p>
+<blockquote>
+<p>Your task is to write a program to accomplish the following task.</p>
+<p>Before writing the code, think about: 1. What resources are required?
+2. What skills or APIs can be reused? 3. What steps are needed to
+accomplish the task? 4. How should these steps be implemented?</p>
+<p>Then write the code to accomplish the task.</p>
+</blockquote>
+<h3 id="源码prompt">6.6 源码prompt</h3>
+<p>voyager/prompts/action_template.txt</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">You are a helpful assistant that writes Mineflayer javascript code to complete any Minecraft task specified by me.</span><br><span class="line"></span><br><span class="line">Here are some useful programs written with Mineflayer APIs.</span><br><span class="line"></span><br><span class="line">&#123;programs&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">At each round of conversation, I will give you</span><br><span class="line">Code from the last round: ...</span><br><span class="line">Execution error: ...</span><br><span class="line">Chat log: ...</span><br><span class="line">Biome: ...</span><br><span class="line">Time: ...</span><br><span class="line">Nearby blocks: ...</span><br><span class="line">Nearby entities (nearest to farthest):</span><br><span class="line">Health: ...</span><br><span class="line">Hunger: ...</span><br><span class="line">Position: ...</span><br><span class="line">Equipment: ...</span><br><span class="line">Inventory (xx/36): ...</span><br><span class="line">Chests: ...</span><br><span class="line">Task: ...</span><br><span class="line">Context: ...</span><br><span class="line">Critique: ...</span><br><span class="line"></span><br><span class="line">You should then respond to me with</span><br><span class="line">Explain (if applicable): Are there any steps missing in your plan? Why does the code not complete the task? What does the chat log and execution error imply?</span><br><span class="line">Plan: How to complete the task step by step. You should pay attention to Inventory since it tells what you have. The task completeness check is also based on your final inventory.</span><br><span class="line">Code:</span><br><span class="line">    1) Write an async function taking the bot as the only argument.</span><br><span class="line">    2) Reuse the above useful programs as much as possible.</span><br><span class="line">        - Use `mineBlock(bot, name, count)` to collect blocks. Do not use `bot.dig` directly.</span><br><span class="line">        - Use `craftItem(bot, name, count)` to craft items. Do not use `bot.craft` or `bot.recipesFor` directly.</span><br><span class="line">        - Use `smeltItem(bot, name count)` to smelt items. Do not use `bot.openFurnace` directly.</span><br><span class="line">        - Use `placeItem(bot, name, position)` to place blocks. Do not use `bot.placeBlock` directly.</span><br><span class="line">        - Use `killMob(bot, name, timeout)` to kill mobs. Do not use `bot.attack` directly.</span><br><span class="line">    3) Your function will be reused for building more complex functions. Therefore, you should make it generic and reusable. You should not make strong assumption about the inventory (as it may be changed at a later time), and therefore you should always check whether you have the required items before using them. If not, you should first collect the required items and reuse the above useful programs.</span><br><span class="line">    4) Functions in the &quot;Code from the last round&quot; section will not be saved or executed. Do not reuse functions listed there.</span><br><span class="line">    5) Anything defined outside a function will be ignored, define all your variables inside your functions.</span><br><span class="line">    6) Call `bot.chat` to show the intermediate progress.</span><br><span class="line">    7) Use `exploreUntil(bot, direction, maxDistance, callback)` when you cannot find something. You should frequently call this before mining blocks or killing mobs. You should select a direction at random every time instead of constantly using (1, 0, 1).</span><br><span class="line">    8) `maxDistance` should always be 32 for `bot.findBlocks` and `bot.findBlock`. Do not cheat.</span><br><span class="line">    9) Do not write infinite loops or recursive functions.</span><br><span class="line">    10) Do not use `bot.on` or `bot.once` to register event listeners. You definitely do not need them.</span><br><span class="line">    11) Name your function in a meaningful way (can infer the task from the name).</span><br><span class="line"></span><br><span class="line">You should only respond in the format as described below:</span><br><span class="line">RESPONSE FORMAT:</span><br><span class="line">&#123;response_format&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>1. Primitive APIs + 已有 Skill</strong></p>
+<ul>
+<li><code>&#123;programs&#125;</code>：提供已有的 Mineflayer API 示例和已学习的
+Skill。</li>
+<li>规则 2 中显式列出的函数，例如 <code>mineBlock</code>
+等，可直接调用。</li>
+</ul>
+<p><strong>2. 上一轮代码与执行反馈</strong>
+每轮提供上一轮执行结果，包括：</p>
+<ul>
+<li><code>Code from the last round</code></li>
+<li><code>Execution error</code></li>
+<li><code>Chat log</code></li>
+<li><code>Critique</code></li>
+</ul>
+<p>用于分析上一轮代码的问题，并据此调整下一轮实现。</p>
+<p><strong>3. 当前环境状态</strong> 每轮提供 Minecraft Agent
+的实时状态，包括：</p>
+<ul>
+<li><code>Biome</code></li>
+<li><code>Time</code></li>
+<li><code>Nearby blocks</code></li>
+<li><code>Nearby entities</code></li>
+<li><code>Health</code></li>
+<li><code>Hunger</code></li>
+<li><code>Position</code></li>
+<li><code>Equipment</code></li>
+<li><code>Inventory</code></li>
+<li><code>Chests</code></li>
+</ul>
+<p>其中 <strong>Inventory
+是任务规划和完成度判断的重要依据</strong>，最终任务是否完成也会结合最终
+Inventory 进行检查。</p>
+<p><strong>4. 推理与任务规划要求</strong> Prompt 要求 Agent
+在生成代码前进行以下分析：</p>
+<blockquote>
+<p><strong>Explain（如适用）</strong>：检查当前计划是否存在遗漏，并分析代码为什么未能完成任务，以及
+<code>Chat log</code> 和 <code>Execution error</code> 反映出的问题。</p>
+<p><strong>Plan</strong>：给出完成任务的分步计划，并结合当前环境状态，尤其是
+<code>Inventory</code>，确定下一步需要执行的操作。</p>
+</blockquote>
+<p><strong>5. 代码生成规范</strong> 遵循 Prompt 后半部分的 <strong>规则
+1～11</strong>，并满足输出格式中对代码的通用性要求，最终生成可执行的
+Mineflayer JavaScript 代码。</p>
+<p>{response_format} 内容如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Explain: ...</span><br><span class="line">Plan:</span><br><span class="line">1) ...</span><br><span class="line">2) ...</span><br><span class="line">3) ...</span><br><span class="line">...</span><br><span class="line">Code:</span><br><span class="line">```javascript</span><br><span class="line">// helper functions (only if needed, try to avoid them)</span><br><span class="line">...</span><br><span class="line">// main function after the helper functions</span><br><span class="line">async function yourMainFunctionName(bot) &#123;</span><br><span class="line">  // ...</span><br><span class="line">&#125;</span><br><span class="line">```</span><br></pre></td></tr></table></figure>
+<h2 id="迭代式提示机制">7. 迭代式提示机制</h2>
+<p>迭代式提示机制是 Voyager
+的核心代码生成与执行框架。其基本流程为：GPT-4
+生成代码后立即执行，系统根据执行结果和任务完成状态，决定是否进行下一轮修改。完整循环如下：</p>
+<blockquote>
+<p><strong>生成代码 → 执行 → 获取反馈 → 修改代码 → 再次执行</strong></p>
+</blockquote>
+<p>该迭代将持续进行，直至任务成功完成或达到预设的最大尝试次数。</p>
+<p>执行结果主要对应以下三类反馈情形：</p>
+<ol type="1">
+<li><strong>环境反馈</strong>：代码运行正常，但 Minecraft
+环境反馈任务前置条件不满足，需调整行动策略。</li>
+<li><strong>执行错误</strong>：代码本身引发异常（如语法错误、API
+调用失败），需修正程序逻辑。</li>
+<li><strong>自我验证</strong>：代码无报错，但任务目标实际未达成，需分析失败原因并提出改进方案。</li>
+</ol>
+<h3 id="环境反馈代码执行正常但环境条件不满足">7.1
+环境反馈（代码执行正常，但环境条件不满足）</h3>
+<p>代码本身运行无误，但 Minecraft 环境反馈任务前置条件未能满足。</p>
+<p>例如，环境返回：</p>
+<blockquote>
+<p>“无法合成铁胸甲，因为还缺少 7 个铁锭。”</p>
+</blockquote>
+<p>此反馈向 GPT-4 传递了明确的语义信息：</p>
+<p>text</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">任务目标：合成铁胸甲</span><br><span class="line">    ↓</span><br><span class="line">执行受阻</span><br><span class="line">    ↓</span><br><span class="line">根本原因：铁锭数量不足（缺 7 个）</span><br></pre></td></tr></table></figure>
+<p>据此，GPT-4
+可针对性地调整策略（如先采集更多铁锭），而非盲目重试。</p>
+<p><strong>本质</strong>：环境反馈是 Minecraft
+世界向大语言模型传递的状态信息，用于指导下一步行动决策。</p>
+<h3 id="执行错误代码运行异常">7.2 执行错误（代码运行异常）</h3>
+<p>代码在执行器层面抛出异常，包括但不限于：</p>
+<ul>
+<li>语法错误（SyntaxError）</li>
+<li>非法操作（Invalid Operation）</li>
+<li>API 调用异常（API Error）</li>
+</ul>
+<p>此类错误直接暴露了代码本身的缺陷，能够帮助 GPT-4
+快速定位并修正程序逻辑中的具体问题。</p>
+<h3 id="自我验证代码执行正常但任务目标未达成">7.3
+自我验证（代码执行正常，但任务目标未达成）</h3>
+<p>代码运行虽未报错，却并不代表任务真正完成。</p>
+<p>例如，任务要求“获得一个铁胸甲”，执行全程无 Python
+异常，但最终状态为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">铁胸甲数量 = 0</span><br></pre></td></tr></table></figure>
+<p>此时，任务仍然失败。</p>
+<p>为此，Voyager 引入了一个独立的 <strong>GPT-4 智能体</strong>
+负责自我验证（Self-Verification）。该智能体以当前任务和智能体状态为输入，输出任务是否完成（Yes
+/ No）。当判定失败时，它还会进一步提供：</p>
+<ul>
+<li><strong>批评意见（Critique）</strong>：解释为什么失败；</li>
+<li><strong>改进建议（Suggestion）</strong>：指出下一步应如何调整。</li>
+</ul>
+<p>因此，自我验证提供的并非简单的“成功/失败”二值信号，而是包含失败原因和修正方向的高质量语义反馈，可显著提升后续迭代的效率和准确性。</p>
+<h2 id="三个组件如何形成完整闭环">8. 三个组件如何形成完整闭环？</h2>
+<p>最后复习一下流程</p>
+<p><img src="/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/voyager_flowchart_v5.png" style="zoom: 33%;"></p>
+<h2 id="voyager-的亮点">9. Voyager 的亮点</h2>
+<p>Voyager 最值得关注的亮点，是其提出的 <strong>“用代码作为 Agent
+的动作空间（Code as Action Space）”</strong> 这一核心思想。</p>
+<p>传统 LLM Agent 通常让模型输出 JSON、文本指令或预定义的 API
+调用作为动作，而 Voyager 则让 GPT-4 <strong>直接生成可执行的 JavaScript
+代码</strong>，通过代码调用 Minecraft 环境中的 API
+来完成复杂、连续的操作。</p>
+<p>这种方式的优势在于：<strong>代码天然可以表达多步、组合式和具有时间跨度的动作</strong>。Agent
+不需要每一步都重新生成一个简单动作，而是可以生成一段程序，一次完成多个连续操作，并根据执行结果不断修改和扩展代码。</p>
+<h3 id="从-voyager-到-codeact">9.1 从 Voyager 到 CodeAct</h3>
+<p>Voyager 最初是在 <strong>Minecraft
+开放世界环境</strong>中验证这一思想。</p>
+<p>之后，<strong>CodeAct</strong> 将这一思想进一步抽象为一种通用的 LLM
+Agent 动作范式：</p>
+<blockquote>
+<p><strong>不再限制 Agent 输出固定格式的 JSON / 文本动作，而是让 LLM
+直接生成可执行代码作为动作。</strong></p>
+</blockquote>
+<p>CodeAct 将 Agent 的动作空间统一为可执行的 Python 代码，并通过 Python
+解释器执行这些代码。Agent
+可以根据执行结果获得反馈，在后续交互中继续<strong>修正代码、组合已有操作或生成新的动作</strong>。</p>
+<h3 id="voyager-的-skill-library">9.2 Voyager 的 Skill Library</h3>
+<p>除了 <strong>Code as Action Space</strong>，Voyager
+的另一个重要亮点是 <strong>Skill Library（技能库）</strong>。</p>
+<p>Voyager 并不是让 Agent
+每次遇到任务都从零生成代码，而是会将已经验证有效的技能保存下来，并在后续任务中进行<strong>检索和复用</strong>。每个
+Skill 本质上是一段可以执行的 Mineflayer JavaScript
+程序，用于完成某个具有明确功能的任务，例如获取资源、制作物品或执行一系列连续操作。</p>
+<p>Skill Library 主要解决的是 <strong>“已有能力如何积累和复用”</strong>
+的问题：</p>
+<ol type="1">
+<li><strong>Skill 生成</strong>：GPT-4 根据当前任务、Agent
+状态以及已有程序等信息生成新的可执行代码。</li>
+<li><strong>Skill 执行与验证</strong>：生成的代码在 Minecraft
+环境中执行，并根据执行结果判断其是否有效。</li>
+<li><strong>Skill 存储</strong>：验证成功的代码及其描述被保存到 Skill
+Library 中。</li>
+<li><strong>Skill 检索</strong>：面对新任务时，根据任务语义从已有 Skill
+中检索相关技能，并将其作为后续代码生成的参考。</li>
+<li><strong>Skill 组合</strong>：Agent 可以调用或组合多个已有
+Skill，完成比单个 Skill 更复杂的任务。</li>
+</ol>
+<p>因此，Skill Library 与 <strong>Code as Action Space</strong>
+是相互配合的：</p>
+<blockquote>
+<p><strong>Code as Action Space 解决“Agent 如何表达和执行复杂动作”，而
+Skill Library 解决“Agent
+如何积累、检索和复用已经学会的动作”。</strong></p>
+</blockquote>
+<p>这使 Voyager
+不仅能够在当前任务中生成代码，还能够随着探索过程<strong>持续积累可复用的程序化技能</strong>，从而逐渐形成能力库。</p>
+<h3 id="openhands代码-agent-的实际落地">9.3 OpenHands：代码 Agent
+的实际落地</h3>
+<p>这一思路后来被 <strong>OpenHands（原 OpenDevin）</strong> 等开源
+Coding Agent 框架进一步采用和发展。</p>
+<p>OpenHands 将 Agent 的动作空间扩展到真实的软件开发环境，使 Agent
+能够通过代码、Shell、文件操作等方式与开发环境交互，完成编程、调试、运行程序等任务。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM/" rel="tag"># 从零开始的LLM</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0/" rel="tag"># 持续学习</a>
+              <a href="/tags/%E7%AC%AC11%E8%8A%82/" rel="tag"># 第11节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/08/13/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-10/" rel="prev" title="从零开始的LLM 10. mem0原理及API使用">
+                  <i class="fa fa-angle-left"></i> 从零开始的LLM 10. mem0原理及API使用
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
