@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 本文将介绍 token压缩技术的原理。 • Recurrent Memory Transformer (RMT) • Recurrent Context Compression (RCC)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的LLM 12. 压缩算法 (RMT 和 RCC)">
+<meta property="og:url" content="https://zusda.github.io/2026/09/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-12/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 本文将介绍 token压缩技术的原理。 • Recurrent Memory Transformer (RMT) • Recurrent Context Compression (RCC)">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/09/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-12/image-20260904233841428.png">
+<meta property="article:published_time" content="2026-09-04T15:24:52.000Z">
+<meta property="article:modified_time" content="2026-09-06T08:25:21.055Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="从零开始的LLM">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="持续学习">
+<meta property="article:tag" content="第12节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/09/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-12/image-20260904233841428.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/09/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-12/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/09/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-12/","path":"2026/09/04/从零开始的LLM-12/","title":"从零开始的LLM 12. 压缩算法 (RMT 和 RCC)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>从零开始的LLM 12. 压缩算法 (RMT 和 RCC) | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E6%99%AF%E6%8F%90%E8%A6%81"><span class="nav-number">2.</span> <span class="nav-text">1. 前景提要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#recurrent-memory-transformer-rmt"><span class="nav-number">3.</span> <span class="nav-text">2. Recurrent Memory
+Transformer (RMT)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 训练</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E5%88%87%E5%88%86-segment-%E6%97%B6"><span class="nav-number">3.2.1.</span> <span class="nav-text">不切分 Segment 时</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%87%E5%88%86%E6%88%90-segment-%E5%90%8E"><span class="nav-number">3.2.2.</span> <span class="nav-text">切分成 Segment 后</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%BB%93%E8%AE%BA"><span class="nav-number">3.2.3.</span> <span class="nav-text">核心结论</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#recurrent-context-compression-rcc"><span class="nav-number">4.</span> <span class="nav-text">3. Recurrent Context
+Compression (RCC)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E7%90%86-1"><span class="nav-number">4.0.1.</span> <span class="nav-text">3.1 原理</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#encoder-%E9%83%A8%E5%88%86%E5%B0%86-segment-%E5%8E%8B%E7%BC%A9%E4%B8%BA%E7%8A%B6%E6%80%81%E5%90%91%E9%87%8F"><span class="nav-number">4.0.1.1.</span> <span class="nav-text">Encoder 部分：将 Segment
+压缩为状态向量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#decoder-%E9%83%A8%E5%88%86%E8%A7%A3%E5%8E%8B-%E7%94%9F%E6%88%90"><span class="nav-number">4.0.1.2.</span> <span class="nav-text">Decoder 部分：解压 &#x2F; 生成</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BE%E4%BE%8B%E5%8E%8B%E7%BC%A9%E5%90%91%E9%87%8F%E5%B1%82%E6%95%B0-decoder%E5%B1%82%E6%95%B0%E6%97%B6%E7%9A%84%E6%98%A0%E5%B0%84%E8%A7%84%E5%88%99"><span class="nav-number">4.0.2.</span> <span class="nav-text">举例：压缩向量层数 ≠
+decoder层数时的映射规则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E4%B8%AA-segment-%E7%9A%84%E6%83%85%E5%86%B5"><span class="nav-number">4.0.3.</span> <span class="nav-text">多个 segment 的情况</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%9B%9E%E5%BD%92%E7%94%9F%E6%88%90"><span class="nav-number">4.0.4.</span> <span class="nav-text">自回归生成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#rcc-%E7%9A%84%E6%9C%AC%E8%B4%A8%E6%89%A9%E5%B1%95%E8%80%8C%E9%9D%9E%E6%97%A0%E9%99%90%E5%8E%8B%E7%BC%A9"><span class="nav-number">4.0.5.</span> <span class="nav-text">RCC 的本质：扩展而非无限压缩</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">4. 总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#rmt"><span class="nav-number">5.1.</span> <span class="nav-text">RMT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rcc"><span class="nav-number">5.2.</span> <span class="nav-text">RCC</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF%E5%B7%AE%E5%BC%82"><span class="nav-number">5.2.1.</span> <span class="nav-text">适用场景差异</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/09/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-12/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="从零开始的LLM 12. 压缩算法 (RMT 和 RCC) | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从零开始的LLM 12. 压缩算法 (RMT 和 RCC)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-09-04 23:24:52" itemprop="dateCreated datePublished" datetime="2026-09-04T23:24:52+08:00">2026-09-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-09-06 16:25:21" itemprop="dateModified" datetime="2026-09-06T16:25:21+08:00">2026-09-06</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>本文将介绍 token压缩技术的原理。</p>
+<p>• Recurrent Memory Transformer (RMT)</p>
+<p>• Recurrent Context Compression (RCC)</p>
+<span id="more"></span>
+<p>经过前面的学习，我们已经系统地完成了大语言模型（LLM）的基础部分，主要参考了以下资料：</p>
+<ul>
+<li>《动手学深度学习》</li>
+<li>《蘑菇书》</li>
+<li>《Happy-LLM》</li>
+<li>《Hello-Agents》</li>
+<li>《all-in-rag》</li>
+</ul>
+<p>到这里，可以认为已经具备了继续深入学习 Agent 的基础能力。</p>
+<p>接下来的内容将不再像之前那样按照固定课程循序渐进，而是更多围绕当前
+Agent 领域的研究方向展开。学习内容既会涉及工程实践（如各种 Agent
+框架、工作流、记忆系统等），也会涉及算法与模型层面的探索（如多模态、持续学习等）。</p>
+<ol type="1">
+<li>Generative Agents</li>
+<li>Letta</li>
+<li>A-MEM</li>
+<li>Voyager</li>
+</ol>
+<p>这条路线主要围绕 <strong>Agent 的持续学习（Continual
+Learning）</strong> 展开，也是我目前最感兴趣的方向：<strong>如何让一个
+Agent
+在长期运行过程中不断积累经验、提升能力，而不是每次都从零开始。</strong></p>
+<p>目前来看，大致有两种思路：</p>
+<ol type="1">
+<li><strong>不修改模型本身。</strong> 仅通过
+Prompt、记忆系统（Memory）、RAG、工具调用等机制，使 Agent
+能够不断积累知识和经验，实现能力的持续增长。</li>
+<li><strong>修改模型本身。</strong> 基于 Agent
+长期运行过程中积累的对话、笔记和总结等数据，在合适的时机对模型进行持续训练（Continual
+Fine-tuning），使模型真正将这些经验内化，而不仅仅依赖外部记忆。</li>
+</ol>
+<p>由于这一阶段更多是阅读论文、分析开源项目、验证实验以及整理个人理解，而不是单纯跟着教程学习，因此资料收集、实验和整理都会比之前花费更多时间。</p>
+<hr>
+<h2 id="前景提要">1. 前景提要</h2>
+<p>为什么要学压缩技术呢，主要是我在开发《杀戮尖塔》游戏agent的时候遇到了问题。</p>
+<p>我希望使智能体能够自主理解游戏规则并完成通关。目前已实现游戏交互的
+Python 脚本（在游戏内开启 Web 服务，通过 REST API
+获取状态并执行动作，例如 <code>GET /state</code>
+获取当前状态，<code>POST /doAction</code>
+执行指令）。在逐步构建智能体的过程中，遇到诸多挑战，因此重新规划了阶段性方案：</p>
+<ul>
+<li><strong>第一阶段</strong>：基础智能体（基于 React 的 LLM +
+短期/长期记忆），已完成并保存，作为无附加功能的基线。</li>
+<li><strong>后续多智能体协作流程</strong>：
+<ol type="1">
+<li><strong>交互智能体</strong>：接收用户输入，与游戏进行交互。</li>
+<li><strong>观察智能体</strong>：分析交互记录（用户输入、工具调用及结果），提取基础事实（如"打击造成
+6 点伤害""对易伤目标造成 9 点伤害""易伤增伤
+50%"等），并存储至临时文件。</li>
+<li><strong>整合智能体</strong>：梳理临时文件中的信息，合并整理到最终知识库。</li>
+<li><strong>内化智能体</strong>：基于知识库分类生成训练数据，并通过蒸馏将知识融入基础智能体。</li>
+</ol></li>
+</ul>
+<p>然而，实践中暴露出关键问题：<strong>2.
+观察智能体会重复提取相同的知识</strong>（例如每次战斗状态均会分析出"打击造成
+6 点伤害"），导致大量冗余信息。</p>
+<blockquote>
+<p>若每次从记忆或 RAG
+中检索已有知识并放入提示词，既不可扩展又占用大量上下文；</p>
+<p>若生成后再过滤，则效率低下且浪费 Token。</p>
+</blockquote>
+<p>这里引出一个问题：<strong>智能体是否能自主"记住"已记录的事实？</strong></p>
+<p>答案是否定的——LLM
+在推理时是无状态的，每次调用完全独立，不具备持久记忆能力。所谓的记忆仅依赖于提示词中的显式上下文，无法内化于模型参数中。</p>
+<p>因此，关于记忆的问题，我认为不可能依赖外部结构解决，必须重新审视 LLM
+本身。</p>
+<blockquote>
+<p>在此之前，我曾设想过一种方案：在每次查询（Query）前面添加若干个固定位置的向量作为"记忆槽"，将历史对话内容通过编码器（Encoder）模型压缩成紧凑的向量表示，塞入这些记忆槽中（之所以选择
+Encoder 而非 Decoder，是因为 Decoder 模型的压缩能力集中在最后一个 Token
+上，承载量实在太小，难以容纳完整的对话信息）。</p>
+<p>后来，我又想到了蒸馏的方法——这个思路一开始是我自己独立提出的，后续进一步调查时发现已有类似工作。蒸馏能够将知识内化到模型参数中，听起来能从根本上解决问题，因此我暂时搁置了压缩记忆槽的设想，转而尝试通过蒸馏实现知识内化。</p>
+<p>但实践下来，蒸馏遇到了新的瓶颈：知识本身具有完整的陈述结构，可以基于此构造训练数据集进行内化；然而"记忆"本质上仅仅是对发生过的事实的"记得"，它缺乏明确的结构化表达，极其难以构造合理的训练数据集。因此，我重新评估后认为，最初考虑的压缩算法反而更契合记忆任务的需求。</p>
+</blockquote>
+<p>基于上述思考，我目前正在重新系统性地研究<strong>循环记忆变换器（Recurrent
+Memory Transformer, RMT）</strong>和<strong>循环上下文压缩（Recurrent
+Context Compression, RCC）</strong>等相关技术，探索如何在 LLM
+推理过程中以紧凑、可更新的方式集成长期记忆。</p>
+<h2 id="recurrent-memory-transformer-rmt">2. Recurrent Memory
+Transformer (RMT)</h2>
+<h3 id="原理">2.1 原理</h3>
+<p>这个方法并不会改变 Transformer
+模型结构本身。只对输出和输入部分进行修改。</p>
+<p>首先看论文中的流程图</p>
+<p><img src="/2026/09/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-12/image-20260904233841428.png"></p>
+<p>首先，RMT会将一段长的token切分成多个块，命名为segment。在每个segment前后添加数个token，作为memory使用（即图中的read和write部分）</p>
+<p>我们举例说明，</p>
+<p>假设存在 token ： [A] [B] [C] ... [Z] 在一个segment中。</p>
+<p>在 原token序列的前后方添加上memory token，组成完整的input：[MEM1]
+[MEM2] [A] [B] [C] ... [Z] [MEM3] [MEM4]</p>
+<blockquote>
+<p>[MEM1] [MEM2] 和 [MEM3] [MEM4] 分别代表图中的read 和
+write部分，这里我仅用两个token表示。</p>
+</blockquote>
+<blockquote>
+<p>普通词token通过embedding变成向量，然后进入LLM的transformer进行计算。</p>
+<p>但是input中的read和write部分，一开始就是一个可学习的向量参数（<code>nn.Parameter(torch.randn(num_mem_tokens, hidden_dim)</code>）。因此实际拼接是在都变成向量后进行的。</p>
+<p>在同一次前向传播（处理一整条长序列的所有segment）中：</p>
+<ul>
+<li>第一个segment的input，read部分和write部分都使用这套可学习参数<strong>当前的值</strong>（不是随机初始化——随机初始化只发生在模型刚创建、还没开始训练的那一刻；训练过程中的每一步用的都是截至目前已经学到的参数值）。</li>
+<li>从第二个segment开始，read部分的输入被替换为上一个segment计算完成后、write位置产生的输出（即压缩后的记忆内容）；而write部分的输入，每个segment都仍然使用同一份可学习参数（在本次forward全程中，这份参数没有被更新，所以每个segment看到的write输入值都相同）。</li>
+</ul>
+<p>整条序列的<strong>所有segment跑完后</strong>，把loss加总，统一执行一次反向传播（BPTT），梯度沿着"write输出→下一个segment
+read输入"这条链条跨越多个segment传播回去。此时，<strong>read参数（主要从segment1获得梯度）、write参数（从所有segment累积梯度）、以及Transformer本体权重，会在这次反向传播后被一起更新</strong>，用于下一次训练迭代。</p>
+<blockquote>
+<p>虽然从第二个segment开始，read位置的<strong>输入值</strong>被替换成了上一个segment
+write位置的<strong>输出</strong>，但第一个segment的read部分仍然用的是那份可学习的"初始read参数"，因此read的向量会从segment1的loss里拿到梯度并被更新。</p>
+</blockquote>
+</blockquote>
+<p>input 在经过 Transformer
+模型的计算后，在每个位置生成对应的输出，[MEM3] [MEM4]
+所在位置的输出结果，则是该segment信息内容的压缩。</p>
+<p>在计算组装下一个segment的input时，将此时输出的write部分内容放在本次input的read部分位置，作为压缩的上下文内容读入。本次input中的write部分依然仅作为占位符进行初始化。</p>
+<h3 id="训练">2.2 训练</h3>
+<p>假设序列被划分为两个 Segment：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Segment 1: a b c d</span><br><span class="line">Segment 2: e f g h</span><br></pre></td></tr></table></figure>
+<hr>
+<h4 id="不切分-segment-时">不切分 Segment 时</h4>
+<p>标准 next-token prediction 是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">a → b</span><br><span class="line">b → c</span><br><span class="line">c → d</span><br><span class="line">d → e</span><br><span class="line">e → f</span><br><span class="line">f → g</span><br><span class="line">g → h</span><br></pre></td></tr></table></figure>
+<p>所以：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">d 的输出 → 预测 e</span><br><span class="line">e 的输出 → 预测 f</span><br><span class="line">f 的输出 → 预测 g</span><br><span class="line">g 的输出 → 预测 h</span><br></pre></td></tr></table></figure>
+<hr>
+<h4 id="切分成-segment-后">切分成 Segment 后</h4>
+<p><strong>对于 Segment 1：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[a b c d]</span><br></pre></td></tr></table></figure>
+<p>模型仍然按照自回归方式计算：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a → b</span><br><span class="line">b → c</span><br><span class="line">c → d</span><br><span class="line">d → e</span><br></pre></td></tr></table></figure>
+<p>这里需要特别注意：</p>
+<p><strong>虽然</strong> <code>e</code> <strong>位于 Segment
+2，但</strong> <code>e</code> <strong>作为</strong> <code>d</code>
+<strong>的下一个 token，仍然可以由 Segment 1 最后位置</strong>
+<code>d</code> <strong>的输出进行预测。</strong></p>
+<p>即<code>d → e</code> 的 loss 仍然属于 Segment 1 这一侧的计算。</p>
+<hr>
+<p><strong>对于 Segment 2 ：</strong></p>
+<p>RMT 会将 Segment 1 产生的 memory 传递给下一段：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[MEM1&#x27;] [MEM2&#x27;] [e f g h]</span><br></pre></td></tr></table></figure>
+<p>此时需要注意，<code>e</code> <strong>已经作为 Segment 1 中</strong>
+<code>d</code> <strong>的预测目标被计算过了</strong>。</p>
+<blockquote>
+<p>即从 [MEM1'] [MEM2'] [e] 开始预测 f,g,h</p>
+</blockquote>
+<p>因此，Segment 2 中真正继续计算的 next-token prediction 是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">e → f</span><br><span class="line">f → g</span><br><span class="line">g → h</span><br></pre></td></tr></table></figure>
+<p>Segment 切分本身不会改变 next-token prediction
+的逻辑。只是把序列分块处理；跨 segment 的预测关系仍然存在，而 RMT 用
+memory 来携带跨 segment 的信息。</p>
+<hr>
+<h4 id="核心结论">核心结论</h4>
+<p>Segment 切分本身<strong>不会改变 next-token prediction
+的目标关系</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a → b → c → d → e → f → g → h</span><br></pre></td></tr></table></figure>
+<p>切分后只是将这个连续序列分成多个块进行计算。</p>
+<p>RMT 的作用是通过 memory 将前一个 Segment 的上下文信息传递到后一个
+Segment，使后一个 Segment 在处理 <code>e f g h</code>
+时仍然能够利用前一个 Segment 的信息。</p>
+<hr>
+<p>RMT 不能直接拿一个很长的文本开始训练。</p>
+<p>根本原因在于<strong>训练稳定性和 Memory 利用的有效性</strong>。</p>
+<ol type="1">
+<li><strong>训练不稳定</strong>：如果一开始就让模型处理多个
+Segment，模型不仅难以学会有效利用
+Memory，训练过程还可能无法收敛。消融实验表明：不使用课程学习、直接在最大
+Segment
+数上训练时，模型既难以学会任务，也无法很好地泛化到其他长度。</li>
+<li><strong>梯度传播困难</strong>：RMT 依赖 BPTT 沿着 Memory token 跨
+Segment 反向传播梯度。Segment 数越多，BPTT
+展开越深，梯度传播链路越长，因此越容易出现梯度消失或梯度爆炸的问题。</li>
+</ol>
+<p>因此，原始 RMT 采用了<strong>课程学习（Curriculum
+Learning）</strong>：</p>
+<ul>
+<li><strong>Step 1</strong>：先从 1 个 Segment 的简单任务开始训练；</li>
+<li><strong>Step 2</strong>：模型掌握后，逐步增加 Segment 数量；</li>
+<li><strong>Step 3</strong>：训练后期混合不同数量的
+Segment，提升模型对不同长度的泛化能力。</li>
+</ul>
+<p>这种方法虽然有效，但<strong>训练流程更复杂，且计算成本较高</strong>。</p>
+<h2 id="recurrent-context-compression-rcc">3. Recurrent Context
+Compression (RCC)</h2>
+<h4 id="原理-1">3.1 原理</h4>
+<p>RCC 通过 encoder-decoder
+架构，把长文本压缩成一组更短的向量表示，从而在有限存储空间内扩展 LLM
+的有效上下文长度。</p>
+<h5 id="encoder-部分将-segment-压缩为状态向量">Encoder 部分：将 Segment
+压缩为状态向量</h5>
+<p>Encoder 可以基于 Transformer，也可以采用类似 Mamba 的 RNN
+结构。其核心思路是：将长文本切分成固定长度的 Segment，并将每个 Segment
+压缩成一组状态向量。</p>
+<p><strong>压缩率（compression
+rate）</strong>表示一个压缩向量最多概括多少个 token。</p>
+<p>例如，压缩率设为 <strong>4</strong>，表示每 4 个 token 压缩成 1
+个压缩向量，因此 Segment 长度也设为 4。</p>
+<p>假设 segment1 包含这 4 个 token：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">t1, t2, t3, t4</span><br></pre></td></tr></table></figure>
+<p>经过 RCC encoder（假设 3 层）逐层计算，得到每层的输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">c1_1, c1_2, c1_3, c1_4   （第1层输出）</span><br><span class="line">c2_1, c2_2, c2_3, c2_4   （第2层输出）</span><br><span class="line">c3_1, c3_2, c3_3, c3_4   （第3层输出）</span><br></pre></td></tr></table></figure>
+<p>从每层输出中取<strong>位置为压缩率整数倍的那个向量</strong>，也就是<strong>每个
+segment 的最后一个位置</strong>（这里压缩率为4，所以取第4个位置）。</p>
+<p>因此每层取第4个位置的输出，拼接成该 segment 的压缩向量列表：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C_segment1 = [ c1_4, c2_4, c3_4 ]</span><br></pre></td></tr></table></figure>
+<p>之所以选择 Segment 的最后一个位置，是因为 Encoder
+采用因果（causal）结构，每个位置只能看到当前位置及之前的
+token。<strong>只有最后一个位置看到了整个 Segment
+的全部内容，因此它的隐藏状态才能代表整段信息。</strong></p>
+<blockquote>
+<p>这里的encoder指的是拥有encoder功能的一个模块，即将多个token压缩成更少的token，具体实现可以使用decoder
+transformer模型等其他模型。</p>
+</blockquote>
+<h5 id="decoder-部分解压-生成">Decoder 部分：解压 / 生成</h5>
+<p>Decoder 的作用是将这些压缩信息注入
+LLM，使模型在生成时能够利用原始长文本中的信息。</p>
+<p>首先，将 prompt 全部转换为 token 向量：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">e1, e2, ..., en</span><br></pre></td></tr></table></figure>
+<p><code>C_segment1</code>
+中的每个向量，先经过一个线性层，将维度映射到与 <code>e</code> 相同：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C_segment1_linear = [ ^c1_4, ^c2_4, ^c3_4 ]</span><br></pre></td></tr></table></figure>
+<p>假设 decoder 同样只有 3 层：</p>
+<p><strong>第一层</strong></p>
+<ul>
+<li>输入：将 <code>^c1_4</code> <strong>拼接</strong>在 token
+序列前面</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[ ^c1_4 | e1, e2, ..., en ]</span><br></pre></td></tr></table></figure>
+<ul>
+<li>输出</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[ h1 | o1_1, o1_2, ..., o1_n ]</span><br></pre></td></tr></table></figure>
+<p><strong>第二层</strong></p>
+<ul>
+<li>压缩向量对应位置的输出，通过<strong>残差连接</strong>与下一层压缩向量相加（注意：只有压缩信息对应的位置做这个更新，真实
+token 部分的输出原样传递）</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">h1_new = h1 + ^c2_4</span><br></pre></td></tr></table></figure>
+<ul>
+<li>输入</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[ h1_new | o1_1, o1_2, ..., o1_n ]</span><br></pre></td></tr></table></figure>
+<ul>
+<li>输出</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[ h2 | o2_1, o2_2, ..., o2_n ]</span><br></pre></td></tr></table></figure>
+<p><strong>第三层</strong></p>
+<p>同样地：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">h2_new = h2 + ^c3_4</span><br></pre></td></tr></table></figure>
+<ul>
+<li>输入</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[ h2_new | o2_1, o2_2, ..., o2_n ]</span><br></pre></td></tr></table></figure>
+<ul>
+<li>输出</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[ h3 | o3_1, o3_2, ..., o3_n ]</span><br></pre></td></tr></table></figure>
+<hr>
+<p>若压缩向量的层数与 decoder
+层数不一致，论文中说明可用简单的规则映射（复制或取平均）来对齐。</p>
+<h4 id="举例压缩向量层数-decoder层数时的映射规则">举例：压缩向量层数 ≠
+decoder层数时的映射规则</h4>
+<p>假设 encoder 提取出的压缩向量有
+<strong>3层</strong>：<code>[c1, c2, c3]</code></p>
+<p><strong>情况一：decoder层数 &gt; 压缩向量层数（用复制）</strong></p>
+<p>decoder 有
+<strong>6层</strong>，需要把3个压缩向量"摊"到6层上，用<strong>复制</strong>的方式，每个压缩向量重复用两次：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">decoder第1层 ← c1</span><br><span class="line">decoder第2层 ← c1   （复制）</span><br><span class="line">decoder第3层 ← c2</span><br><span class="line">decoder第4层 ← c2   （复制）</span><br><span class="line">decoder第5层 ← c3</span><br><span class="line">decoder第6层 ← c3   （复制）</span><br></pre></td></tr></table></figure>
+<p><strong>情况二：decoder层数 &lt; 压缩向量层数（用平均）</strong></p>
+<p>decoder 只有
+<strong>1层</strong>，但压缩向量有3层，此时把3层向量<strong>取平均</strong>，合并成1个向量给这一层用：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">decoder第1层 ← (c1 + c2 + c3) / 3</span><br></pre></td></tr></table></figure>
+<p>如果是decoder
+2层、压缩向量6层这种不能整除的情况，通常也是按顺序分组后组内取平均（比如6层分成2组，每组3层取平均，分别给decoder的第1、2层）。</p>
+<hr>
+<h4 id="多个-segment-的情况">多个 segment 的情况</h4>
+<p>当输入包含多个 Segment 时，Decoder 的每一层都会将<strong>所有 Segment
+对应该层的压缩向量并列拼接</strong>，再接上真实的 token embedding。</p>
+<p>例如，假设有 <code>Segment 1</code> 和 <code>Segment 2</code>，则
+Decoder 第一层的输入为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[^c1_4(seg1), ^c1_4(seg2) | e1, e2, ..., en]</span><br></pre></td></tr></table></figure>
+<p>后续各层的结构相同，只需将压缩向量替换为对应层的输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">第 1 层：</span><br><span class="line">[^c1_4(seg1), ^c1_4(seg2) | e1, ..., en]</span><br><span class="line"></span><br><span class="line">第 2 层：</span><br><span class="line">[^c2_4(seg1), ^c2_4(seg2) | e1, ..., en]</span><br><span class="line"></span><br><span class="line">第 3 层：</span><br><span class="line">[^c3_4(seg1), ^c3_4(seg2) | e1, ..., en]</span><br></pre></td></tr></table></figure>
+<p>因此，<strong>每个 Decoder 层都会同时接收所有 Segment
+在该层产生的压缩向量</strong>，并将它们与真实 token 一起输入
+Decoder。</p>
+<hr>
+<h4 id="自回归生成">自回归生成</h4>
+<p>生成时的整体流程分为两个阶段：</p>
+<p><strong>第一阶段：历史内容压缩（encoder）</strong></p>
+<p>之前的对话历史，提前经过 encoder 处理，按 segment
+切分并逐层压缩，得到对应的一组压缩向量
+<code>^c_layer(seg1), ^c_layer(seg2), ...</code>。这一步和当前 prompt
+无关，是提前准备好的历史信息摘要。</p>
+<p><strong>第二阶段：拼接压缩向量 +
+prompt，进行生成（decoder）</strong></p>
+<p>当前用户输入的 prompt，转换成正常的 token embedding
+<code>e1, e2, ..., en</code>，<strong>不经过压缩</strong>。</p>
+<p>decoder 按照之前描述的流程，把 encoder 准备好的
+<code>^c_layer(seg)</code> 放在每一层输入的前面，接上 prompt 的
+token：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[ ^c_layer(seg1), ^c_layer(seg2), ... | e1, e2, ..., en ]</span><br></pre></td></tr></table></figure>
+<p>在 prompt token 之后，decoder 按标准自回归 next-token prediction
+的方式，逐步生成下一个词、再把新生成的词接到序列末尾、继续预测下一个词，如此循环，直到生成结束。</p>
+<hr>
+<h4 id="rcc-的本质扩展而非无限压缩">RCC 的本质：扩展而非无限压缩</h4>
+<p>RCC 与 RMT 的核心区别之一在于：<strong>RMT 通过 Memory 在 Segment
+之间递归传递信息，理论上可以持续处理任意长度的序列；而 RCC
+并没有彻底消除 Decoder 的上下文长度限制。</strong></p>
+<p>RCC 的本质是<strong>扩展 Decoder
+能够利用的有效上下文长度</strong>，而不是无限扩大上下文窗口。</p>
+<p>这一点可以从论文给出的公式看出：</p>
+<blockquote>
+<p><strong>RCC 理论最大上下文长度 = Encoder 压缩率 × Decoder
+上下文窗口长度</strong></p>
+</blockquote>
+<p>也就是说，Decoder
+本身的上下文窗口仍然是有限的。区别在于，原本一个位置只能容纳一个原始
+token，而经过压缩后，一个位置可以表示多个原始 token。</p>
+<p>因此，<strong>压缩率越高，同样大小的 Decoder
+窗口能够覆盖的原始文本越长</strong>。但这种扩展本质上仍然是一个乘法关系；当输入超过理论最大长度后，RCC
+依然无法继续利用更早的上下文。</p>
+<p>同时，压缩率与信息保真度之间存在明显的
+<strong>trade-off</strong>：</p>
+<p><strong>压缩率越高 → 每个压缩向量需要概括的 token 越多 → 信息密度越高
+→ 信息损失也越大。</strong></p>
+<p>论文实验中，即使在 <strong>32 倍压缩率</strong>下，文本重建任务的
+BLEU-4 仍接近 0.95，说明 RCC
+在较高压缩率下依然能够较好地保留信息。但这并不意味着压缩率越高越好；继续提高压缩率后，单个压缩向量需要承载的信息越来越多，重建和利用这些信息时的失真也会更加明显。</p>
+<p>因此，RCC 更准确的定位是：</p>
+<blockquote>
+<p><strong>通过可控的信息损失，换取更长的有效上下文。</strong></p>
+</blockquote>
+<p>它是在<strong>上下文长度与信息保真度之间进行权衡</strong>，而不是像
+RMT 那样通过跨 Segment 的递归 Memory
+机制，从架构层面绕开固定上下文窗口的限制。</p>
+<h2 id="总结">4. 总结</h2>
+<h3 id="rmt">RMT</h3>
+<p>RMT 在架构层面可以通过 Memory 在 Segment
+之间递归传递信息，因此<strong>理论上可以持续处理任意长度的序列</strong>，不受固定的总序列长度限制。但实际使用中仍存在几个重要限制：</p>
+<ul>
+<li><strong>Memory 容量有限</strong>：每个时刻能够保留多少信息，取决于
+Memory token 的数量。Memory token 越多，能够承载的信息越多，但每个
+Segment 的计算量也会相应增加。由于 Memory token 的读写开销只发生在当前
+Segment，因此这部分开销不会随着序列长度累积，而是每处理一个 Segment
+都固定增加。</li>
+<li><strong>训练成本高、流程复杂</strong>：RMT
+通常需要通过课程学习逐步增加 Segment 数量，同时依赖 BPTT（反向传播） 跨
+Segment 传播梯度。当 BPTT
+展开深度过大时，容易出现梯度不稳定，导致模型能够有效利用的跨 Segment
+记忆深度存在实际瓶颈。</li>
+<li><strong>迁移性较差</strong>：Memory
+机制需要针对具体模型进行训练。因此训练完成后，通常难以直接迁移到另一个模型（例如更大的模型），往往需要重新进行训练，训练成本较高。</li>
+</ul>
+<h3 id="rcc">RCC</h3>
+<p>RCC 虽然名称中也包含 <strong>Recurrent</strong>，但其核心思路与 RMT
+不同。它本质上是<strong>通过压缩将 LLM
+原本的上下文窗口等比例扩展</strong>，而不是从架构层面消除上下文长度限制：</p>
+<ul>
+<li><strong>长度上限依然存在</strong>：理论最大上下文长度 =
+<strong>压缩率 × Decoder
+上下文窗口长度</strong>。因此超过这个上限后，RCC
+依然无法继续利用更早的上下文。</li>
+<li><strong>压缩率与保真度存在权衡</strong>：压缩率越高，单个压缩向量需要概括的原始
+token 越多，信息损失也越大，保真度随之下降。论文中 32
+倍压缩率下文本重建任务的 BLEU-4 已接近
+0.95，说明较高压缩率下仍能保持较好的效果，但也说明<strong>压缩率并非越高越好</strong>。</li>
+<li><strong>核心思想</strong>：本质上是<strong>用可控的信息损失，换取更长的有效上下文</strong>。</li>
+</ul>
+<h4 id="适用场景差异">适用场景差异</h4>
+<p>从设计动机来看，两者更适合不同类型的场景：</p>
+<ul>
+<li><strong>RMT</strong>
+更适合<strong>流式、持续增长的序列处理</strong>。例如对话历史不断增加时，可以逐段处理并通过
+Memory 持续传递信息，不需要提前知道最终序列长度。</li>
+<li><strong>RCC</strong>
+更偏向<strong>预处理式压缩</strong>。可以提前将较长的历史内容压缩，再与当前
+Prompt 一起输入
+Decoder，更适合<strong>历史内容相对固定、需要基于完整历史进行一次性生成</strong>的场景。</li>
+</ul>
+<p>简单来说：</p>
+<blockquote>
+<p><strong>RMT：通过递归 Memory 持续处理更长的序列。</strong>
+<strong>RCC：通过压缩让有限的 Context Window
+容纳更多原始内容。</strong></p>
+</blockquote>
+<hr>
+<p>额外资料：</p>
+<table>
+<colgroup>
+<col style="width: 6%">
+<col style="width: 46%">
+<col style="width: 47%">
+</colgroup>
+<thead>
+<tr>
+<th>方法</th>
+<th>GitHub 仓库</th>
+<th>定位 / 特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RMT</strong></td>
+<td><code>booydar/recurrent-memory-transformer</code></td>
+<td>官方实现，包含基准测试，参考价值较高</td>
+</tr>
+<tr>
+<td><strong>RMT</strong></td>
+<td><code>lucidrains/recurrent-memory-transformer-pytorch</code></td>
+<td>社区常用的 PyTorch 实现，使用较为方便（391 Stars）</td>
+</tr>
+<tr>
+<td><strong>RCC</strong></td>
+<td><code>WUHU-G/RCC_Transformer</code></td>
+<td>官方实现，提供最高 <strong>32× 压缩率</strong>的模型</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM/" rel="tag"># 从零开始的LLM</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0/" rel="tag"># 持续学习</a>
+              <a href="/tags/%E7%AC%AC12%E8%8A%82/" rel="tag"># 第12节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/" rel="prev" title="从零开始的LLM 11. Voyager原理学习">
+                  <i class="fa fa-angle-left"></i> 从零开始的LLM 11. Voyager原理学习
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
