@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css"><!--我的APlayer的样式-->
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script><!--APlayer的依赖-->
+<script src="https://unpkg.com/meting@2/dist/Meting.min.js"></script><!--Meting的依赖-->
+<meting-js
+    server="netease"
+    type="playlist"
+    autoplay=false 
+    fixed=true 
+    lrc-type=0
+    id="7120442532"> 
+</meting-js> 
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 在 2.LLM模型及训练 中，我曾介绍过 Transformer 的三类主要架构。不过当时刚开始系统学习 LLM，关注点主要集中在 Decoder 结构，对 Encoder 和 Encoder-Decoder 的理解还不够深入。 最近在学习记忆压缩相关方法时，需要重新梳理 Encoder 和 Encoder-Decoder 架构，也因此发现了之前文章中一些理解上的疏漏。因此，这次">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的LLM 13.LLM模型及训练">
+<meta property="og:url" content="https://zusda.github.io/2026/09/14/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-13/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 在 2.LLM模型及训练 中，我曾介绍过 Transformer 的三类主要架构。不过当时刚开始系统学习 LLM，关注点主要集中在 Decoder 结构，对 Encoder 和 Encoder-Decoder 的理解还不够深入。 最近在学习记忆压缩相关方法时，需要重新梳理 Encoder 和 Encoder-Decoder 架构，也因此发现了之前文章中一些理解上的疏漏。因此，这次">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/09/14/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-13/image-20260915094953374.png">
+<meta property="og:image" content="https://zusda.github.io/2026/09/14/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-13/image-20260915095847438.png">
+<meta property="og:image" content="https://zusda.github.io/2026/09/14/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-13/image-20260915230320116.png">
+<meta property="og:image" content="https://zusda.github.io/2026/09/14/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-13/image-20260915231310109.png">
+<meta property="article:published_time" content="2026-09-13T19:06:10.000Z">
+<meta property="article:modified_time" content="2026-09-15T19:19:48.975Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="从零开始的LLM">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="第13节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/09/14/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-13/image-20260915094953374.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/09/14/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-13/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/09/14/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-13/","path":"2026/09/14/从零开始的LLM-13/","title":"从零开始的LLM 13.LLM模型及训练"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>从零开始的LLM 13.LLM模型及训练 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#transformer"><span class="nav-number">2.</span> <span class="nav-text">1. Transformer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#transformer-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 Transformer 是什么</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#encoder-only"><span class="nav-number">3.</span> <span class="nav-text">2. Encoder-Only</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%AE%AD%E7%BB%83%E4%BB%BB%E5%8A%A1-mlm"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 预训练任务 —— MLM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%AE%AD%E7%BB%83%E4%BB%BB%E5%8A%A1-nsp"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 预训练任务 —— NSP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E6%B8%B8%E4%BB%BB%E5%8A%A1%E5%BE%AE%E8%B0%83"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 下游任务微调</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#decoder-only"><span class="nav-number">4.</span> <span class="nav-text">3. Decoder-Only</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%AE%AD%E7%BB%83%E4%BB%BB%E5%8A%A1-clm"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 预训练任务 —— CLM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sftsupervised-fine-tuning%E6%9C%89%E7%9B%91%E7%9D%A3%E5%BE%AE%E8%B0%83"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 SFT（Supervised
+Fine-Tuning，有监督微调）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#encoder-decoder"><span class="nav-number">5.</span> <span class="nav-text">4. encoder-decoder</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E4%B8%AD%E7%9A%84%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD"><span class="nav-number">5.1.</span> <span class="nav-text">4.1 训练中的前向传播</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%AE%AD%E7%BB%83%E4%BB%BB%E5%8A%A1"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 预训练任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BE%E4%BE%8B%E8%AF%B4%E6%98%8E"><span class="nav-number">5.3.</span> <span class="nav-text">举例说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E8%B0%83%E7%BB%9F%E4%B8%80%E5%88%B0-text-to-text-%E6%A1%86%E6%9E%B6"><span class="nav-number">5.4.</span> <span class="nav-text">4.3 微调：统一到 Text-to-Text
+框架</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/09/14/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-13/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="从零开始的LLM 13.LLM模型及训练 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从零开始的LLM 13.LLM模型及训练
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-09-14 03:06:10" itemprop="dateCreated datePublished" datetime="2026-09-14T03:06:10+08:00">2026-09-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-09-16 03:19:48" itemprop="dateModified" datetime="2026-09-16T03:19:48+08:00">2026-09-16</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>在 <a href="https://zusda.github.io/2026/05/27/从零开始的LLM-2/">2.LLM模型及训练</a>
+中，我曾介绍过 Transformer 的三类主要架构。不过当时刚开始系统学习
+LLM，关注点主要集中在 Decoder 结构，对 Encoder 和 Encoder-Decoder
+的理解还不够深入。</p>
+<p>最近在学习记忆压缩相关方法时，需要重新梳理 Encoder 和 Encoder-Decoder
+架构，也因此发现了之前文章中一些理解上的疏漏。因此，这次重新整理并撰写这篇文章，对decoder简单介绍，着重于其他两种结构。</p>
+<span id="more"></span>
+<hr>
+<h2 id="transformer">1. Transformer</h2>
+<h3 id="transformer-是什么">1.1 Transformer 是什么</h3>
+<p>Transformer 是一种神经网络模型架构。我们在前文推导的 Multi-Head
+Attention，正是 Transformer 最核心的组成部分。一个完整的 Transformer 由
+Encoder（编码器）或
+Decoder（解码器），以及若干归一化层与线性层共同构成。</p>
+<p>目前主流的 Transformer 模型分为三类：</p>
+<ul>
+<li><strong>Encoder-Only</strong>：只理解，不生成（代表：BERT）</li>
+<li><strong>Decoder-Only</strong>：以生成为核心（代表：GPT、Claude）</li>
+<li><strong>Encoder-Decoder</strong>：理解后再生成（代表：T5、翻译模型）</li>
+</ul>
+<h2 id="encoder-only">2. Encoder-Only</h2>
+<p>在 Encoder-Only 架构中，Attentioni部分只由 Self-Attention 组成。</p>
+<p><img src="/2026/09/14/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-13/image-20260915094953374.png" style="zoom: 67%;"></p>
+<p>如图所示，一个 Encoder Layer 通常由两个子结构串联组成：</p>
+<ol type="1">
+<li><p><strong>Self-Attention</strong>：输入首先经过
+Self-Attention，让每个 token 根据其他 token
+的信息更新自身的表示，然后通过残差连接（Residual
+Connection）与原始输入相加。</p></li>
+<li><p><strong>FFN（Feed-Forward
+Network）</strong>：上一步得到的结果进入前馈网络进行进一步的非线性变换，再通过残差连接与输入相加。FFN
+不会让不同 token 之间发生信息交互，而是<strong>独立地处理每个
+token</strong>。经过 FFN 后，token 的数量不变，最终通过残差连接与 FFN
+的输入相加。</p></li>
+</ol>
+<p><strong>为什么需要Attention 与 FFN 的分工？</strong></p>
+<p>Attention 和 FFN 在 Transformer 中承担着不同的作用。</p>
+<ol type="1">
+<li><p><strong>Attention 的核心作用是信息交互。</strong> Self-Attention
+会根据 Query 和 Key 计算不同 token 之间的注意力权重，再对 Value
+进行加权求和。因此，它解决的主要问题是：<strong>当前 token 应该从其他
+token 获取哪些信息，以及获取多少信息。</strong> 但 Attention
+本身并不能单独完成足够复杂的非线性特征变换。</p></li>
+<li><p><strong>FFN 的核心作用是对每个 token
+的表示进行非线性变换。</strong> 它对 Attention
+混合后的信息进行进一步加工，通过非线性激活函数增强模型的特征表达能力，帮助模型学习更加复杂的语法、结构和语义关系。</p></li>
+</ol>
+<p>两者不断交替，使 Transformer 能够逐层构建更加复杂的语义表示。</p>
+<h3 id="预训练任务-mlm">2.1 预训练任务 —— MLM</h3>
+<p>BERT 主要采用 <strong>MLM（Masked Language
+Model，掩码语言模型）</strong>进行预训练。</p>
+<p>MLM 可以理解为一种“完形填空”任务：在文本序列中随机选择一部分
+token，将其遮蔽，然后要求模型根据上下文预测这些位置原本是什么
+token。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">输入： I &lt;MASK&gt; you because you are &lt;MASK&gt; </span><br><span class="line">目标： I love you because you are wonderful</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>其中，<code>[MASK]</code> 是 BERT 词表中专门添加的特殊 token，与
+<code>[CLS]</code>、<code>[SEP]</code>、<code>[PAD]</code>
+等一样，都具有固定的 token ID。</p>
+</blockquote>
+<p>需要注意的是，<strong>并不是所有位置都参与损失计算</strong>。只有被选中的
+Mask 位置，其输出才会被送入分类层，并与对应的真实 token
+计算交叉熵损失：</p>
+<p>模型实际上会为<strong>每个位置</strong>输出一个<strong>该位置</strong>的整个词表上的概率分布**，然后使用真实
+token 对应的概率计算交叉熵。</p>
+<blockquote>
+<p><strong>Decoder-Only（如 GPT）的预训练方式不同。</strong></p>
+<p>Decoder-Only 通常使用 <strong>CLM（Causal Language
+Modeling，因果语言模型）</strong>。模型在<strong>每个位置预测下一个
+token</strong>，并通过 Causal Mask 阻止当前位置看到未来 token。</p>
+</blockquote>
+<p>在具体训练时，BERT 随机选择每条训练语料中 <strong>15%</strong> 的
+token 参与预测，但这 15% 并非全部替换为
+<code>[MASK]</code>，而是按如下比例处理：</p>
+<table>
+<thead>
+<tr>
+<th>处理方式</th>
+<th>概率</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>替换为 <code>[MASK]</code></td>
+<td>80%</td>
+<td>核心遮蔽，驱动模型预测</td>
+</tr>
+<tr>
+<td>替换为随机 token</td>
+<td>10%</td>
+<td>迫使模型保持对全部 token 的上下文表征</td>
+</tr>
+<tr>
+<td>保持原 token 不变</td>
+<td>10%</td>
+<td>消除预训练与微调阶段的分布偏移</td>
+</tr>
+</tbody>
+</table>
+<h3 id="预训练任务-nsp">2.2 预训练任务 —— NSP</h3>
+<p>MLM 主要学习 <strong>token 级别的上下文关系</strong>，但一些 NLP
+任务还需要理解<strong>句子之间的关系</strong>。</p>
+<p>例如：</p>
+<ul>
+<li><strong>问答匹配</strong>：判断问题与回答是否匹配；</li>
+<li><strong>自然语言推理（NLI）</strong>：判断一个假设是否能够由前提推出；</li>
+<li><strong>句子关系判断</strong>：判断两个句子之间是否存在特定关系。</li>
+</ul>
+<p>因此，BERT 在原始论文中还引入了 <strong>NSP（Next Sentence
+Prediction，下一句预测）</strong>任务。</p>
+<p>NSP
+的任务非常简单：给模型两个句子，让模型判断第二个句子是否是原始文本中紧接着第一个句子的下一句。</p>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Sentence A:</span><br><span class="line">I went to the cinema yesterday.</span><br><span class="line"></span><br><span class="line">Sentence B:</span><br><span class="line">The movie was very interesting.</span><br></pre></td></tr></table></figure>
+<p>如果 B 确实是原文中 A
+的下一句，则标签为：<code>IsNext</code>，否则：<code>NotNext</code></p>
+<p>本质上，这就是一个<strong>带标签的二分类任务</strong>。</p>
+<p>BERT 使用 <code>[CLS]</code>
+位置的最终隐层向量作为整个句对的表示，然后接入一个分类层。</p>
+<p>可以简单理解为：NSP 是<strong>在 BERT 的 Encoder
+输出基础之上</strong>增加一个分类任务，通过监督学习训练模型判断两个句子之间的关系。</p>
+<h3 id="下游任务微调">2.3 下游任务微调</h3>
+<p>BERT
+的一个重要特点是：<strong>预训练阶段和下游任务阶段可以使用统一的输入格式。</strong></p>
+<p>其中最重要的两个特殊 token 是：</p>
+<p><strong><code>[CLS]</code> —— Classification Token</strong></p>
+<p>BERT 会在每个输入序列的开头加入 <code>[CLS]</code>。</p>
+<p>经过多层 Transformer Encoder 后，[CLS] 位置的隐层向量会通过
+Self-Attention
+与整个输入序列进行信息交互，因此可以作为整个序列的语义表示。</p>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[CLS] 这部电影节奏紧凑，演员表演非常自然 [SEP]</span><br></pre></td></tr></table></figure>
+<p>对于文本分类、句子关系判断等任务，可以直接取 <code>[CLS]</code>
+对应的最终隐层向量，再接入一个分类器。</p>
+<p><strong><code>[SEP]</code> —— Separator Token</strong></p>
+<p><code>[SEP]</code> 用于表示句子的边界。</p>
+<p>对于句对任务，两个句子可以拼接后一起输入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[CLS] Sentence A [SEP] Sentence B [SEP]</span><br></pre></td></tr></table></figure>
+<p>同时，BERT 还可以使用 <strong>Segment Embedding（Token Type
+Embedding）</strong>区分两个句子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Sentence A → Segment A</span><br><span class="line">Sentence B → Segment B</span><br></pre></td></tr></table></figure>
+<p>这样模型可以同时获得 token、位置信息以及句子所属的 Segment 信息。</p>
+<p><strong>常见下游任务</strong></p>
+<ol type="1">
+<li><strong>句对分类</strong>（Sentence-Pair Classification）</li>
+</ol>
+<p>例如自然语言推理（NLI）、语义相似度判断等。将两个句子拼接后输入
+BERT，通过 <code>[CLS]</code>
+的最终隐层向量表示整个句对，再接入分类器得到预测结果。</p>
+<ol start="2" type="1">
+<li><strong>单句分类</strong>（Single-Sentence Classification）</li>
+</ol>
+<p>例如情感分析、文本分类等。输入单个句子，同样取 <code>[CLS]</code>
+的最终隐层向量作为句子的语义表示，再接入分类器进行预测。</p>
+<hr>
+<p>以情感分类为例：用 BERT 判断电影评论是正面还是负面。</p>
+<p><strong>第一步：准备输入</strong></p>
+<p>将评论按照 BERT 的输入格式进行处理：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[CLS] 这部电影节奏紧凑，演员表演非常自然 [SEP]</span><br></pre></td></tr></table></figure>
+<p><strong>第二步：增加分类头</strong></p>
+<p>预训练好的 BERT 可以作为基础模型，将 <code>[CLS]</code>
+位置的最终隐层向量作为输入，接入一个分类网络进行训练。</p>
+<p>假设 BERT 的隐藏维度为 768：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[CLS] hidden state</span><br><span class="line">       768维</span><br><span class="line">         ↓</span><br><span class="line">   Linear(768, 2)</span><br><span class="line">         ↓</span><br><span class="line">      Softmax</span><br><span class="line">         ↓</span><br><span class="line">   [正面, 负面]</span><br></pre></td></tr></table></figure>
+<p>这里的分类网络结构通常比较简单，分类任务所需的语义特征主要由
+Transformer Encoder 提取。</p>
+<p>Loss 仅根据最终的分类结果计算。反向传播时，梯度会从分类网络继续传回
+Transformer Encoder，并更新其参数；与分类网络相比，Encoder
+通常采用更小的学习率，以避免破坏预训练得到的语言表示。</p>
+<p><strong>第三步：准备训练数据</strong></p>
+<p>与 BERT 的预训练相比，下游任务通常只需要规模小得多的标注数据。</p>
+<p>例如情感分类数据：</p>
+<p><img src="/2026/09/14/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-13/image-20260915095847438.png" style="zoom:80%;"></p>
+<p><strong>第四步：进行微调</strong></p>
+<p>使用这些带标签的数据训练模型。</p>
+<p>典型情况下，会使用较小的学习率，例如 <code>2e-5</code>，训练若干个
+Epoch。</p>
+<p>这里需要注意：传统 BERT Fine-tuning
+并不是只训练顶部的分类头，而是通常会<strong>同时更新 BERT
+本体和新增的分类头</strong>。</p>
+<p>训练过程中的梯度会<strong>从分类头向后传播</strong>，最终更新 BERT
+的预训练参数，使其逐渐适应当前的下游任务。</p>
+<p><strong>第五步：推理</strong></p>
+<p>微调完成后，输入新的电影评论：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[CLS] 导演的镜头语言太生硬，故事也讲不清楚 [SEP]</span><br></pre></td></tr></table></figure>
+<p>模型经过 BERT Encoder 后，取 <code>[CLS]</code>
+的隐层向量输入分类头。</p>
+<p>模型输出：<code>负面: 92%   正面: 8%  →  预测结果：负面 ✓</code></p>
+<h2 id="decoder-only">3. Decoder-Only</h2>
+<p>Decoder-Only 模型的 Attention 部分只使用 <strong>Masked
+Self-Attention</strong>。</p>
+<p><strong>Masked Self-Attention</strong>：每个 token
+只能关注自己以及它之前的 token，无法看到后续位置的
+token。这保证了自回归生成时的信息约束——模型在预测第 (i) 个 token
+时，不能“偷看”第 (i+1) 个及之后的内容。</p>
+<p>与 Encoder-Only 模型类似，Decoder Layer 在 Attention 后同样包含
+<strong>FFN（通常在现代 LLM 中称为 MLP）</strong>，用于对 Attention
+混合后的信息进行进一步的非线性变换。</p>
+<p><img src="/2026/09/14/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-13/image-20260915230320116.png" style="zoom:80%;"></p>
+<h3 id="预训练任务-clm">3.1 预训练任务 —— CLM</h3>
+<p>Decoder-Only 模型（如 GPT）通常采用 <strong>CLM（Causal Language
+Modeling，因果语言模型）</strong>进行预训练。</p>
+<p>CLM 的核心思路是：</p>
+<blockquote>
+<p><strong>给定前面的所有 token，预测下一个 token。</strong></p>
+</blockquote>
+<p>由于使用了 Masked Self-Attention，模型在训练时无法看到当前 token
+后面的内容，因此只能根据前文进行预测。</p>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">输入：今天天气      → 预测：很</span><br><span class="line">输入：今天天气很    → 预测：好</span><br><span class="line">输入：今天天气很好  → 预测：。</span><br></pre></td></tr></table></figure>
+<p>在实际训练中，并不需要像上面的例子一样逐步输入。整个序列可以一次性输入模型，通过
+Masked Self-Attention
+保证每个位置只能看到自己及之前的内容，然后同时计算各个位置的预测结果。</p>
+<h3 id="sftsupervised-fine-tuning有监督微调">3.2 SFT（Supervised
+Fine-Tuning，有监督微调）</h3>
+<p>经过预训练后，LLM
+已经具备较强的语言建模能力，但此时模型学习到的主要是<strong>根据上下文预测下一个
+token</strong>，并不意味着它已经很好地掌握了“按照用户指令完成任务”的能力。</p>
+<p>因此，通常还需要通过 <strong>SFT（Supervised
+Fine-Tuning，有监督微调）</strong>进一步训练模型，使其学习指令遵循、问答、翻译、总结等任务。</p>
+<p>与 BERT 等 Encoder-Only 模型的下游任务微调不同，Decoder-Only LLM
+通常不会针对每一种任务单独增加一个分类头，而是仍然让模型<strong>直接生成文本</strong>。</p>
+<p><strong>SFT 数据格式</strong></p>
+<p>标准的指令数据通常包含以下字段：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;instruction&quot;</span><span class="punctuation">:</span> <span class="string">&quot;即用户的任务指令&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;input&quot;</span><span class="punctuation">:</span> <span class="string">&quot;执行该指令所需的补充输入，没有则置空&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;output&quot;</span><span class="punctuation">:</span> <span class="string">&quot;模型应该给出的回复&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>以翻译任务为例：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;instruction&quot;</span><span class="punctuation">:</span> <span class="string">&quot;将下列文本翻译成英文：&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;input&quot;</span><span class="punctuation">:</span> <span class="string">&quot;今天天气真好&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;output&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Today is a nice day!&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p><strong>SFT 的训练格式</strong></p>
+<p>为了让模型学习“<strong>根据指令生成回答</strong>”这一模式，训练时通常会将
+instruction、input 和 output 按照特定的模板组织起来。</p>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\### Instruction:\n&#123;&#123;content&#125;&#125;\n\n### Response:\n</span><br></pre></td></tr></table></figure>
+<p>其中的 <code>content</code> 即为具体的用户指令。这里的用户指令不仅指
+<code>instruction</code> 字段，而是 <code>instruction</code> 和
+<code>input</code> 的拼接，即模型可以执行的一条完整指令。</p>
+<p>在训练过程中，模型仍然采用<strong>下一 token
+预测</strong>的方式，只是训练数据从普通文本变成了“指令 →
+回答”的结构。</p>
+<h2 id="encoder-decoder">4. encoder-decoder</h2>
+<p>Encoder-Decoder 架构由 Encoder 和 Decoder 两部分组成。</p>
+<p><strong>Encoder：</strong></p>
+<p>每层包含 Self-Attention 和 FFN。由于没有因果掩码，Encoder 中的每个
+token 都可以关注输入序列中的其他 token。</p>
+<p><strong>Decoder：</strong></p>
+<p>每层包含 Masked Self-Attention、Cross-Attention 和 FFN。</p>
+<ul>
+<li><strong>Masked Self-Attention</strong>：对 Decoder
+当前已经生成的序列进行自注意力计算，通过 Causal Mask
+屏蔽未来位置，确保生成时不会看到尚未生成的 token。</li>
+<li><strong>Cross-Attention</strong>：Q 来自 Decoder 当前状态，K 和 V
+来自 Encoder 的输出，使 Decoder 在生成每个 token 时能够关注 Encoder
+输出中的相关信息。</li>
+</ul>
+<p><img src="/2026/09/14/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-13/image-20260915231310109.png" style="zoom:67%;"></p>
+<h3 id="训练中的前向传播">4.1 训练中的前向传播</h3>
+<p>Encoder-Decoder 模型需要两个输入：<strong>Encoder 输入和 Decoder
+输入</strong>。</p>
+<blockquote>
+<p><strong>Encoder
+输入</strong>是我们希望模型进行<strong>编码的内容</strong>，而
+<strong>Decoder
+输入</strong>则来自我们希望<strong>模型生成的目标内容</strong>。</p>
+</blockquote>
+<p>Encoder 首先对输入序列进行
+<strong>Self-Attention</strong>。由于Self-Attention中，每个位置都可以关注整个输入序列，因此
+Encoder 的输出包含完整的上下文信息。</p>
+<p>随后，Decoder 对目标序列进行处理。训练过程中，Decoder
+的输入来自目标序列，但会向右移动一位，使模型在每个位置预测下一个
+token。</p>
+<p>Decoder 的输入首先经过 <strong>Masked
+Self-Attention</strong>，<strong>使每个位置只能看到自己以及之前的
+token</strong>。</p>
+<p>然后进入 <strong>Cross-Attention</strong>：</p>
+<ul>
+<li><strong>Q 来自 Decoder 当前的隐层表示；</strong></li>
+<li>K 和 V 来自 Encoder 的输出。</li>
+</ul>
+<p>因此，Decoder 的 Masked Self-Attention 输出 在 Cross-Attention
+中，可以访问 Encoder 输出中的所有 token
+信息。（我们attention原理中说过，图结构是Q连向K的。）</p>
+<h3 id="预训练任务">4.2 预训练任务</h3>
+<p>T5（一个 encoder-decoder 模型）的预训练任务称为 Span Corruption。它与
+BERT(encoder-only) 的 MLM 类似，但有一个关键区别：BERT 遮蔽的是单个随机
+token，而 T5 遮蔽的是连续的 token 片段（Span）。</p>
+<p>预训练的目标，是让 encoder
+具备理解能力。但“理解”本身是个抽象概念，怎么定义它、怎么衡量它？</p>
+<p>T5 的思路是：<strong>借助 decoder 来定义 encoder 的理解能力。如果
+decoder 能根据 encoder 的输出，准确还原出被遮蔽的内容，就说明 encoder
+真正理解了上下文。</strong></p>
+<p>同时，由于 loss 是从 decoder
+的输出反向传播回去的，训练过程中也会顺带训练出一个能够解析 encoder
+内容的 decoder。</p>
+<h3 id="举例说明">举例说明</h3>
+<p>原始文本：<code>The cat sat on the mat.</code></p>
+<p><strong>第一步：构造 encoder 输入。</strong> 用哨兵 token
+替换掉文本中的连续片段：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The &lt;extra_id_0&gt; on &lt;extra_id_1&gt; .</span><br></pre></td></tr></table></figure>
+<p>经过 encoder 后，这些 token 会变成对应的 hidden
+vector，并<strong>作为 cross-attention 中的 K、V</strong>。</p>
+<p><strong>第二步：构造 decoder 输入。</strong> decoder
+需要按顺序还原每个哨兵 token 对应的内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;extra_id_0&gt; cat sat &lt;extra_id_1&gt; the mat.</span><br></pre></td></tr></table></figure>
+<p>含义是：<code>&lt;extra_id_0&gt;</code> 对应 "cat
+sat"，<code>&lt;extra_id_1&gt;</code> 对应 "the mat"。</p>
+<p>如果想让对应关系更明确（让看的人不产生误解），也可以改成如下作为
+decoder 的输入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;extra_id_0&gt;: cat sat  \n &lt;extra_id_1&gt;: the mat.</span><br></pre></td></tr></table></figure>
+<p><strong>第三步：构造训练目标。</strong> 实际输入会在最前面加一个
+<code>&lt;start&gt;</code> 作为起始 token：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;start&gt; &lt;extra_id_0&gt; cat sat &lt;extra_id_1&gt; the mat.</span><br></pre></td></tr></table></figure>
+<p>target 则和标准的下一词训练一样，将每个词往后移一位</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;extra_id_0&gt; cat sat &lt;extra_id_1&gt; the mat</span><br></pre></td></tr></table></figure>
+<p>预测关系如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">输入</th>
+<th style="text-align: left;">预测目标</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>&lt;start&gt;</code></td>
+<td style="text-align: left;"><code>&lt;extra_id_0&gt;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;extra_id_0&gt;</code></td>
+<td style="text-align: left;">cat</td>
+</tr>
+<tr>
+<td style="text-align: left;">cat</td>
+<td style="text-align: left;">sat</td>
+</tr>
+<tr>
+<td style="text-align: left;">sat</td>
+<td style="text-align: left;"><code>&lt;extra_id_1&gt;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;extra_id_1&gt;</code></td>
+<td style="text-align: left;">the</td>
+</tr>
+<tr>
+<td style="text-align: left;">the</td>
+<td style="text-align: left;">mat</td>
+</tr>
+<tr>
+<td style="text-align: left;">mat</td>
+<td style="text-align: left;">.</td>
+</tr>
+</tbody>
+</table>
+<p>最后就是正常的 loss 计算。</p>
+<h3 id="微调统一到-text-to-text-框架">4.3 微调：统一到 Text-to-Text
+框架</h3>
+<p>得益于 Text-to-Text 的统一框架，T5
+的微调方式非常一致：无论任务类型是什么，都只需<strong>构造对应格式的输入输出文本对</strong>，在预训练模型上继续训练即可，无需修改任何模型结构。</p>
+<p><code>预训练</code>和<code>微调</code>的<strong>核心差异在于 decoder
+的目标</strong>：</p>
+<ul>
+<li><strong>预训练阶段</strong>：decoder 的目标是解释 span
+里缺了什么，借此反向定义并训练 encoder 的理解能力。</li>
+<li><strong>微调阶段</strong>：decoder
+的目标回归到<strong>正常的答案生成</strong>，即<strong>根据具体任务要求输出结果</strong>。</li>
+</ul>
+<p>以机器翻译为例：</p>
+<p><strong>Encoder 输入：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">translate English to French:</span><br></pre></td></tr></table></figure>
+<p><strong>Decoder 输入：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;start&gt; Good morning.</span><br></pre></td></tr></table></figure>
+<p>这里需要任务前缀，因为微调时模型可能需要在多个任务之间切换或训练。</p>
+<p>然后正常地对 decoder 的输出进行下一词预测 loss 计算即可。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM/" rel="tag"># 从零开始的LLM</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/%E7%AC%AC13%E8%8A%82/" rel="tag"># 第13节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/09/04/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-12/" rel="prev" title="从零开始的LLM 12. 压缩算法 (RMT 和 RCC)">
+                  <i class="fa fa-angle-left"></i> 从零开始的LLM 12. 压缩算法 (RMT 和 RCC)
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
