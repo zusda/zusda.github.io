@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script>
+<script>
+  const ap = new APlayer({
+    container: document.getElementById('aplayer'),
+    fixed: true,
+    autoplay: false,
+    lrcType: 3,            // 3 = 从每首歌的 lrc 字段指向的文件加载歌词
+    audio: [
+      {
+        name: 'From a Place of Love.mp3',
+        artist: 'Mili',
+        url: '/music/Mili - From a Place of Love.mp3',
+        lrc: '/music/Mili - From a Place of Love.lrc'
+      },
+    ]
+  });
+</script>
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 本文主要介绍模型训练所涉及的基础知识，以及在此基础上如何提高训练效率、加速模型训练。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ai学术篇_1_模型训练加速">
+<meta property="og:url" content="https://zusda.github.io/2026/10/21/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-1-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 本文主要介绍模型训练所涉及的基础知识，以及在此基础上如何提高训练效率、加速模型训练。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/10/21/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-1-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F/image-20261022163717224.png">
+<meta property="og:image" content="https://zusda.github.io/2026/10/21/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-1-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F/image-20261022163727127.png">
+<meta property="og:image" content="https://zusda.github.io/2026/10/21/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-1-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F/image-20261022164609053.png">
+<meta property="article:published_time" content="2026-10-21T11:27:00.000Z">
+<meta property="article:modified_time" content="2026-10-22T09:09:24.868Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai系列">
+<meta property="article:tag" content="ai学术篇">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/10/21/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-1-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F/image-20261022163717224.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/10/21/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-1-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/10/21/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-1-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F/","path":"2026/10/21/ai学术篇-1-模型训练加速/","title":"ai学术篇_1_模型训练加速"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ai学术篇_1_模型训练加速 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="nav-number">2.</span> <span class="nav-text">1. 基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#gpu-%E5%88%A9%E7%94%A8%E7%8E%87gpu-utilization"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 GPU 利用率（GPU
+Utilization）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E5%AD%98%E5%8D%A0%E7%94%A8%E7%8E%87memory-usage"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 显存占用率（Memory Usage）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E5%88%A9%E7%94%A8%E7%8E%87"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 资源利用率</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E8%AE%A1%E7%AE%97%E6%B5%81%E7%A8%8B%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">2. 训练计算流程原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E5%88%A9%E7%94%A8%E8%80%97%E6%97%B6%E8%AE%A1%E7%AE%97%E5%8E%9F%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">3. 资源利用耗时计算原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gpu-%E5%88%A9%E7%94%A8%E7%8E%87%E6%98%BE%E5%AD%98%E5%8D%A0%E7%94%A8%E7%8E%87%E8%B5%84%E6%BA%90%E5%88%A9%E7%94%A8%E7%8E%87%E4%B8%89%E8%80%85%E5%85%B3%E7%B3%BB%E4%B8%BE%E4%BE%8B"><span class="nav-number">5.</span> <span class="nav-text">4. GPU
+利用率、显存占用率、资源利用率三者关系举例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gpu-%E5%88%A9%E7%94%A8%E7%8E%87%E4%BD%8E%E7%9A%84%E5%8E%9F%E5%9B%A0%E4%B8%8E%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95"><span class="nav-number">6.</span> <span class="nav-text">5. GPU
+利用率低的原因与解决办法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87%E8%B7%9F%E4%B8%8D%E4%B8%8A"><span class="nav-number">6.1.</span> <span class="nav-text">5.1 数据准备跟不上</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E6%A8%A1%E5%9E%8B%E4%B8%AD-kernel-%E5%A4%9A%E4%B8%94%E6%AF%8F%E4%B8%AA-kernel-%E8%AE%A1%E7%AE%97%E9%87%8F%E4%B8%8D%E5%A4%A7"><span class="nav-number">6.2.</span> <span class="nav-text">5.2 小模型中 kernel
+多且每个 kernel 计算量不大</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%A7%E9%87%8F%E5%90%8C%E6%AD%A5%E6%93%8D%E4%BD%9C"><span class="nav-number">6.3.</span> <span class="nav-text">5.3 大量同步操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84%E8%B0%83%E4%BC%98%E7%AD%96%E7%95%A5"><span class="nav-number">7.</span> <span class="nav-text">6.
+不同场景下的调优策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E9%80%9F%E5%B8%B8%E7%94%A8%E7%9A%84-4-%E7%A7%8D%E6%96%B9%E6%B3%95"><span class="nav-number">7.1.</span> <span class="nav-text">6.1 加速常用的 4 种方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E4%B8%80%E5%A4%8D%E7%8E%B0%E5%B7%B2%E6%9C%89%E5%B7%A5%E4%BD%9C%E8%AE%BA%E6%96%87%E5%8E%9F%E9%A1%B9%E7%9B%AE"><span class="nav-number">7.2.</span> <span class="nav-text">6.2
+场景一：复现已有工作（论文&#x2F;原项目）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E4%BA%8C%E8%87%AA%E5%B7%B1%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="nav-number">7.3.</span> <span class="nav-text">6.3 场景二：自己训练模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%E5%86%99%E4%BB%A3%E7%A0%81%E6%97%B6%E5%85%88%E6%8A%8A%E8%BF%99%E4%BA%9B%E6%89%8B%E6%AE%B5%E9%85%8D%E4%B8%8A"><span class="nav-number">7.3.1.</span> <span class="nav-text">第一步：写代码时，先把这些手段配上</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%E8%B0%83-batch"><span class="nav-number">7.3.2.</span> <span class="nav-text">第二步：调 batch</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E5%8A%A0%E9%80%9F%E6%96%B9%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">8.</span> <span class="nav-text">7. 三种加速方法的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#torch.compile%E7%BC%96%E8%AF%91%E6%A8%A1%E5%9E%8B"><span class="nav-number">8.1.</span> <span class="nav-text">7.1
+torch.compile：编译模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E4%BC%98%E5%8C%96%E6%96%B9%E5%BC%8F"><span class="nav-number">8.1.1.</span> <span class="nav-text">主要优化方式：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%97%B6%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F"><span class="nav-number">8.1.2.</span> <span class="nav-text">使用时需要注意：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E6%98%AF%E5%90%A6%E5%80%BC%E5%BE%97%E4%BD%BF%E7%94%A8"><span class="nav-number">8.1.3.</span> <span class="nav-text">如何判断是否值得使用？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#windows-%E4%B8%AD%E6%96%87%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BC%96%E7%A0%81%E9%97%AE%E9%A2%98"><span class="nav-number">8.1.4.</span> <span class="nav-text">Windows 中文系统的编码问题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E5%BF%AB%E7%9A%84-attentionflashattention"><span class="nav-number">8.2.</span> <span class="nav-text">7.2 更快的
+Attention：FlashAttention</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E4%BC%98%E5%8A%BF"><span class="nav-number">8.2.1.</span> <span class="nav-text">主要优势：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pytorch-%E4%B8%AD%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">8.2.2.</span> <span class="nav-text">PyTorch 中的实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#x-transformers-%E4%B8%AD%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">8.2.3.</span> <span class="nav-text">x-transformers
+中的实现</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E7%B2%BE%E5%BA%A6%E8%AE%AD%E7%BB%83%E9%99%8D%E4%BD%8E%E8%AE%A1%E7%AE%97%E7%B2%BE%E5%BA%A6"><span class="nav-number">8.3.</span> <span class="nav-text">7.3 混合精度训练：降低计算精度</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E7%B2%BE%E5%BA%A6%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">8.3.1.</span> <span class="nav-text">1. 混合精度的工作原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E4%BB%A3%E7%A0%81%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E6%A0%B7%E6%8E%92%E5%B8%83"><span class="nav-number">8.3.2.</span> <span class="nav-text">2. 训练代码为什么这样排布？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B7%B7%E5%90%88%E7%B2%BE%E5%BA%A6%E8%83%BD%E5%8A%A0%E9%80%9F"><span class="nav-number">8.3.3.</span> <span class="nav-text">3. 为什么混合精度能加速？</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">87</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/10/21/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-1-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ai学术篇_1_模型训练加速 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ai学术篇_1_模型训练加速
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-10-21 19:27:00" itemprop="dateCreated datePublished" datetime="2026-10-21T19:27:00+08:00">2026-10-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-10-22 17:09:24" itemprop="dateModified" datetime="2026-10-22T17:09:24+08:00">2026-10-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>本文主要介绍模型训练所涉及的基础知识，以及在此基础上如何提高训练效率、加速模型训练。</p>
+<span id="more"></span>
+<p>姑且将 AI 系列后续内容分为以下 4 个部分：</p>
+<ol type="1">
+<li><strong>学术篇：</strong> LLM
+基础知识、模型训练、各类算法的原理与实现等。</li>
+<li><strong>开发篇：</strong> Agent 框架、各类 AI 应用的开发等。</li>
+<li><strong>运维篇：</strong> Agent 应用的部署、推理参数测试等。</li>
+<li><strong>杂项：</strong> AI
+渗透、视频生成、音频生成、超分辨率等其他内容。</li>
+</ol>
+<hr>
+<p>本来打算等 SMT
+训练完成后再写这篇文章，但今天开始训练时，又学到了不少与训练效率相关的知识。为了梳理今天学到的内容，索性一边整理，一边把它们写成博客。</p>
+<p>本篇快写完了，先做个总结。</p>
+<p>总体来说，训练效率优化主要分为两步：首先优化代码执行效率，减少不必要的计算开销；然后在不超出硬件承载能力的前提下，尽可能提高
+Batch Size，充分利用显存和计算资源，从而提升整体训练速度。</p>
+<p>不过，<strong>调整 Batch Size
+不只是性能优化，也可能改变训练行为</strong>，进而影响梯度更新、收敛过程和最终结果。因此，在复现他人的源码时，如果目标是尽可能保持原有训练行为，就应优先优化代码执行效率，而不是随意修改
+Batch Size
+等训练参数。（因此，这次复现<strong>只需优化代码</strong>执行效率，<strong>保持原有训练参数不变</strong>，直接部署到服务器训练即可，之前纠结于调整
+Batch Size 加速训练其实没有必要。）</p>
+<hr>
+<h2 id="基础知识">1. 基础知识</h2>
+<h3 id="gpu-利用率gpu-utilization">1.1 GPU 利用率（GPU
+Utilization）</h3>
+<p>GPU 利用率主要衡量 GPU
+在<strong>一段时间内</strong>处于活动状态的时间比例。</p>
+<p>例如，<code>nvidia-smi</code> 中的 <code>utilization.gpu</code>
+表示在最近<strong>一个采样周期内</strong>，GPU
+有多少时间在干活（即至少有一个任务正在执行）。</p>
+<h3 id="显存占用率memory-usage">1.2 显存占用率（Memory Usage）</h3>
+<p>显存占用率衡量的是显存资源的使用情况，可以通过以下指标计算：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">memory.used / memory.total</span><br></pre></td></tr></table></figure>
+<p>其中，<code>memory.used</code>
+表示已使用的显存，<code>memory.total</code> 表示总显存。</p>
+<p>在每个 batch
+执行相同训练操作的前提下，可以将显存占用率简化理解为：<strong>一个 batch
+完整训练所需的显存资源与 GPU 总显存的比例</strong>。</p>
+<blockquote>
+<p>实际显存占用还可能包含 CUDA
+上下文、缓存分配器预留的显存等额外开销。</p>
+</blockquote>
+<h3 id="资源利用率">1.3 资源利用率</h3>
+<p><strong>计算资源</strong>主要指 GPU
+内部负责<strong>执行运算的硬件单元</strong>，例如
+SM（流式多处理器）及其中的 CUDA Core、Tensor Core 等。</p>
+<p>可以将这些计算单元比作工厂里的工位：计算资源利用率反映的是这些硬件单元在执行任务时的实际繁忙程度。
+如果部分计算单元没有得到充分利用，就意味着 GPU
+仍有潜在的计算能力未被发挥出来。</p>
+<p><strong>怎么判断：</strong></p>
+<ul>
+<li><strong>一般先看功耗：<code>power.draw / power.limit</code>。</strong>
+用 <code>nvidia-smi</code> 的 <code>power.draw</code>
+除以该卡功耗上限（<code>power.limit</code>），近似反映计算单元被铺满的程度。<strong>这个方式方便快捷，日常一般就看它</strong>——功耗高说明计算单元在满负荷运转，功耗低说明大量计算单元闲着。</li>
+<li><strong>要精确看吞吐：steps/s 或 samples/s。</strong>
+这是最准确的依据，但 <strong><code>nvidia-smi</code>
+看不到，需要在训练代码里自己计时统计</strong>（如每个 step
+记录时间戳，算每秒处理的 batch 数或样本数）。吞吐随 batch
+增大而上涨，涨到不再涨，说明计算资源已吃满。</li>
+</ul>
+<h2 id="训练计算流程原理">2. 训练计算流程原理</h2>
+<p>训练过程中，同一个 Batch 内的样本并行计算，而不同 Batch
+的训练步骤通常按顺序执行。</p>
+<ul>
+<li><strong>batch 内部</strong>： <strong>并行计算</strong>。一个 Batch
+中的样本一起输入
+GPU，由多个计算单元并行处理。若计算任务超过硬件的即时处理能力，就会分批执行。</li>
+<li><strong>batch 之间</strong>： <strong>依次执行</strong>。
+标准训练流程中，通常需要完成当前 Batch
+的前向传播、反向传播和参数更新，才能开始下一个 Batch 的训练。</li>
+</ul>
+<p><strong>为什么 batch 之间必须串行：</strong> 下一个 batch
+的计算要用更新后的权重，而权重更新要等上一个 batch
+的梯度算完。后一步依赖前一步的结果，无法同时进行。</p>
+<blockquote>
+<p>显存里同一时刻只有<strong>一个 batch</strong>
+的中间结果，所以显存是复用的：上一个 batch
+的中间结果（各层激活值等）在反向传播算完梯度后不再需要，会被释放或覆盖，下一个
+batch 的前向再从这块空间重新分配。因此显存占用不随 batch
+数量累积增长，而是稳定在一个 batch 所需的峰值附近。</p>
+</blockquote>
+<h2 id="资源利用耗时计算原理">3. 资源利用耗时计算原理</h2>
+<p><strong>前提</strong></p>
+<p>假设数据无限供应、显存无限，且每个样本处理时间相同，因此同样大小的
+batch 处理时间相同。</p>
+<blockquote>
+<p>在这个前提下，GPU 能做到不空等、一直在连续跑；采样时间内 GPU 一直有
+batch 可处理，利用率达到 100%，此时采样时间内能处理的 batch
+数量达到最大值 M。</p>
+</blockquote>
+<blockquote>
+<p>实际中每个 batch 的处理速度并不完全相同，所以利用率 100%
+时采样时间内的 batch 数量对应的指标其实是<strong>吞吐</strong>（steps/s
+或 samples/s），需要在训练代码里自己计时统计，<code>nvidia-smi</code>
+看不到。这里分析的是加速训练的因素，因此设定每个 batch
+处理速度相同。</p>
+</blockquote>
+<hr>
+<p><strong>理想模型：一个样本作为一块</strong></p>
+<p>有 b 个计算单元，并行处理 b 个样本（资源 100% 利用），所需时间
+t。</p>
+<ol type="1">
+<li><strong>没吃满阶段（样本数 ≤ b）：</strong> batch
+加大，处理时间不变，仍为 t，吞吐随 batch 线性上涨。</li>
+<li><strong>吃满之后（样本数 &gt; b）：</strong> 处理时间 = ⌈样本数 / b⌉
+× t。例如 b+1 个样本需要 2t，因为多出的 1
+个样本要等下一轮计算单元空出来才能处理。</li>
+</ol>
+<blockquote>
+<p>补充：这里隐含"每个样本正好占用 1
+个计算单元、且耗时相同"的假设。若样本耗时不同，波次会出现"短板效应"——同一波里<code>最慢的样本</code>决定该波结束时间，部分计算单元会空转等待。</p>
+</blockquote>
+<hr>
+<p><strong>现实模型：一个样本被切成多个小块</strong></p>
+<p>一个样本会被切成多个小块。用 N 表示计算单元数（并行处理 N 个小块），s
+表示一波（并行算一次小块）的时间，一个样本被切成 n 个小块。</p>
+<ol type="1">
+<li><strong>一个 batch 的总块数 ≤ N：</strong> 一波算完，耗时 s。</li>
+<li><strong>总块数 &gt; N：</strong> 耗时 = ⌈总块数 / N⌉ × s。</li>
+</ol>
+<p><strong>多加 1 个样本举例：</strong>
+假设总块数刚好占满所有计算单元（正好排满整数波），此时多加 1
+个样本，总块数增加 n，多出约 ⌈n / N⌉ 波的时间，每波只有 s。因为 s
+远小于整个 batch 的耗时，所以增量很小，不会像理想模型那样直接变成
+2t，曲线看起来是斜坡。</p>
+<hr>
+<p><strong>对比</strong></p>
+<ul>
+<li><strong>理想模型：</strong> 多 1 个样本，可能多整整一轮，t 变
+2t（阶梯状跳变）。</li>
+<li><strong>现实模型：</strong> 多 1
+个样本，只多几个小波，耗时略增（近似斜坡）。</li>
+</ul>
+<blockquote>
+<p>补充：两个模型的差异本质是<strong>并行粒度</strong>不同。</p>
+<p>理想模型把样本当作不可分割的最小调度单位，资源利用率在"未满"与"满"之间突变；</p>
+<p>现实模型把样本拆成小块，调度单位更细，能填满计算单元的空隙，因此耗时随
+batch 增长更平滑。</p>
+<p>实际 GPU 训练介于两者之间：粒度比"整样本"细，但受 kernel
+启动开销、同步屏障、尾部效应（最后不足一波的部分）影响，斜坡上仍会有小台阶，不会完全平滑。</p>
+</blockquote>
+<h2 id="gpu-利用率显存占用率资源利用率三者关系举例">4. GPU
+利用率、显存占用率、资源利用率三者关系举例</h2>
+<p><strong>工厂（GPU）</strong>来了一批<strong>订单（batch）</strong>，订单里每个产品提供了一份<strong>原材料（样本）</strong>，材料先存进<strong>仓库（显存）</strong>；100
+名<strong>工人（计算单元，如 SM、CUDA
+Core）</strong>从仓库领材料干活，把每个产品做出来。</p>
+<ul>
+<li><strong>工厂</strong> = GPU</li>
+<li><strong>一批订单</strong> = 一个 batch</li>
+<li><strong>订单里的每个产品原材料</strong> = 一个样本</li>
+<li><strong>仓库</strong> = 显存</li>
+<li><strong>100 名工人</strong> = 计算单元（SM、CUDA Core）</li>
+</ul>
+<hr>
+<p>三个指标分别看什么</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">指标</th>
+<th style="text-align: left;">工厂里的对应</th>
+<th style="text-align: left;">看的是</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">GPU 利用率</td>
+<td style="text-align: left;">工厂<strong>有多少时间</strong>在开工（哪怕只开一个工位）</td>
+<td style="text-align: left;">时间</td>
+</tr>
+<tr>
+<td style="text-align: left;">显存占用率</td>
+<td style="text-align: left;"><strong>仓库</strong>被占了多少</td>
+<td style="text-align: left;">空间</td>
+</tr>
+<tr>
+<td style="text-align: left;">资源利用率</td>
+<td style="text-align: left;"><strong>多少工位</strong>真正在干活</td>
+<td style="text-align: left;">计算单元</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><strong>举例</strong></p>
+<p><strong>情况 A：活太少，工位大量闲置</strong></p>
+<p>工厂接到一批订单，但订单里只有 2 个产品，而工厂有 100 个工位。</p>
+<ul>
+<li><strong>GPU 利用率</strong>：很高（接近
+100%）。因为工厂<strong>确实在开工</strong>，采样那一刻有工人在干活。（假设采样时间约等于做一个产品所需的时间，这里只有
+2 个产品、2 个工人同时开工，整个采样窗口内工人一直在干活。）</li>
+<li><strong>资源利用率</strong>：很低（2/100 = 2%）。只有 2
+个工位在干活，98 个闲着。</li>
+<li><strong>显存占用率</strong>：很低。订单少，仓库里只放了 2
+份材料。</li>
+</ul>
+<blockquote>
+<p>这说明：<strong>利用率高 ≠
+算力吃满</strong>。工厂开着门、有人在干活，但绝大多数工位是空的。</p>
+</blockquote>
+<p><strong>情况 B：活很多，但仓库爆了</strong></p>
+<p>订单里塞了 10000 个产品，仓库装不下，直接 OOM 报错（爆仓）。</p>
+<ul>
+<li><strong>显存占用率</strong>：超过容量上限，OOM。</li>
+</ul>
+<blockquote>
+<p>这说明：<strong>显存是硬约束</strong>。batch
+再大、算力再足，仓库装不下就做不下去，此时该考虑混合精度、梯度检查点等省显存手段。</p>
+</blockquote>
+<p><strong>情况 C：工位和仓库都够，但原料送不上来（多 batch
+情形）</strong></p>
+<p>工位 100 个、仓库也空着，但送订单的卡车（CPU
+准备数据）太慢，工人干完一单（batch）就得等下一单到达才能干活。</p>
+<ul>
+<li><strong>GPU 利用率</strong>：忽高忽低、经常掉到
+0（工人在等原料）。（假设干完一单后，要等同样长的时间才能开始下一单，而采样窗口覆盖"这一单开始到下一单开始"这一段，则利用率为
+50%。）</li>
+<li><strong>资源利用率</strong>：忙的时候高，闲的时候低。</li>
+<li><strong>显存占用率</strong>：不高（仓库没堆满）。</li>
+</ul>
+<blockquote>
+<p>这说明：<strong>瓶颈在数据供应（输入侧）</strong>，不在算力和显存。</p>
+</blockquote>
+<p><strong>情况 D：工位和仓库都满，活也源源不断</strong></p>
+<ul>
+<li><strong>GPU 利用率</strong>：稳定 90% 以上。</li>
+<li><strong>资源利用率</strong>：高（工位铺满）。</li>
+<li><strong>显存占用率</strong>：高但没爆。</li>
+</ul>
+<blockquote>
+<p>这才是<strong>真正满负荷</strong>的理想状态。</p>
+</blockquote>
+<h2 id="gpu-利用率低的原因与解决办法">5. GPU
+利用率低的原因与解决办法</h2>
+<p>GPU 利用率没满，<strong>最常见的原因是输入侧（CPU
+侧）跟不上</strong>：在采样时间内，GPU 在等 CPU 处理的事情多。CPU
+侧常见的有三种情况：数据准备跟不上、kernel
+提交慢、同步操作打断流水线。</p>
+<blockquote>
+<p>GPU 利用率没满，<strong>多数情况下（尤其是单机单卡、中小模型）主因在
+CPU 侧</strong>：数据准备跟不上、kernel
+提交慢、同步操作打断流水线。因此排查时应<strong>优先从 CPU
+侧入手</strong>。</p>
+<p>但大模型、多卡、长序列等场景下，多卡通信、显存带宽、GPU
+内部依赖也可能成为主因，CPU 侧不再是唯一重点。</p>
+</blockquote>
+<h3 id="数据准备跟不上">5.1 数据准备跟不上</h3>
+<p><strong>现象：</strong> GPU 在等 CPU 提供数据。典型信号是
+<code>utilization.gpu</code> 忽高忽低、经常掉到 0，而
+<code>power.draw</code> 也不高。</p>
+<p><strong>解决办法：异步准备数据。</strong> 用后台线程/进程提前把 batch
+准备好、放进队列，让训练函数直接从队列取到 GPU
+上计算，而不是临时现准备。</p>
+<blockquote>
+<p>PyTorch 中对应 <code>DataLoader</code> 的
+<code>num_workers &gt; 0</code>（多进程预取）、<code>pin_memory=True</code>（锁页内存加速
+H2D 拷贝）、<code>prefetch_factor</code> 控制预取批数。</p>
+<p>若 <code>num_workers=0</code>，数据加载和训练串行，GPU
+必然周期性空等。</p>
+</blockquote>
+<h3 id="小模型中-kernel-多且每个-kernel-计算量不大">5.2 小模型中 kernel
+多且每个 kernel 计算量不大</h3>
+<p><strong>现象：</strong> 有数据可算，但 <strong>CPU 提交 kernel
+的速度跟不上 GPU 执行的速度</strong>，GPU 算完一个 kernel
+后要等下一个指令。</p>
+<p>kernel 是 GPU 上执行计算的最底层的任务单位。CPU 提交一个 kernel，GPU
+执行一个 kernel。</p>
+<ul>
+<li>模型里每个操作对应一个或几个 kernel。</li>
+<li>每个 kernel 的计算量由参数规模、batch、序列长度共同决定。</li>
+<li>CPU 提交完一个 kernel 后，立即开始准备下一个，不等 GPU 算完。</li>
+</ul>
+<p><strong>GPU 空等的情况：</strong> 若 CPU 提交一个 kernel 需要 20
+微秒，而 GPU 执行它只需 5 微秒，那么 GPU 算完后要再等 15
+微秒才能拿到下一个 kernel。这 15 微秒 GPU
+处于空闲，会被计入未利用的时间，拉低 GPU 利用率。</p>
+<p><strong>解决方法：</strong></p>
+<ul>
+<li><strong>加大 batch。</strong> 让每一步 GPU
+计算所需时间增加，从而摊薄 CPU
+提交开销。这是提高资源利用率<strong>最直接</strong>的手段，但它会改变训练行为。</li>
+<li><strong><code>torch.compile</code>（算子融合）。</strong>
+把多个小操作合并成一个大 kernel。比如"线性层 + 偏置 + 激活"原本是 3 个
+kernel，合并后只发 1 次，CPU 发指令的次数直接减少。</li>
+</ul>
+<blockquote>
+<p>note1:</p>
+<p>算子融合除了减少 CPU 提交次数，还能减少 kernel
+间的显存读写往返（中间结果不落显存），往往同时提升速度和降低显存占用。类似的还有手写融合算子、使用
+<code>torch.jit.script</code> 等。</p>
+</blockquote>
+<blockquote>
+<p>note2:</p>
+<p>加大 batch 主要会影响以下训练行为：</p>
+<ol type="1">
+<li><strong>每个 epoch 的更新步数变少</strong>：数据量不变，batch 乘
+k，步数除以 k。同样 epoch 数下，总共更新的次数少了。</li>
+<li><strong>梯度噪声变小</strong>：每步梯度更准，但小 batch
+的噪声有时有助于跳出尖锐极小值，所以 batch 过大可能泛化略差。</li>
+<li><strong>最优学习率变了</strong>：步数少了、梯度更可靠了，原来的学习率偏保守，通常需要按比例调大（如线性缩放规则）。</li>
+<li><strong>显存占用上升</strong>：batch 变大，每一步 forward
+产生的中间计算结果（激活值）变多，所以每一份 batch 显存占用增加，可能
+OOM。</li>
+<li><strong>BatchNorm 类层的统计量变化</strong>（如果模型用了）：batch
+统计更稳定，行为会有细微差别。</li>
+</ol>
+</blockquote>
+<h3 id="大量同步操作">5.3 大量同步操作</h3>
+<p>同步就是 CPU 停下来，等 GPU 把手上的活全算完，再往下走。</p>
+<p>常见的触发点：<code>loss.item()</code>、<code>print(tensor)</code>、<code>tensor.cpu()</code>、<code>.numpy()</code>、每步都调
+<code>torch.cuda.synchronize()</code>。其中 <code>print(tensor)</code>
+之所以触发同步，是因为打印/格式化需要具体数值，必须把数据从 GPU 拷回
+CPU。</p>
+<p>CPU 停着等的这段时间，没法发新指令（kernel）；GPU 算完后，要等 CPU
+醒来，处理完触发同步的代码、然后再发下一批指令，这中间 GPU 又闲了。</p>
+<p><strong>完整时间线：</strong></p>
+<ol type="1">
+<li>CPU 发完一批 kernel，遇到同步点（如 <code>loss.item()</code>），CPU
+停下来等 GPU 算完。</li>
+<li>GPU 把队列里的 kernel 全部算完。此时队列空了。</li>
+<li>CPU 被唤醒，拿到结果，处理完同步点后面的代码（比如 print、转成
+Python 数字）。</li>
+<li>CPU 重新开始发下一批 kernel，又要经历一次 kernel 提交的开销
+(准备kernel到发送给GPU的这段时间)。</li>
+<li>在第 2 步结束到第 4 步发出新的 kernel 之间，GPU 是空的。</li>
+</ol>
+<p>所以 GPU 空等的这一段，包含 <strong>CPU
+被唤醒的延迟</strong>、<strong>处理同步点后代码的时间</strong>，以及<strong>准备发出
+kernel 所需的时间</strong>。</p>
+<blockquote>
+<p>日志/打印改为每 N 步一次（如 <code>if step % 100 == 0</code>），loss
+累加用 tensor 在 GPU 上累积、最后统一取一次，避免每步
+<code>.item()</code>。真正必须同步的场合（如验证、保存
+checkpoint）尽量放在 step 边界之外。</p>
+<p>或者只取每第N步的loss记录日志。</p>
+</blockquote>
+<h2 id="不同场景下的调优策略">6.
+<strong>不同场景下的调优策略</strong></h2>
+<h3 id="加速常用的-4-种方法">6.1 加速常用的 4 种方法</h3>
+<table>
+<colgroup>
+<col style="width: 16%">
+<col style="width: 18%">
+<col style="width: 5%">
+<col style="width: 60%">
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">手段</th>
+<th style="text-align: left;">提什么</th>
+<th style="text-align: left;">风险</th>
+<th style="text-align: left;">加速原理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">异步数据提供</td>
+<td style="text-align: left;">GPU 利用率</td>
+<td style="text-align: left;">无</td>
+<td style="text-align: left;">数据加载与 GPU 计算重叠，减少 GPU
+等数据的时间，从而提高 GPU 利用率</td>
+</tr>
+<tr>
+<td style="text-align: left;">更快的 attention</td>
+<td style="text-align: left;">速度 + 显存</td>
+<td style="text-align: left;">低</td>
+<td style="text-align: left;">分块计算、不物化完整的"序列长度×序列长度"attention
+矩阵，减少显存读写和显存占用，序列越长收益越大</td>
+</tr>
+<tr>
+<td style="text-align: left;">混合精度 AMP</td>
+<td style="text-align: left;">速度 + 显存</td>
+<td style="text-align: left;">低</td>
+<td style="text-align: left;">大部分计算降为 16 位浮点，走 Tensor Core
+加速矩阵运算，同时减少显存占用，使更大 batch 成为可能</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>torch.compile</code></td>
+<td style="text-align: left;">kernel 开销 + 显存</td>
+<td style="text-align: left;">低~中</td>
+<td style="text-align: left;">算子融合把多个小 kernel 合成一个，减少 CPU
+提交次数和 kernel 间的显存读写往返</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="场景一复现已有工作论文原项目">6.2
+场景一：复现已有工作（论文/原项目）</h3>
+<p>在已有源代码的基础上，不去修改batch(修改batch会改变原本的训练行为，详细看5.2的note2部分)。</p>
+<p>我们能做的仅有优化内部代码从而加速训练</p>
+<ol type="1">
+<li>添加异步数据提供（减少GPU的数据等待时间）</li>
+<li>添加混合精度 AMP训练</li>
+<li>网络使用更快的 attention</li>
+<li>判断是否适合使用<code>torch.compile</code>（判断标准看第7小节）</li>
+</ol>
+<p>在已有源代码的基础上，<strong>不改 batch</strong>（batch
+由论文或原项目定，改它可能改变训练行为，见 5.2
+的note2说明），只通过优化内部代码来加速训练：</p>
+<ol type="1">
+<li><strong>异步数据提供</strong>——减少 GPU 等数据的时间。</li>
+<li><strong>混合精度 AMP</strong>——加速计算、降低显存。</li>
+<li><strong>更快的 attention</strong>——模型有 attention 时使用。</li>
+<li><strong>使用 <code>torch.compile</code></strong>
+——判断判断是否适合的标准见第 7 节。</li>
+</ol>
+<hr>
+<h3 id="场景二自己训练模型">6.3 场景二：自己训练模型</h3>
+<h4 id="第一步写代码时先把这些手段配上">第一步：写代码时，先把这些手段配上</h4>
+<p>不用等发现瓶颈再加，写代码时直接配好，跑起来就是"已经拉满"的起点：</p>
+<ol type="1">
+<li><strong>异步数据提供</strong>。</li>
+<li><strong>混合精度 AMP</strong>：bf16 优先（通常不用 scaler）；fp16
+必须配 <code>GradScaler</code>。走 Tensor Core 加速计算、降低显存。</li>
+<li><strong>更快的 attention</strong>（模型有 attention 时）。</li>
+<li><strong><code>torch.compile</code></strong>：如果模型结构固定、不会频繁修改，且符合使用要求，可以加上。</li>
+</ol>
+<blockquote>
+<p>配好这些，GPU
+利用率和显存占用基本就是当前代码能做到的较优状态，接下来只需调
+batch。</p>
+</blockquote>
+<h4 id="第二步调-batch">第二步：调 batch</h4>
+<p>在<strong>计算资源</strong>和<strong>显存</strong>这两个约束下增大
+batch，直到某个条件先达到 90% 左右为止；<strong>两个条件都未到 90%
+时，继续加 batch</strong>。谁先到阈值就停在谁那里：</p>
+<ul>
+<li><strong>计算资源先到
+90%</strong>：停，再加没有明显速度收益。判断信号是<strong>功耗接近上限</strong>（<code>power.draw / power.limit</code>
+接近 90% 左右即可，阈值本身留有余量，不必精确到顶）。</li>
+<li><strong>显存先到 90% 左右</strong>：也停，再加有 OOM 风险。</li>
+</ul>
+<blockquote>
+<p>注意：</p>
+<ul>
+<li><strong>不能超出显存是强制要求</strong>。超了可能直接
+OOM，也可能触发换页/卸载到主机内存等机制，大幅降低训练效率。</li>
+<li><strong>计算资源先到顶后仍可继续加 batch</strong>，只是每个 batch
+的处理时间会缓慢增加，速度收益递减。</li>
+<li><strong>一般来说，某个值先到 90%
+时，训练速度就已经接近最大值了</strong>——因为很难精确计算“在显存范围内，超出多少计算资源还能继续提高整体速度”，所以用
+90% 作为“大致到位”的经验阈值即可，不必追求精确最优点。</li>
+</ul>
+</blockquote>
+<h2 id="三种加速方法的实现">7. 三种加速方法的实现</h2>
+<p>训练加速主要可以从三个方面入手：编译模型、优化 Attention
+计算、降低计算精度。它们分别减少模型执行开销、显存读写开销和单次计算成本。</p>
+<h3 id="torch.compile编译模型">7.1
+<code>torch.compile</code>：编译模型</h3>
+<p>作用： 减少模型运行时的调度开销，并在适当情况下融合多个算子，从而减少
+GPU Kernel 启动次数和中间结果的显存读写。</p>
+<p>PyTorch 默认采用动态图执行方式，模型中的运算通常由 Python
+逐步调度。<code>torch.compile</code>
+会对模型进行编译，生成经过优化的执行代码。</p>
+<p>实现： 在模型初始化后添加一行代码。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 初始化模型</span></span><br><span class="line"><span class="variable language_">self</span>.rnn = RNN().cuda()</span><br><span class="line"><span class="variable language_">self</span>.teacher = Teacher().cuda()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编译模型</span></span><br><span class="line"><span class="variable language_">self</span>.rnn = torch.<span class="built_in">compile</span>(<span class="variable language_">self</span>.rnn)</span><br><span class="line"><span class="variable language_">self</span>.teacher = torch.<span class="built_in">compile</span>(<span class="variable language_">self</span>.teacher)</span><br></pre></td></tr></table></figure>
+<h4 id="主要优化方式">主要优化方式：</h4>
+<ul>
+<li>算子融合： 将多个可以融合的运算合并执行，减少中间结果的显存读写和
+Kernel 启动次数。</li>
+<li>减少调度开销： 降低 Python
+逐个调度运算的开销，尤其适用于包含大量细碎运算的模型。</li>
+</ul>
+<p>编译通常不会改变模型的数学计算目标，但浮点运算顺序可能发生变化，因此结果不一定逐位相同。</p>
+<h4 id="使用时需要注意">使用时需要注意：</h4>
+<ol type="1">
+<li>首次运行会产生编译开销。
+编译可能耗费数十秒甚至更久，具体取决于模型和配置。短任务可能还没来得及获得加速，实验就已经结束。</li>
+<li>输入形状变化可能触发重新编译。 例如 Batch Size
+或序列长度发生变化时，可能需要生成新的编译结果。</li>
+<li>部分代码可能无法完整编译。 动态控制流、不受支持的 Python
+操作等可能导致计算图中断，降低优化效果。</li>
+</ol>
+<p>编译缓存默认位于本机缓存目录，不会自动随项目迁移。更换设备、软件环境或模型代码时，可能需要重新编译或生成新的缓存。</p>
+<h4 id="如何判断是否值得使用">如何判断是否值得使用？</h4>
+<p>与其从各种角度去判断，不如直接从结果上判断是否能用。简单快捷。</p>
+<p>采用 A/B 对比：</p>
+<ol type="1">
+<li>不使用
+<code>torch.compile</code>，运行一段时间，记录稳定后的训练速度。</li>
+<li>使用
+<code>torch.compile</code>，首次编译和预热阶段后，以相同条件记录稳定后的速度。</li>
+<li>对比两者的稳态速度，判断是否有利于加速。</li>
+</ol>
+<p>如果模型结构和输入形状相对固定，且训练时间较长，通常值得尝试；如果加速效果不明显，就没有必要强行使用。</p>
+<h4 id="windows-中文系统的编码问题">Windows 中文系统的编码问题</h4>
+<p>某些 PyTorch 编译环境在 Windows 中文系统下可能出现
+<code>UnicodeDecodeError</code>。原因可能是编译器读取内置模板文件时，使用了与文件内容不匹配的默认编码。</p>
+<p>可以尝试启用 Python UTF-8 模式。</p>
+<p>方法一：在代码最顶部设置，必须早于 <code>import torch</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line">os.environ[<span class="string">&quot;PYTHONUTF8&quot;</span>] = <span class="string">&quot;1&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br></pre></td></tr></table></figure>
+<p>方法二：如果在 PyCharm
+中运行，可以在运行配置的环境变量中添加：<code>PYTHONUTF8=1</code></p>
+<p><img src="/2026/10/21/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-1-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F/image-20261022163717224.png" style="zoom:80%;">
+<img src="/2026/10/21/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-1-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F/image-20261022163727127.png" style="zoom:80%;"></p>
+<h3 id="更快的-attentionflashattention">7.2 更快的
+Attention：FlashAttention</h3>
+<p><strong>作用</strong>： 优化 Transformer 中 Attention
+的计算过程，减少显存读写，提高计算速度并降低显存占用。</p>
+<p>普通 Attention 需要生成一个序列长度 ×
+序列长度的注意力分数矩阵，并将中间结果写入显存，再读取出来进行后续计算。序列越长，这部分计算和显存开销通常越大。</p>
+<p>FlashAttention 通过分块计算，利用 GPU
+的高速片上存储处理计算过程，避免将完整的注意力分数矩阵写入显存。</p>
+<h4 id="主要优势">主要优势：</h4>
+<ul>
+<li>更快： 减少中间结果的显存读写。</li>
+<li>更省显存： 不需要显式保存完整的注意力分数矩阵。</li>
+<li>计算精确： 不属于近似 Attention
+算法，但浮点运算顺序不同可能导致微小数值差异。</li>
+</ul>
+<h4 id="pytorch-中的实现">PyTorch 中的实现</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line">output = F.scaled_dot_product_attention(q, k, v)</span><br></pre></td></tr></table></figure>
+<p>PyTorch 会根据硬件、输入形状和数据类型等条件，自动选择合适的
+Attention 实现，其中可能包括 FlashAttention 内核。</p>
+<h4 id="x-transformers-中的实现"><code>x-transformers</code>
+中的实现</h4>
+<p>如果当前版本支持 <code>attn_flash</code> 参数，可以在初始化
+<code>Decoder</code> 时开启：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">self</span>.decoder = Decoder(</span><br><span class="line">    dim=cfg.d_model,</span><br><span class="line">    depth=cfg.decoder_depth,</span><br><span class="line">    heads=cfg.n_heads,</span><br><span class="line">    rotary_pos_emb=<span class="literal">True</span>,</span><br><span class="line">    use_rmsnorm=<span class="literal">True</span>,</span><br><span class="line">    attn_flash=<span class="literal">True</span>,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>具体参数名称和底层实现取决于 <code>x-transformers</code>
+的版本。开启该选项后，也不代表一定会使用 FlashAttention
+内核，实际效果需要测试。</p>
+<h3 id="混合精度训练降低计算精度">7.3 混合精度训练：降低计算精度</h3>
+<p>作用： 计算密集的算子使用 FP16 或 BF16
+提高计算速度、减少显存占用；对数值精度敏感的运算则根据需要保留
+FP32。</p>
+<p>混合精度并不是将整个模型统一转换为 16
+位，而是让不同运算使用合适的精度。</p>
+<p><strong>实现</strong>： 使用 PyTorch 的 <code>autocast</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">self</span>.amp = torch.amp.autocast(</span><br><span class="line">    <span class="string">&quot;cuda&quot;</span>,</span><br><span class="line">    dtype=torch.bfloat16,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<h4 id="混合精度的工作原理">1. 混合精度的工作原理</h4>
+<p>典型情况下，各部分的精度处理如下：</p>
+<ul>
+<li>模型权重： 如果模型以 FP32 初始化，权重默认仍保持 FP32，不会因为进入
+<code>autocast</code> 就永久转换成 BF16。</li>
+<li>矩阵乘、卷积等算子： 通常可以使用 BF16 执行，以利用 GPU
+的低精度计算能力。</li>
+<li>Softmax、LayerNorm、Loss 等运算：
+根据具体算子的精度规则，部分运算会使用 FP32，以提高数值稳定性。</li>
+<li>优化器状态： 如果使用常规 FP32
+模型参数和优化器配置，优化器状态通常也保持 FP32。</li>
+</ul>
+<p>具体使用哪种精度由 PyTorch
+的自动混合精度规则决定，并非所有敏感算子都会无条件使用 FP32。</p>
+<h4 id="训练代码为什么这样排布">2. 训练代码为什么这样排布？</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">model = Model().cuda()</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> x, y <span class="keyword">in</span> loader:</span><br><span class="line">    <span class="keyword">with</span> <span class="variable language_">self</span>.amp:</span><br><span class="line">        out = model(x.cuda())</span><br><span class="line">        loss = loss_fn(out, y.cuda())</span><br><span class="line"></span><br><span class="line">    loss.backward()</span><br><span class="line">    optimizer.step()</span><br><span class="line">    optimizer.zero_grad()</span><br></pre></td></tr></table></figure>
+<p>（1）<code>model = Model().cuda()</code>：初始化模型</p>
+<p>创建模型并将其移动到
+GPU。这里没有指定其他数据类型，因此<strong>模型参数默认保持
+FP32</strong>。</p>
+<p>这使得后续可以在 FP32 主参数的基础上，通过 <code>autocast</code>
+让部分运算使用 BF16。</p>
+<p>（2）<code>with self.amp:</code>：开启自动混合精度</p>
+<p>进入 <code>autocast</code>
+上下文后，范围内的<strong>运算</strong>会<strong>根据 PyTorch
+的精度规则自动选择 BF16 或 FP32</strong>。</p>
+<p>（3）<code>out = model(x.cuda())</code>：前向传播</p>
+<p>将输入数据移动到 GPU，并执行模型的前向计算。</p>
+<p>例如，矩阵乘法可能使用 BF16 计算。此时，原本的 FP32
+权重不会被永久修改；对于支持自动转换的运算，PyTorch
+会在计算时使用适当的精度。</p>
+<p>（4）<code>loss = loss_fn(out, y.cuda())</code>：计算 Loss</p>
+<p>将 Loss 计算放在 <code>with</code>
+内，是为了让它也处于自动混合精度的管理范围内。</p>
+<p>例如，使用交叉熵损失时，PyTorch
+的相应实现会根据精度规则选择合适的计算精度，部分计算可能提升到
+FP32，以改善数值稳定性。</p>
+<p>需要注意，把 Loss 放在 <code>with</code> 内，并不意味着它一定使用
+FP32。具体精度取决于所用的 Loss
+算子及其实现。如果放在外面，也不代表一定会用 BF16 计算。</p>
+<p>（5）<code>loss.backward()</code>：反向传播</p>
+<p>在 <code>with</code>
+外执行反向传播即可。反向运算会依据对应前向运算的精度规则执行，不需要再额外包一层
+<code>autocast</code>。</p>
+<p>（6）<code>optimizer.step()</code>：更新模型参数</p>
+<p>优化器根据梯度更新参数。如果模型参数保持
+FP32，<strong>参数更新就作用于 FP32
+权重</strong>，有助于保留较小的更新量。</p>
+<h4 id="为什么混合精度能加速">3. 为什么混合精度能加速？</h4>
+<ul>
+<li>提高计算效率： GPU 对 BF16、FP16
+等低精度运算通常具有更高的计算吞吐量。</li>
+<li>减少显存读写： 16 位张量的存储空间通常只有 32 位张量的一半。</li>
+<li>保留必要的数值精度：
+不强制所有运算都使用低精度，而是通过自动精度规则兼顾速度与稳定性。</li>
+</ul>
+<p>其中，BF16 的数值范围接近 FP32，通常比 FP16
+更不容易发生数值溢出或下溢。在支持 BF16 的 GPU 上，可以优先尝试 BF16
+混合精度训练。</p>
+<p>补充图： <img src="/2026/10/21/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-1-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F/image-20261022164609053.png"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai%E7%B3%BB%E5%88%97/" rel="tag"># ai系列</a>
+              <a href="/tags/ai%E5%AD%A6%E6%9C%AF%E7%AF%87/" rel="tag"># ai学术篇</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/09/27/ai%E6%B8%97%E9%80%8F/" rel="prev" title="ai渗透">
+                  <i class="fa fa-angle-left"></i> ai渗透
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
