@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script>
+<script>
+  const ap = new APlayer({
+    container: document.getElementById('aplayer'),
+    fixed: true,
+    autoplay: false,
+    lrcType: 3,            // 3 = 从每首歌的 lrc 字段指向的文件加载歌词
+    audio: [
+      {
+        name: 'From a Place of Love.mp3',
+        artist: 'Mili',
+        url: '/music/Mili - From a Place of Love.mp3',
+        lrc: '/music/Mili - From a Place of Love.lrc'
+      },
+    ]
+  });
+</script>
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 本文主要介绍模型参数精度的相关知识，以及参数精度对模型训练的影响。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ai学术篇 2.模型精度">
+<meta property="og:url" content="https://zusda.github.io/2026/10/22/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-2-%E6%A8%A1%E5%9E%8B%E7%B2%BE%E5%BA%A6/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 本文主要介绍模型参数精度的相关知识，以及参数精度对模型训练的影响。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-10-22T15:39:54.000Z">
+<meta property="article:modified_time" content="2026-10-23T04:22:35.655Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai系列">
+<meta property="article:tag" content="ai学术篇">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/10/22/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-2-%E6%A8%A1%E5%9E%8B%E7%B2%BE%E5%BA%A6/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/10/22/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-2-%E6%A8%A1%E5%9E%8B%E7%B2%BE%E5%BA%A6/","path":"2026/10/22/ai学术篇-2-模型精度/","title":"ai学术篇 2.模型精度"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ai学术篇 2.模型精度 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B2%BE%E5%BA%A6%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">2.</span> <span class="nav-text">1. 精度是什么</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%8E%9F%E7%90%86"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 浮点数的表示原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B5%AE%E7%82%B9%E6%95%B0%E5%8F%AA%E5%AD%98%E5%82%A8%E9%83%A8%E5%88%86%E5%B0%BE%E6%95%B0"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 为什么浮点数只存储部分尾数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E6%95%B0%E4%BD%8D%E5%86%B3%E5%AE%9A%E6%95%B0%E5%80%BC%E8%8C%83%E5%9B%B4"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 指数位：决定数值范围</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%BE%E6%95%B0%E4%BD%8D%E5%86%B3%E5%AE%9A%E6%95%B0%E5%80%BC%E7%B2%BE%E7%BB%86%E7%A8%8B%E5%BA%A6"><span class="nav-number">2.4.</span> <span class="nav-text">1.4 尾数位：决定数值精细程度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E6%B5%AE%E7%82%B9%E6%95%B0%E6%A0%BC%E5%BC%8F%E5%8F%8A%E4%BD%8D%E6%95%B0%E5%88%86%E9%85%8D"><span class="nav-number">2.5.</span> <span class="nav-text">1.5 常见浮点数格式及位数分配</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B2%BE%E5%BA%A6%E5%AF%B9%E8%AE%AD%E7%BB%83%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">3.</span> <span class="nav-text">2. 精度对训练的影响</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E9%80%9F%E5%BA%A6"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 计算速度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E5%AD%98%E5%8D%A0%E7%94%A8"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 显存占用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 数值稳定性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%B6%E6%95%9B%E8%A1%A8%E7%8E%B0"><span class="nav-number">3.4.</span> <span class="nav-text">2.4 收敛表现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C-gpu-%E7%9A%84%E6%80%A7%E8%83%BD%E5%B7%AE%E5%BC%82"><span class="nav-number">3.5.</span> <span class="nav-text">2.5 不同 GPU 的性能差异</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%B7%B7%E5%90%88%E7%B2%BE%E5%BA%A6%E4%BB%A3%E7%A0%81%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E6%A0%B7%E6%8E%92%E5%B8%83"><span class="nav-number">4.</span> <span class="nav-text">3.
+什么是混合精度？代码为什么这样排布？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E7%B2%BE%E5%BA%A6%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 混合精度是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 代码示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C-gpu-%E4%B8%8A%E7%9A%84%E7%B2%BE%E5%BA%A6%E9%80%89%E6%8B%A9"><span class="nav-number">5.</span> <span class="nav-text">4. 不同 GPU 上的精度选择</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E6%95%B0%E5%80%BC%E7%B2%BE%E5%BA%A6"><span class="nav-number">5.1.</span> <span class="nav-text">4.1 常见数值精度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%84%E4%BB%A3-gpu-%E6%9E%B6%E6%9E%84%E6%94%AF%E6%8C%81%E5%93%AA%E4%BA%9B%E7%B2%BE%E5%BA%A6%E5%8A%A0%E9%80%9F"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 各代 GPU
+架构支持哪些精度加速</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.3.</span> <span class="nav-text">4.3 总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E5%9C%A8-v100-%E4%B8%8A%E4%BD%BF%E7%94%A8-bf16"><span class="nav-number">6.</span> <span class="nav-text">5. 实例：在 V100 上使用 BF16</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">88</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/10/22/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-2-%E6%A8%A1%E5%9E%8B%E7%B2%BE%E5%BA%A6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ai学术篇 2.模型精度 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ai学术篇 2.模型精度
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-10-22 23:39:54" itemprop="dateCreated datePublished" datetime="2026-10-22T23:39:54+08:00">2026-10-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-10-23 12:22:35" itemprop="dateModified" datetime="2026-10-23T12:22:35+08:00">2026-10-23</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>本文主要介绍模型参数精度的相关知识，以及参数精度对模型训练的影响。</p>
+<span id="more"></span>
+<p>姑且将 AI 系列后续内容分为以下 4 个部分：</p>
+<ol type="1">
+<li><strong>学术篇：</strong> LLM
+基础知识、模型训练、各类算法的原理与实现等。</li>
+<li><strong>开发篇：</strong> Agent 框架、各类 AI 应用的开发等。</li>
+<li><strong>运维篇：</strong> Agent 应用的部署、推理参数测试等。</li>
+<li><strong>杂项：</strong> AI
+渗透、视频生成、音频生成、超分辨率等其他内容。</li>
+</ol>
+<hr>
+<p>这篇文章主要是帮自己理清：模型训练该用什么精度，以及这种精度该在哪类
+GPU 上跑。 想直接看结论的，可跳到 <a href="#4-不同-gpu-上的精度选择">4.
+不同 GPU 上的精度选择</a>。</p>
+<hr>
+<h2 id="精度是什么">1. 精度是什么</h2>
+<p>精度在本文中主要指浮点数的存储格式。一个浮点数占用多少位（bit），以及这些位如何分配给符号、指数和尾数，决定了它能够表示的数值范围和数值精细程度。</p>
+<h3 id="浮点数的表示原理">1.1 浮点数的表示原理</h3>
+<p>浮点数的本质是二进制科学计数法。一个规格化的二进制浮点数可以表示为：
+<span class="math display">\[
+\text{值}=(-1)^{\text{符号位}}\times 1.\text{尾数}\times 2^{\text{指数}}
+\]</span> 其中：</p>
+<ul>
+<li><strong>符号位</strong>：决定数值的正负。</li>
+<li><strong>指数位</strong>：用于存储指数，决定浮点数能够表示的数值范围。</li>
+<li><strong>尾数位</strong>：用于存储有效数字的二进制部分，决定数值的精细程度。</li>
+</ul>
+<p>以 FP32 为例，一个浮点数共占用 32 个二进制位：</p>
+<ul>
+<li>1 位符号位</li>
+<li>8 位指数位</li>
+<li>23 位尾数位</li>
+</ul>
+<p>假设存在二进制数<span class="math inline">\(1110.011_2\)</span></p>
+<blockquote>
+<p>整数部分 <code>1110</code>：<span class="math inline">\(1\times2^3+1\times2^2+1\times2^1+0\times2^0=14\)</span></p>
+<p>小数部分 <code>.011</code>：<span class="math inline">\(0\times2^{-1}+1\times2^{-2}+1\times2^{-3}=0.375\)</span></p>
+<p><span class="math inline">\(1110.011_2 = 14.375_{10}\)</span></p>
+</blockquote>
+<p>假设我们要表示该二进制数 (<span class="math inline">\(1110.011_2\)</span>)，可以按照以下步骤理解浮点数的表示过程。</p>
+<p><strong>第一步：通过尾数表示有效数字。</strong></p>
+<p>先将<strong>数值规格化</strong>，将小数点<strong>左侧保留一位非零数字</strong>：
+<span class="math display">\[
+1110.011_2=1.110011_2\times 2^3
+\]</span> 规格化后，整数部分必然是
+1，因此这一位不需要存储。尾数位只需要保存小数点后面的
+<code>110011</code>，其余未使用的尾数位补 0。</p>
+<p><strong>第二步：通过指数缩放数值。</strong></p>
+<p>上面的表达式中，指数为 3，表示将尾数 <span class="math inline">\(1.110011_2\)</span> 乘以 <span class="math inline">\(2^3\)</span>，也就是将小数点向右移动 3 位：</p>
+<blockquote>
+<p>在 FP32 中，指数位实际存储的是经过偏移量（Bias）处理后的指数。FP32 的
+Bias 为 127，因此实际指数为 3 时，指数位存储的数值是：3+127=130。130 的
+8 位二进制表示为 <code>10000010</code>。</p>
+</blockquote>
+<h3 id="为什么浮点数只存储部分尾数">1.2 为什么浮点数只存储部分尾数</h3>
+<p>浮点数采用二进制科学计数法表示数值。通过移动小数点，并调整指数，可以用统一的格式表示不同大小的数值。</p>
+<p>规格化规定：对于非零的规格化二进制数，小数点左侧必须保留一位非零数字。由于二进制中非零数字只有
+1，因此这一位必然是 1。</p>
+<p>这带来了一个好处：<strong>最高位的 1
+是固定的，不需要额外占用存储位，可以省下这一位用于保存更多有效数字。</strong></p>
+<p>例如，FP32 使用 23 位存储尾数，但实际有效数字还包括默认省略的最高位
+1，因此规格化数的有效精度相当于 24 位二进制有效数字。</p>
+<blockquote>
+<p>需要注意，这个规则适用于规格化数，零和非规格化数不使用默认省略最高位
+1 的表示方式。</p>
+</blockquote>
+<h3 id="指数位决定数值范围">1.3 指数位：决定数值范围</h3>
+<p>指数位用于存储指数。指数位越多，通常能够覆盖的数值范围越大。</p>
+<p>以 FP32、BF16 和 FP16 为例：</p>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th style="text-align: right;">指数位</th>
+<th style="text-align: right;">最大有限值</th>
+<th style="text-align: right;">最小正规格化正数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FP32</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">约 <span class="math inline">\(3.4\times10^{38}\)</span></td>
+<td style="text-align: right;">约 <span class="math inline">\(1.2\times10^{-38}\)</span></td>
+</tr>
+<tr>
+<td>BF16</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">约 <span class="math inline">\(3.4\times10^{38}\)</span></td>
+<td style="text-align: right;">约 <span class="math inline">\(1.2\times10^{-38}\)</span></td>
+</tr>
+<tr>
+<td>FP16</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">65504</td>
+<td style="text-align: right;">约 <span class="math inline">\(6.1\times10^{-5}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>FP32 和 BF16 都有 8 位指数，因此它们的数值范围基本相同；FP16 只有 5
+位指数，可表示的数值范围更小。</p>
+<blockquote>
+<p>需要注意，FP16 还支持非正规格化数，其最小正数约为 <span class="math inline">\(5.96\times10^{-8}\)</span>，低于最小正规格化正数。</p>
+</blockquote>
+<hr>
+<h3 id="尾数位决定数值精细程度">1.4 尾数位：决定数值精细程度</h3>
+<p>尾数位越多，通常能够表示的相邻数值越接近，数值精细程度也越高。</p>
+<p>以区间 ([1,2)) 为例，对于规格化二进制浮点数，若尾数有 (m)
+位，则该区间被划分为 <span class="math inline">\(2^m\)</span>
+个等间隔的小区间。</p>
+<table>
+<colgroup>
+<col style="width: 5%">
+<col style="width: 8%">
+<col style="width: 27%">
+<col style="width: 34%">
+<col style="width: 23%">
+</colgroup>
+<thead>
+<tr>
+<th>格式</th>
+<th style="text-align: right;">尾数位</th>
+<th style="text-align: right;">([1,2)) 内的间隔数</th>
+<th style="text-align: right;">1.0 后面的下一个可表示数</th>
+<th style="text-align: right;">约十进制有效数字</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FP32</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">(2^{23})，约 840 万</td>
+<td style="text-align: right;">1.000000119</td>
+<td style="text-align: right;">约 7 位</td>
+</tr>
+<tr>
+<td>FP16</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">1024</td>
+<td style="text-align: right;">1.0009765625</td>
+<td style="text-align: right;">约 3 位</td>
+</tr>
+<tr>
+<td>BF16</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">128</td>
+<td style="text-align: right;">1.0078125</td>
+<td style="text-align: right;">约 2 位</td>
+</tr>
+</tbody>
+</table>
+<p><strong>以 BF16 为例：</strong></p>
+<p>BF16 有 7 位尾数，因此在 1 到 2 之间有 (2^7=128)
+个等间隔的小区间，每格间距为： <span class="math display">\[
+\frac{2-1}{128}=\frac{1}{128}=0.0078125
+\]</span> 例如，1.0 后面的下一个可表示数是：<span class="math inline">\(1.0+0.0078125=1.0078125\)</span></p>
+<p>BF16
+在这个区间内只能直接表示这些间隔对应的数值。如果某个数落在两个可表示数之间，就需要通过舍入，将其转换为一个可表示的数值，通常采用最接近的值。</p>
+<p>例如，1.003 并不能被 BF16
+精确表示，存储时需要舍入到附近的可表示值。</p>
+<p><strong>十进制有效数字</strong>是指一个数从第一个非零数字开始，能够保留的有效数字位数。将二进制有效位数换算成十进制，可以大致理解为：一个数<strong>有多少位十进制数字能够得到较可靠的表示</strong>，再往后的数字可能因浮点数的表示精度有限而产生舍入误差。</p>
+<p>因此，在数值 1 附近，FP32 能够表示比 BF16
+更接近的数值，数值精细程度也更高。</p>
+<h3 id="常见浮点数格式及位数分配">1.5 常见浮点数格式及位数分配</h3>
+<p>浮点数格式的名称通常包含格式类型和位数信息。</p>
+<table>
+<colgroup>
+<col style="width: 5%">
+<col style="width: 33%">
+<col style="width: 60%">
+</colgroup>
+<thead>
+<tr>
+<th>名称</th>
+<th>全称</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FP32</td>
+<td>32-bit Floating Point</td>
+<td>32 位浮点数</td>
+</tr>
+<tr>
+<td>FP16</td>
+<td>16-bit Floating Point</td>
+<td>16 位浮点数</td>
+</tr>
+<tr>
+<td>BF16</td>
+<td>Brain Floating Point 16</td>
+<td>16 位 Brain Floating Point 格式</td>
+</tr>
+<tr>
+<td>TF32</td>
+<td>TensorFloat-32</td>
+<td>NVIDIA 面向 Tensor Core 计算设计的浮点格式</td>
+</tr>
+</tbody>
+</table>
+<p>其中，FP32、FP16 和 BF16 的数字表示一个数的总存储位数。TF32
+则是特殊情况：名称中的 32 表示其计算格式与 32
+位浮点计算相关，但它并不是常规的 32 位存储格式。</p>
+<p>FP32、FP16 和 BF16
+都由符号位、指数位和尾数组成，但各部分的位数分配不同。</p>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th style="text-align: right;">符号位</th>
+<th style="text-align: right;">指数位</th>
+<th style="text-align: right;">尾数位</th>
+<th style="text-align: right;">总位数</th>
+<th style="text-align: right;">指数偏移量（Bias）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FP32</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">127</td>
+</tr>
+<tr>
+<td>FP16</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr>
+<td>BF16</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">127</td>
+</tr>
+</tbody>
+</table>
+<p><strong>指数偏移量（Bias）</strong>
+用于存储有正有负的指数。对于规格化数，实际指数等于存储的指数值减去
+Bias。</p>
+<p>从表格可以看出，FP16 和 BF16 虽然都占用 16 位，但位数分配不同：</p>
+<ul>
+<li><strong>FP16</strong>：5 位指数、10
+位尾数。数值范围较小，但数值精细程度高于 BF16。</li>
+<li><strong>BF16</strong>：8 位指数、7 位尾数。数值范围接近
+FP32，但数值精细程度较低。</li>
+</ul>
+<p>因此，<strong>总位数相同，不代表数值范围和数值精细程度相同</strong>。不同格式对指数位和尾数位的分配，决定了它们各自的数值表示能力。</p>
+<h2 id="精度对训练的影响">2. 精度对训练的影响</h2>
+<p>不同浮点数精度会影响模型训练的计算速度、显存占用、数值稳定性、收敛表现，以及不同硬件之间的性能差异。</p>
+<h3 id="计算速度">2.1 计算速度</h3>
+<p>GPU 的 Tensor Core 对不同精度提供不同的计算吞吐量。通常情况下，FP16
+和 BF16 的峰值算力高于
+FP32，因此<strong>使用低精度进行训练</strong>，有机会<strong>显著提高计算速度</strong>。</p>
+<p>实际加速效果取决于 GPU
+型号、运算类型、算子实现和硬件利用率等因素。</p>
+<h3 id="显存占用">2.2 显存占用</h3>
+<p>不同精度的浮点数占用不同的存储空间：</p>
+<ul>
+<li>FP32：每个数占用 4 字节。</li>
+<li>FP16、BF16：每个数占用 2 字节。</li>
+</ul>
+<p>因此，在存储相同数量的数值时，使用 16
+位精度可以将这部分<strong>显存占用降低约 50%</strong>。</p>
+<p>训练时，模型权重、激活值、梯度和优化器状态都会占用显存。不过，实际节省的显存取决于各部分采用的存储精度。例如，混合精度训练可能保留
+FP32 主权重或优化器状态，因此总显存占用不一定减半。</p>
+<h3 id="数值稳定性">2.3 数值稳定性</h3>
+<p>低精度浮点数能够表示的<strong>数值范围和精细程度有限</strong>，可能<strong>影响训练过程中的数值计算</strong>。</p>
+<ul>
+<li><strong>FP16</strong>：数值范围较小，较小的梯度可能发生下溢，变成
+0。训练时通常可以使用 Loss Scaling（损失缩放）缓解这一问题。</li>
+<li><strong>BF16</strong>：数值范围接近
+FP32，<strong>不容易因数值范围不足而发生梯度下溢或溢出</strong>，但尾数位较少，数值精细程度较低。</li>
+</ul>
+<p>因此，BF16
+通常更容易处理训练中的数值范围问题，但并不意味着它在所有情况下都比 FP16
+更稳定。</p>
+<h3 id="收敛表现">2.4 收敛表现</h3>
+<p>低精度计算会产生舍入误差，<strong>可能影响模型参数的更新</strong>。</p>
+<p>例如，当参数更新量相对于当前参数值过小时，更新后的数值可能被舍入回原来的值，导致这次更新无法有效反映在参数中。</p>
+<p>BF16
+的尾数位较少，在某些情况下更容易出现这类精度损失。如果关键参数更新长期无法有效反映在参数值中，就可能影响训练进展。</p>
+<p>需要注意，这并不意味着使用 BF16 就一定会导致 Loss
+停滞。实际收敛表现还取决于模型结构、学习率、优化器和训练策略等因素。</p>
+<h3 id="不同-gpu-的性能差异">2.5 不同 GPU 的性能差异</h3>
+<p>不同 GPU 对 FP32、FP16 和 BF16
+的支持程度，以及各精度下的峰值算力，可能存在较大差异。</p>
+<p>因此，同样两张 GPU，在 FP32 训练下性能差距可能较小，但在 FP16 或 BF16
+训练下，差距可能明显增大。</p>
+<p>选择训练精度时，需要结合目标 GPU
+的硬件规格和<strong>对应精度的实际计算能力</strong>进行判断。</p>
+<h2 id="什么是混合精度代码为什么这样排布">3.
+什么是混合精度？代码为什么这样排布？</h2>
+<h3 id="混合精度是什么">3.1 混合精度是什么</h3>
+<p>混合精度训练（Mixed Precision
+Training）是指在模型训练过程中，根据不同计算操作的特点，混合使用不同的浮点数精度。</p>
+<p>例如，使用 FP16 或 BF16
+执行矩阵乘法等计算密集型操作，以提高计算速度、减少显存占用；同时，在需要时使用
+FP32 进行计算，以降低精度损失带来的影响。</p>
+<p>使用 PyTorch 的 <code>autocast</code> 时，通常有以下特点：</p>
+<ul>
+<li><strong>模型参数</strong>：通常<strong>以 FP32
+保存</strong>，作为参数更新的基础。</li>
+<li><strong>矩阵乘法、卷积等操作</strong>：根据自动混合精度规则，选择
+FP16 或 <strong>BF16 等精度执行</strong>。</li>
+<li><strong>部分对数值精度敏感的操作</strong>：例如交叉熵损失，通常会<strong>使用
+FP32 计算loss</strong>。</li>
+<li><strong>反向传播与参数更新</strong>：根据前向计算建立的计算图执行反向传播，再由优化器更新模型参数。</li>
+</ul>
+<p>这里需要区分两件事：<strong>参数以什么精度保存，与计算时使用什么精度。</strong>
+例如，模型权重可以保留为 FP32，而矩阵乘法在计算时使用 BF16。</p>
+<h3 id="代码示例">3.2 代码示例</h3>
+<p>以下以 BF16 混合精度训练为例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">model = Model().cuda()</span><br><span class="line">optimizer = torch.optim.AdamW(model.parameters())</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> x, y <span class="keyword">in</span> loader:</span><br><span class="line">    x = x.cuda()</span><br><span class="line">    y = y.cuda()</span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> torch.autocast(device_type=<span class="string">&quot;cuda&quot;</span>, dtype=torch.bfloat16):</span><br><span class="line">        out = model(x)</span><br><span class="line">        loss = loss_fn(out, y)</span><br><span class="line"></span><br><span class="line">    loss.backward()</span><br><span class="line">    optimizer.step()</span><br></pre></td></tr></table></figure>
+<ol type="1">
+<li><p><code>model = Model().cuda()</code>：创建模型并移动到 GPU。</p>
+<p>这里没有将模型转换为 BF16，因此模型参数通常仍然是
+FP32。在这种混合精度训练方式中，<strong>模型参数以 FP32
+保存</strong>，部分运算则可以使用 BF16 执行。</p></li>
+<li><p><code>optimizer = torch.optim.AdamW(model.parameters())</code>：创建优化器。</p>
+<p>优化器负责根据反向传播得到的梯度更新模型参数。在上述配置中，<strong>优化器直接管理模型的
+FP32 参数</strong>。</p></li>
+<li><p><code>x = x.cuda()</code> 和
+<code>y = y.cuda()</code>：将数据移动到 GPU。</p></li>
+<li><p><code>optimizer.zero_grad()</code>：清除上一轮梯度。</p></li>
+<li><p><code>with torch.autocast(...)</code>：控制自动混合精度的范围。</p>
+<p>进入 <code>autocast</code> 上下文后，PyTorch
+会<strong>根据算子的精度规则，自动决定哪些操作使用 BF16，哪些操作使用
+FP32</strong>。</p></li>
+<li><p><code>out = model(x)</code>：执行前向传播。</p>
+<p>模型接收输入 <code>x</code>，执行前向计算并得到输出
+<code>out</code>。</p>
+<p>在 <code>autocast</code> 中，适合使用 BF16
+的运算（例如矩阵乘法）通常会自动采用 BF16。<strong>即使模型参数仍然是
+FP32，部分运算也可以使用
+BF16，</strong>而不需要手动转换整个模型的参数。</p></li>
+<li><p><code>loss = loss_fn(out, y)</code>：计算损失。</p>
+<p>将损失计算放在 <code>autocast</code>
+内，可以让其中的算子遵循自动混合精度规则。</p>
+<p>例如，PyTorch 会将<strong>交叉熵损失等部分操作安排为 FP32
+计算</strong>，以降低数值误差风险。但并不是所有损失函数都会自动使用
+FP32，具体取决于内部算子及其精度规则。</p></li>
+<li><p><code>loss.backward()</code>：计算梯度。</p>
+<p>反向传播放在 <code>autocast</code> 外，是 PyTorch
+推荐的使用方式。</p>
+<p>反向计算会根据前向传播建立的计算图执行，并使用与相应前向操作相关的计算规则，通常不需要再用
+<code>autocast</code> 包裹反向传播。</p></li>
+<li><p><code>optimizer.step()</code>：更新模型参数。</p>
+<p>优化器根据计算得到的梯度更新模型参数。在上述配置中，参数以 FP32
+保存，因此更新作用于 FP32 参数，而不是直接将每次更新都舍入到 BF16
+的精度。</p>
+<p>这有助于保留较小的参数更新量，但不能消除所有数值误差。</p></li>
+</ol>
+<hr>
+<h2 id="不同-gpu-上的精度选择">4. 不同 GPU 上的精度选择</h2>
+<p>不同 GPU
+架构对浮点格式的硬件支持不同；即使是同一种精度，不同显卡的实际吞吐也可能差异很大。因此，选择训练精度时，需要综合考虑
+GPU 架构、硬件算力和软件框架的支持情况。</p>
+<h3 id="常见数值精度">4.1 常见数值精度</h3>
+<table>
+<colgroup>
+<col style="width: 13%">
+<col style="width: 44%">
+<col style="width: 41%">
+</colgroup>
+<thead>
+<tr>
+<th>精度方案</th>
+<th>特点</th>
+<th>典型用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BF16/FP32 混合精度</td>
+<td>矩阵乘、卷积等适合低精度的算子使用 BF16，数值敏感的算子仍使用
+FP32，权重和优化器状态通常保持 FP32。BF16 与 FP32
+的指数位数相同，动态范围相近，通常不需要 GradScaler</td>
+<td>大语言模型训练与微调</td>
+</tr>
+<tr>
+<td>FP16/FP32 混合精度</td>
+<td>FP16 计算快、显存占用低，但数值范围小，容易下溢或溢出，通常需要配合
+GradScaler</td>
+<td>不支持 BF16 的设备（如 Volta、Turing）</td>
+</tr>
+<tr>
+<td>TF32</td>
+<td>数据仍以 FP32 存储；矩阵运算时，Tensor Core 将输入尾数截断为 10
+位参与乘法，并以 FP32 累加，在保留 FP32 数值范围的同时提高速度。需要
+Ampere 及以上架构。PyTorch
+中矩阵乘法默认不启用（<code>torch.backends.cuda.matmul.allow_tf32</code>
+默认为 <code>False</code>），cuDNN 卷积默认启用；可通过
+<code>torch.set_float32_matmul_precision("high")</code> 开启</td>
+<td>Ampere 及更新架构上的 FP32 矩阵运算加速</td>
+</tr>
+<tr>
+<td>FP32</td>
+<td>单精度浮点，数值范围和精度较为均衡，但显存占用和带宽开销较大</td>
+<td>默认训练方案；对数值精度要求较高的任务</td>
+</tr>
+<tr>
+<td>FP8</td>
+<td>8
+位浮点，进一步降低显存占用、提高计算效率，但数值范围和精度有限，通常需要缩放因子和专门的库（如
+Transformer Engine）。需要 Ada、Hopper 或 Blackwell 架构</td>
+<td>支持 FP8 的 GPU 上的大规模训练与推理</td>
+</tr>
+<tr>
+<td>INT8/INT4/FP4</td>
+<td>使用更低位宽表示数值，通常需要量化或专门的低精度计算流程。FP4 需要
+Blackwell 架构</td>
+<td>以模型量化与推理为主，部分格式（如 FP4）也在探索用于训练</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>PyTorch 默认创建的浮点张量使用 <strong>FP32</strong>，例如
+<code>torch.tensor([1.0])</code> 得到 FP32 张量（可通过
+<code>torch.get_default_dtype()</code> 查看）。</p>
+</blockquote>
+<h3 id="各代-gpu-架构支持哪些精度加速">4.2 各代 GPU
+架构支持哪些精度加速</h3>
+<blockquote>
+<p>数据由 AI 总结提供，仅作参考。</p>
+</blockquote>
+<p>图例：✓ 有原生硬件加速（Tensor Core 或全速 CUDA Core）；△
+可以运行，但速度没有优势；✗ 无原生硬件支持。</p>
+<table>
+<colgroup>
+<col style="width: 15%">
+<col style="width: 53%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
+</colgroup>
+<thead>
+<tr>
+<th>GPU 架构</th>
+<th>代表型号</th>
+<th>FP32</th>
+<th>FP16</th>
+<th>BF16</th>
+<th>TF32</th>
+<th>FP8</th>
+<th>FP4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pascal</td>
+<td>P40、GTX 1080 Ti（P100 除外，见说明）</td>
+<td>✓</td>
+<td>△</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Volta</td>
+<td>V100、Titan V</td>
+<td>✓</td>
+<td>✓</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Turing</td>
+<td>T4、RTX 2080 Ti</td>
+<td>✓</td>
+<td>✓</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Ampere</td>
+<td>A100、A800、A10、A40、RTX 3090、RTX A6000</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✗</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Ada Lovelace</td>
+<td>RTX 4090、L40S、L20、L4、RTX 6000 Ada</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Hopper</td>
+<td>H100、H200、H800、H20、GH200</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Blackwell</td>
+<td>B200、B300、RTX 5090、RTX PRO 6000</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+<p>说明：</p>
+<ul>
+<li>FP32 由 CUDA Core 原生计算，所有架构都支持；Tensor Core 加速 FP32
+的方式是 TF32。</li>
+<li>Pascal 没有 Tensor Core。P40、GTX 1080 Ti 的 FP16 吞吐远低于
+FP32（约 1/64），只有 P100 具备 2 倍速 FP16。</li>
+<li>Turing 没有 BF16 Tensor Core，BF16 可能回退到 FP32
+路径，速度反而更慢。GTX 16 系列虽为 Turing 架构，但没有 Tensor
+Core。</li>
+<li>B300 属于 Blackwell Ultra，是 Blackwell 的升级版本。</li>
+<li>FP8、FP4 的实际可用性还取决于具体型号、框架及相关库的支持。</li>
+</ul>
+<blockquote>
+<p>具体型号的支持情况请以 NVIDIA 官方规格为准。</p>
+</blockquote>
+<h3 id="总结">4.3 总结</h3>
+<ul>
+<li><strong>Ampere 及以后（RTX 30/40/50、A100、H100 等）：</strong>
+优先使用 <strong>BF16/FP32 混合精度</strong>。BF16 的动态范围与 FP32
+相近，通常不需要
+GradScaler，是大多数大模型训练与微调场景下合适的默认选择。FP8、FP4
+属于进阶选项，需确认具体型号与软件支持后再用。</li>
+<li><strong>Volta、Turing（V100、T4、RTX 20 系列）：</strong> 使用
+<strong>FP16/FP32 混合精度</strong>，并<strong>配合 GradScaler
+防止梯度下溢</strong>。这两代没有 BF16 Tensor Core，不建议使用
+BF16，否则可能回退到 FP32 路径，速度反而更慢。</li>
+<li><strong>Pascal 及更老的卡（P40、GTX 1080 Ti 等）：</strong> 没有
+Tensor Core，FP16 吞吐远低于 FP32，建议直接使用 FP32（P100 的 FP16
+是个别例外）。</li>
+<li><strong>PyTorch 的默认行为：</strong> 浮点张量默认是 FP32；启用
+<code>autocast</code> 后，才会按算子规则自动选择计算精度。</li>
+<li><strong>TF32：</strong> 在 Ampere 及以后的显卡上，如果想加速 FP32
+矩阵乘法，需要手动开启 TF32（PyTorch 中矩阵乘法默认不启用，cuDNN
+卷积默认启用）。开启前最好确认对模型精度和收敛没有影响。</li>
+</ul>
+<h2 id="实例在-v100-上使用-bf16">5. 实例：在 V100 上使用 BF16</h2>
+<p><strong>现象：</strong> 在 <strong>V100 上使用 BF16
+混合精度</strong>：
+<code>torch.autocast(device_type="cuda", dtype=torch.bfloat16)</code>，得不到
+Tensor Core 加速。具体表现取决于 PyTorch
+版本：有的版本直接报错，有的版本回退到 FP32 计算来模拟 BF16，速度与纯
+FP32 相当，甚至更慢。</p>
+<p><strong>原因：</strong> Tensor Core 是 NVIDIA GPU
+中专用的矩阵乘加硬件单元，从
+Volta（V100）架构开始引入。只有当矩阵乘的输入是 Tensor Core
+支持的格式时，计算才会走 Tensor Core，其理论峰值算力是 CUDA Core
+的数倍到十余倍。这就是前面强调的"<strong>精度决定能否用上硬件算力</strong>"。</p>
+<p>不同架构的 Tensor Core 支持的格式不同：V100 只支持 FP16，Ampere
+起才增加 BF16 和 TF32。因此在 V100 上，BF16 的矩阵乘用不上 Tensor
+Core，应改用 FP16 混合精度。</p>
+<p><strong>检查方法：</strong> 在实际训练用的 GPU
+机器上运行下面的命令，检查当前设备是否真正支持 BF16：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c <span class="string">&quot;import torch; print(torch.cuda.is_bf16_supported(including_emulation=False))&quot;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>输出 <code>True</code>：设备原生支持 BF16（Ampere 及以后）。</li>
+<li>输出 <code>False</code>：设备不支持 BF16，例如 V100、T4。</li>
+</ul>
+<p><code>including_emulation</code> 默认为
+<code>True</code>，此时只要能创建 BF16 张量就会返回
+<code>True</code>，即使底层只是用 FP32
+模拟，所以检查硬件支持时需要显式设为 <code>False</code>。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai%E7%B3%BB%E5%88%97/" rel="tag"># ai系列</a>
+              <a href="/tags/ai%E5%AD%A6%E6%9C%AF%E7%AF%87/" rel="tag"># ai学术篇</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/10/21/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-1-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F/" rel="prev" title="ai学术篇 1.模型训练加速">
+                  <i class="fa fa-angle-left"></i> ai学术篇 1.模型训练加速
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
