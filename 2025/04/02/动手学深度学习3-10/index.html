@@ -193,7 +193,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -285,6 +285,22 @@
 <h2 id="读取数据并训练模型">2. 读取数据并训练模型</h2>
 <p>关于load_data_fashion_mnist和train_ch3请查看之前章节的介绍，或查看官方源码理解，后续不再将其定义贴出。避免占太多空间。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">batch_size = <span class="number">256</span></span><br><span class="line">train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size)</span><br><span class="line">loss = torch.nn.CrossEntropyLoss()</span><br><span class="line"></span><br><span class="line">optimizer = torch.optim.SGD(net.parameters(), lr=<span class="number">0.5</span>)</span><br><span class="line"></span><br><span class="line">num_epochs = <span class="number">5</span></span><br><span class="line">d2l.train_ch3(net, train_iter, test_iter, loss, num_epochs, batch_size, <span class="literal">None</span>, <span class="literal">None</span>, optimizer)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
 
     </div>
 

@@ -70,8 +70,8 @@
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="LLM">
 <meta property="article:tag" content="从零开始的LLM">
-<meta property="article:tag" content="第11节">
 <meta property="article:tag" content="持续学习">
+<meta property="article:tag" content="第11节">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://zusda.github.io/2026/08/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-11/voyager_flowchart_v5.png">
 
@@ -210,7 +210,7 @@ Feedback + Errors + Critique</span></a></li><li class="nav-item nav-level-3"><a 
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -447,6 +447,8 @@ yet.”</p>
 </blockquote>
 <p>也就是说：</p>
 <p><strong>任务既要推动探索，又不能一下子难到当前智能体无法完成。</strong></p>
+<p> </p>
+<p> </p>
 <h3 id="agent-current-state-当前状态">4.2 Agent Current State ——
 当前状态</h3>
 <p>Voyager 会把<strong>当前 Minecraft 状态</strong>提供给
@@ -469,6 +471,8 @@ GPT-4，例如：</p>
 <p><strong>当前已经有什么？当前还缺什么？下一步适合做什么？</strong></p>
 </blockquote>
 <p>从而生成一个与当前状态匹配的任务。</p>
+<p> </p>
+<p> </p>
 <h3 id="previously-completed-failed-tasks">4.3 Previously Completed /
 Failed Tasks</h3>
 <p>Voyager 还会告诉 GPT-4：</p>
@@ -486,6 +490,8 @@ Failed Tasks</h3>
 </blockquote>
 <p>因此，GPT-4
 可以根据之前的执行情况生成更加合适的后续任务，而不是盲目提出一个当前难以完成的高级任务。</p>
+<p> </p>
+<p> </p>
 <h3 id="gpt-3.5-self-ask">4.4 GPT-3.5 Self-Ask</h3>
 <p>Voyager 还会利用 GPT-3.5 根据当前状态和探索进度：</p>
 <ol type="1">
@@ -645,6 +651,8 @@ Feedback + Errors + Critique</h3>
 <blockquote>
 <p>GPT-4 生成代码 → 执行 → 发现问题 → 修改代码 → 再次执行</p>
 </blockquote>
+<p> </p>
+<p> </p>
 <h3 id="current-state">6.4 Current State</h3>
 <p>同样会提供 Minecraft 当前状态：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Inventory</span><br><span class="line">Equipment</span><br><span class="line">Nearby blocks</span><br><span class="line">Nearby entities</span><br><span class="line">Biome</span><br><span class="line">Time</span><br><span class="line">Health</span><br><span class="line">Hunger</span><br><span class="line">Position</span><br></pre></td></tr></table></figure>
@@ -728,6 +736,8 @@ Inventory 进行检查。</p>
 Mineflayer JavaScript 代码。</p>
 <p>{response_format} 内容如下</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Explain: ...</span><br><span class="line">Plan:</span><br><span class="line">1) ...</span><br><span class="line">2) ...</span><br><span class="line">3) ...</span><br><span class="line">...</span><br><span class="line">Code:</span><br><span class="line">```javascript</span><br><span class="line">// helper functions (only if needed, try to avoid them)</span><br><span class="line">...</span><br><span class="line">// main function after the helper functions</span><br><span class="line">async function yourMainFunctionName(bot) &#123;</span><br><span class="line">  // ...</span><br><span class="line">&#125;</span><br><span class="line">```</span><br></pre></td></tr></table></figure>
+<p> </p>
+<p> </p>
 <h2 id="迭代式提示机制">7. 迭代式提示机制</h2>
 <p>迭代式提示机制是 Voyager
 的核心代码生成与执行框架。其基本流程为：GPT-4
@@ -758,6 +768,8 @@ Mineflayer JavaScript 代码。</p>
 可针对性地调整策略（如先采集更多铁锭），而非盲目重试。</p>
 <p><strong>本质</strong>：环境反馈是 Minecraft
 世界向大语言模型传递的状态信息，用于指导下一步行动决策。</p>
+<p> </p>
+<p> </p>
 <h3 id="执行错误代码运行异常">7.2 执行错误（代码运行异常）</h3>
 <p>代码在执行器层面抛出异常，包括但不限于：</p>
 <ul>
@@ -767,6 +779,8 @@ Mineflayer JavaScript 代码。</p>
 </ul>
 <p>此类错误直接暴露了代码本身的缺陷，能够帮助 GPT-4
 快速定位并修正程序逻辑中的具体问题。</p>
+<p> </p>
+<p> </p>
 <h3 id="自我验证代码执行正常但任务目标未达成">7.3
 自我验证（代码执行正常，但任务目标未达成）</h3>
 <p>代码运行虽未报错，却并不代表任务真正完成。</p>
@@ -853,8 +867,8 @@ Coding Agent 框架进一步采用和发展。</p>
           <div class="post-tags">
               <a href="/tags/LLM/" rel="tag"># LLM</a>
               <a href="/tags/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM/" rel="tag"># 从零开始的LLM</a>
-              <a href="/tags/%E7%AC%AC11%E8%8A%82/" rel="tag"># 第11节</a>
               <a href="/tags/%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0/" rel="tag"># 持续学习</a>
+              <a href="/tags/%E7%AC%AC11%E8%8A%82/" rel="tag"># 第11节</a>
           </div>
 
         

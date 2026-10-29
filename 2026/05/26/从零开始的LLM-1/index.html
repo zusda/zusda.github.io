@@ -215,7 +215,7 @@ Self-Attention（掩码自注意力）</span></a><ol class="nav-child"><li class
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -561,6 +561,7 @@ B×N×H×d→B×N×D
 \]</span> 即： <span class="math display">\[
 Concat(heads)\in \mathbb{R}^{B \times N \times D}
 \]</span></p>
+<p> </p>
 <p>至此，每个 token 的向量重新回到了 D 维——但现在这个向量是 H 个 head
 各自视角的拼合，同时携带了多种语义关系的信息。</p>
 <h3 id="输出线性层">3.6 输出线性层</h3>
@@ -574,6 +575,7 @@ head 的输出直接拼在一起，彼此之间还是独立的；乘以 <span cl
 <p>最终输出 <span class="math display">\[
 Output=\in \mathbb{R}^{B \times N \times D}
 \]</span></p>
+<p> </p>
 <p>形状与最初的输入 X
 完全一致。从输入到输出，维度没有变化，但<strong>每个 token
 的向量已经从孤立的词义坐标，变成了充分感知上下文之后的语义表达</strong>——这正是整个
@@ -725,6 +727,12 @@ token</strong>"的信息聚合，代表的是"在看过 <code>【BOS】</code> �
 转化为概率分布，才最终得到对下一个 token
 的预测。输出向量本身不是下一个词，而是<strong>预测下一个词所依赖的上下文表示</strong>。</p>
 <p><img src="/2026/05/26/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84LLM-1/image-20260531100744666.png"></p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
 
     </div>
 

@@ -205,7 +205,7 @@ Fusion）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" hr
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -948,6 +948,8 @@ World）是一种基于图结构的近似最近邻索引。</p>
 </tbody>
 </table>
 <p>实际项目中，通常需要结合具体数据集进行测试，才能确定最合适的索引类型及参数配置。</p>
+<p> </p>
+<p> </p>
 <h2 id="向量检索">4. 向量检索</h2>
 <p>经过上一节的处理，我们已经完成了知识库的向量化：原始文档经过文本分块（Chunking）后，被
 Embedding 模型转换为向量，并存储到了向量数据库中。至此，RAG
@@ -1250,6 +1252,8 @@ ID</strong> 的映射关系。</li>
 <code>parent_id</code>，随后再恢复出完整文档</strong>，并进行去重。</p>
 <p>这样做的好处是无需遍历所有文档即可快速完成 <strong>Chunk → Parent
 Document</strong> 的映射，大幅降低了恢复上下文的开销。</p>
+<p> </p>
+<p> </p>
 <h2 id="总结">6. 总结</h2>
 <p>至此，我们已经完成了整个 RAG 向量搜索引擎的构建。</p>
 <p><strong>离线阶段</strong>:
@@ -1258,6 +1262,16 @@ Document</strong> 的映射，大幅降低了恢复上下文的开销。</p>
 后，系统通过稠密向量和稀疏向量进行检索，经过上下文扩展后，最终返回与问题最相关的一组完整文档（Doc）。</p>
 <p>这些文档将作为上下文提供给 LLM，由模型生成最终回答。至此，一个完整的
 RAG 检索流程便构建完成。</p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
 
     </div>
 

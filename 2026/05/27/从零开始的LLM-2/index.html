@@ -217,7 +217,7 @@ Fine-Tuning，有监督微调）</span></a></li><li class="nav-item nav-level-3"
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -583,6 +583,8 @@ Decoder 模块（如 UniLM、BERT2BERT 等变体），而非直接使用。</p>
 <p>取 <code>[CLS]</code> 是因为任务需要句级表示，而 <code>[CLS]</code>
 恰好被训练成了句级语义的"汇总点"。<strong>用哪个位置的输出，完全由下游任务的性质决定</strong>。</p>
 </blockquote>
+<p> </p>
+<p> </p>
 <p><strong>第三步：准备训练数据</strong></p>
 <p>不需要亿级语料，几千条人工标注的样本就足以微调：</p>
 <table>
@@ -784,6 +786,8 @@ token，直到生成结束符为止。输出序列的长度完全由模型自己
 <p>Cross-Attention 本质上就是：<strong>Decoder
 每生成一个词，都拿当前状态去查询 Encoder
 对输入的理解，确保每一步生成都与原始输入语义对齐。</strong></p>
+<p> </p>
+<p> </p>
 <h3 id="大一统思想">3.5 大一统思想</h3>
 <p>前面几节分别介绍了 T5
 的架构与预训练任务，而支撑这一切的核心设计理念，正是 T5
@@ -1245,6 +1249,8 @@ Hacking）</strong>。</p>
 GPT-4 等强模型代替人类标注员，对不同回复进行比较评分，再将这些 AI
 生成的偏好数据训练小模型的
 RM。这大幅降低了对齐训练的成本，且在部分任务上效果接近人工标注。</p>
+<p> </p>
+<p> </p>
 
     </div>
 

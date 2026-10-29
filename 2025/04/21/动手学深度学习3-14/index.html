@@ -214,7 +214,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -306,6 +306,8 @@
 <p>《动手学深度学习》原文（课本）：https://tangshusen.me/Dive-into-DL-PyTorch/#/</p>
 <p>《动手学深度学习》代码：https://github.com/ShusenTang/Dive-into-DL-PyTorch</p>
 <p>（由于有时候公式太多，可能会直接贴图片）</p>
+<p> </p>
+<p> </p>
 <p>前面几节里我们使用了小批量随机梯度下降的优化算法来训练模型。</p>
 <p>在实现中，我们只提供了模型的正向传播（forward
 propagation）的计算，即对输入计算模型输出，</p>
@@ -362,6 +364,8 @@ J = L + s
 <p>对输入或输出X,Y,Z为任意形状张量的函数Y=f(X)和Z=g(Y)，通过链式法则，我们有</p>
 <p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153418769.png" style="zoom: 50%;"></p>
 <p>其中prod运算符将根据两个输入的形状，在必要的操作（如转置和互换输入位置）后对两个输入做乘法。</p>
+<p> </p>
+<p> </p>
 <p>回顾一下本节中样例模型，它的参数是 <span class="math inline">\(W^{(1)}\)</span> 和 <span class="math inline">\(W^{(2)}\)</span> ，因此反向传播的目标是计算 <span class="math inline">\(\frac{∂J}{∂W^{(1)}}\)</span> 和<span class="math inline">\(\frac{∂J}{∂W^{(2)}}\)</span>。asd</p>
 <p>我们将应用链式法则依次计算各中间变量和参数的梯度，其计算次序与前向传播中相应中间变量的计算次序恰恰相反。首先，分别计算目标函数J=L+s有关损失项L和正则项s的梯度</p>
 <p><img src="/2025/04/21/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-14/image-20250423153923998.png" style="zoom: 67%;"></p>
@@ -394,10 +398,16 @@ J = L + s
 <p>另外需要指出的是，这些<strong>中间变量的个数大体上与网络层数线性相关</strong>，<strong>每个变量的大小跟批量大小和输入个数也是线性相关的</strong>，它们是导致<strong>较深的神经网络使用较大批量训练时更容易超内存的主要原因</strong>。</p>
 <h2 id="小结">小结</h2>
 <p>这部分要点内容在于，理解正向传播与反向传播是什么</p>
+<p> </p>
+<p> </p>
 <p>正向传播就是通过网络求值。</p>
 <p>反向传播就是通过网络求导。</p>
+<p> </p>
+<p> </p>
 <p>正向传播相当于 y=wx, L=(y'-y)² （平方差）</p>
 <p>通过 初始化 或 反向传播 获取w的值，计算出y</p>
+<p> </p>
+<p> </p>
 <p>反向传播相当于 ∂L/∂y=-2y'+y , ∂y/∂w=x ⇒ ∂L/∂w=(-2y'+y)x ⇒
 w=w-∂L/∂w</p>
 <p>通过正向传播中的计算值y，获得w的偏导，更新w</p>

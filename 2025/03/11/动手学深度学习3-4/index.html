@@ -202,7 +202,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -358,6 +358,8 @@ y_1=\frac {20.09} {20.09+2.72+0.37}=0.86,\quad y_1=0.12 \quad y_3=0.02
 H(y^{(i)},\hat{y}^{(i)}) = -\sum ^{q}_{j=1}
 {y^{(i)}_jlog\hat{y}^{(i)}_j}
 \]</span></p>
+<p> </p>
+<p> </p>
 <p>其中<span class="math inline">\(y^{(i)}_j\)</span>是向量<span class="math inline">\(y^{(i)}\)</span>中非0即1的元素</p>
 <p>在上式中，我们知道向量<span class="math inline">\(y^{(i)}\)</span>中只有第k个元素<span class="math inline">\(y^{(i)}_k\)</span>为1，其余全为0，因此我们能够改写如下
 <span class="math display">\[
@@ -368,6 +370,7 @@ y^{(i)}=[0,1,0]
 H(y^{(i)},\hat{y}^{(i)}) =
 -(0*log\hat{y}^{(i)}_1+1*log\hat{y}^{(i)}_2+0*log\hat{y}^{(i)}_3)=-log\hat{y}^{(i)}_2
 \]</span></p>
+<p> </p>
 <p>因此我们能看出损失函数<span class="math inline">\(H(y^{(i)},\hat{y}^{(i)})\)</span>实际上是一个log函数</p>
 <p>如果模型对真实类别的<strong>预测概率高</strong>（接近 1），那么
 -log(概率) 也就小，<strong>损失低</strong>，说明模型预测正确。</p>

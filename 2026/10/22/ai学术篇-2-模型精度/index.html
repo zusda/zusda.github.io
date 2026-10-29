@@ -194,7 +194,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -537,6 +537,8 @@ Bias。</p>
 FP32，但数值精细程度较低。</li>
 </ul>
 <p>因此，<strong>总位数相同，不代表数值范围和数值精细程度相同</strong>。不同格式对指数位和尾数位的分配，决定了它们各自的数值表示能力。</p>
+<p> </p>
+<p> </p>
 <h2 id="精度对训练的影响">2. 精度对训练的影响</h2>
 <p>不同浮点数精度会影响模型训练的计算速度、显存占用、数值稳定性、收敛表现，以及不同硬件之间的性能差异。</p>
 <h3 id="计算速度">2.1 计算速度</h3>
@@ -580,6 +582,8 @@ FP32，<strong>不容易因数值范围不足而发生梯度下溢或溢出</str
 训练下，差距可能明显增大。</p>
 <p>选择训练精度时，需要结合目标 GPU
 的硬件规格和<strong>对应精度的实际计算能力</strong>进行判断。</p>
+<p> </p>
+<p> </p>
 <h2 id="什么是混合精度代码为什么这样排布">3.
 什么是混合精度？代码为什么这样排布？</h2>
 <h3 id="混合精度是什么">3.1 混合精度是什么</h3>
@@ -848,6 +852,8 @@ Tensor Core，FP16 吞吐远低于 FP32，建议直接使用 FP32（P100 的 FP1
 矩阵乘法，需要手动开启 TF32（PyTorch 中矩阵乘法默认不启用，cuDNN
 卷积默认启用）。开启前最好确认对模型精度和收敛没有影响。</li>
 </ul>
+<p> </p>
+<p> </p>
 <h2 id="实例在-v100-上使用-bf16">5. 实例：在 V100 上使用 BF16</h2>
 <p><strong>现象：</strong> 在 <strong>V100 上使用 BF16
 混合精度</strong>：

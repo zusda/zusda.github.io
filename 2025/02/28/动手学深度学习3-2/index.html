@@ -200,7 +200,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -295,6 +295,8 @@
 <p>在了解了线性回归的背景知识之后，现在我们可以动手实现它了。尽管强大的深度学习框架可以减少大量重复性工作，但若过于依赖它提供的便利，会导致我们很难深入理解深度学习是如何工作的。因此，本节将介绍如何只利用<strong>Tensor</strong>和<strong>autograd</strong>来实现一个线性回归的训练。</p>
 <p>首先，导入本节中实验所需的包或模块，其中的matplotlib包可用于作图，且设置成嵌入显示。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> IPython <span class="keyword">import</span> display</span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> random</span><br></pre></td></tr></table></figure>
+<p> </p>
+<p> </p>
 <h2 id="构造一个简单的人工训练数据集">2
 构造一个简单的人工训练数据集</h2>
 <p>设训练数据集<strong>样本数为1000</strong>，输入个数<strong>（特征数）为2</strong>。给定随机生成的批量样本特征X，使用线性回归模型真实权重

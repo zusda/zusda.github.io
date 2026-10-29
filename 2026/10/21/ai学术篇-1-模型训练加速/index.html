@@ -205,7 +205,7 @@ Attention：FlashAttention</span></a><ol class="nav-child"><li class="nav-item n
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -353,6 +353,8 @@ SM（流式多处理器）及其中的 CUDA Core、Tensor Core 等。</p>
 记录时间戳，算每秒处理的 batch 数或样本数）。吞吐随 batch
 增大而上涨，涨到不再涨，说明计算资源已吃满。</li>
 </ul>
+<p> </p>
+<p> </p>
 <h2 id="训练计算流程原理">2. 训练计算流程原理</h2>
 <p>训练过程中，同一个 Batch 内的样本并行计算，而不同 Batch
 的训练步骤通常按顺序执行。</p>
@@ -434,6 +436,8 @@ batch 增长更平滑。</p>
 <p>实际 GPU 训练介于两者之间：粒度比"整样本"细，但受 kernel
 启动开销、同步屏障、尾部效应（最后不足一波的部分）影响，斜坡上仍会有小台阶，不会完全平滑。</p>
 </blockquote>
+<p> </p>
+<p> </p>
 <h2 id="gpu-利用率显存占用率资源利用率三者关系举例">4. GPU
 利用率、显存占用率、资源利用率三者关系举例</h2>
 <p><strong>工厂（GPU）</strong>来了一批<strong>订单（batch）</strong>，订单里每个产品提供了一份<strong>原材料（样本）</strong>，材料先存进<strong>仓库（显存）</strong>；100
@@ -491,6 +495,8 @@ Core）</strong>从仓库领材料干活，把每个产品做出来。</p>
 <p>这说明：<strong>利用率高 ≠
 算力吃满</strong>。工厂开着门、有人在干活，但绝大多数工位是空的。</p>
 </blockquote>
+<p> </p>
+<p> </p>
 <p><strong>情况 B：活很多，但仓库爆了</strong></p>
 <p>订单里塞了 10000 个产品，仓库装不下，直接 OOM 报错（爆仓）。</p>
 <ul>
@@ -500,6 +506,8 @@ Core）</strong>从仓库领材料干活，把每个产品做出来。</p>
 <p>这说明：<strong>显存是硬约束</strong>。batch
 再大、算力再足，仓库装不下就做不下去，此时该考虑混合精度、梯度检查点等省显存手段。</p>
 </blockquote>
+<p> </p>
+<p> </p>
 <p><strong>情况 C：工位和仓库都够，但原料送不上来（多 batch
 情形）</strong></p>
 <p>工位 100 个、仓库也空着，但送订单的卡车（CPU
@@ -514,6 +522,8 @@ Core）</strong>从仓库领材料干活，把每个产品做出来。</p>
 <blockquote>
 <p>这说明：<strong>瓶颈在数据供应（输入侧）</strong>，不在算力和显存。</p>
 </blockquote>
+<p> </p>
+<p> </p>
 <p><strong>情况 D：工位和仓库都满，活也源源不断</strong></p>
 <ul>
 <li><strong>GPU 利用率</strong>：稳定 90% 以上。</li>
@@ -627,6 +637,8 @@ kernel 所需的时间</strong>。</p>
 checkpoint）尽量放在 step 边界之外。</p>
 <p>或者只取每第N步的loss记录日志。</p>
 </blockquote>
+<p> </p>
+<p> </p>
 <h2 id="不同场景下的调优策略">6.
 <strong>不同场景下的调优策略</strong></h2>
 <h3 id="加速常用的-4-种方法">6.1 加速常用的 4 种方法</h3>
@@ -735,6 +747,8 @@ OOM，也可能触发换页/卸载到主机内存等机制，大幅降低训练�
 90% 作为“大致到位”的经验阈值即可，不必追求精确最优点。</li>
 </ul>
 </blockquote>
+<p> </p>
+<p> </p>
 <h2 id="三种加速方法的实现">7. 三种加速方法的实现</h2>
 <p>训练加速主要可以从三个方面入手：编译模型、优化 Attention
 计算、降低计算精度。它们分别减少模型执行开销、显存读写开销和单次计算成本。</p>
@@ -869,6 +883,8 @@ FP32。具体精度取决于所用的 Loss
 <p>优化器根据梯度更新参数。如果模型参数保持
 FP32，<strong>参数更新就作用于 FP32
 权重</strong>，有助于保留较小的更新量。</p>
+<p> </p>
+<p> </p>
 <h4 id="为什么混合精度能加速">3. 为什么混合精度能加速？</h4>
 <ul>
 <li>提高计算效率： GPU 对 BF16、FP16

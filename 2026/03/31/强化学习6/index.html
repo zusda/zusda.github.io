@@ -211,7 +211,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -671,6 +671,8 @@ y=r_i+\gamma\max_{a}Q(s_{i+1},a)
 值，就把它当作一个回归问题。我们希望 <span class="math inline">\(Q(s_i,a_i)\)</span> 与目标越接近越好。</p>
 <p>假设已经更新了一定的次数，比如 C 次，设 C=100， 那我们就把 <span class="math inline">\(\hat{Q}\)</span> 设成 Q，这就是 <strong>深度Q网络
 算法</strong>。</p>
+<p> </p>
+<p> </p>
 <h2 id="更新">2026.4.16 更新</h2>
 <p>Q：Q值不应该是跟策略有关的吗，不同的策略会有不同的Q值，那么为什么DQN还能用不同策略的数据来拟合一个Q。</p>
 <p>A: Q值确实与策略有关严格来说，Q函数的定义是：<strong>Q^π(s, a) =
@@ -685,6 +687,8 @@ Q^*(s, a) = \mathbb{E}[ r + γ · \max_{a&#39;} Q*(s&#39;, a&#39;) ]
 <p><strong>它不管你的数据是用什么策略采集的</strong>，只要
 <code>(s, a, r, s')</code>
 这个transition是真实的环境交互，Bellman最优方程就成立。</p>
+<p> </p>
+<p> </p>
 
     </div>
 

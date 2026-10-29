@@ -205,7 +205,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -369,6 +369,8 @@ H(y^{(i)},\hat{y}^{(i)}) = -log\hat{y}^{(i)}_j
 <p><code>y_hat.argmax(dim=1)</code>返回矩阵y_hat每行中最大元素的索引。</p>
 <p><code>(y_hat.argmax(dim=1) == y)</code>是一个类型为ByteTensor的Tensor。</p>
 <p>也就是说样本预测正确即为1，预测错误即为0，所有结果相加并除以样本数（上面的mean函数作用），当成是准确率。</p>
+<p> </p>
+<p> </p>
 <p>类似地，我们可以计算评价模型net在数据集data_iter上的准确率。y.shape[0]
 返回的是该数组的行数</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">evaluate_accuracy</span>(<span class="params">data_iter, net</span>):</span><br><span class="line">    acc_sum, n = <span class="number">0.0</span>, <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> X, y <span class="keyword">in</span> data_iter:</span><br><span class="line">        acc_sum += (net(X).argmax(dim=<span class="number">1</span>) == y).<span class="built_in">float</span>().<span class="built_in">sum</span>().item()</span><br><span class="line">        n += y.shape[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">return</span> acc_sum / n</span><br></pre></td></tr></table></figure>
@@ -399,6 +401,20 @@ H(y^{(i)},\hat{y}^{(i)}) = -log\hat{y}^{(i)}_j
 <p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321160716398.png" style="zoom:50%;"></p>
 <p>给定一系列图像（第三行图像输出），我们比较一下它们的真实标签（第一行文本输出）和模型预测结果（第二行文本输出）。</p>
 <p><img src="/2025/03/20/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A03-6/image-20250321160732356.png"></p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
 
     </div>
 
