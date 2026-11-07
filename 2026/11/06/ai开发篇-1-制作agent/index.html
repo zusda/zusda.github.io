@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zusda.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script src="https://unpkg.com/aplayer@1.10.1/dist/APlayer.min.js"></script>
+<script>
+  const ap = new APlayer({
+    container: document.getElementById('aplayer'),
+    fixed: true,
+    autoplay: false,
+    lrcType: 3,            // 3 = 从每首歌的 lrc 字段指向的文件加载歌词
+    audio: [
+      {
+        name: 'From a Place of Love.mp3',
+        artist: 'Mili',
+        url: '/music/Mili - From a Place of Love.mp3',
+        lrc: '/music/Mili - From a Place of Love.lrc'
+      },
+    ]
+  });
+</script>
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR3FGV78B0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR3FGV78B0');
+</script>
+
+
+
+
+    <meta name="description" content="前言 本文主要介绍个人 Agent 框架 cc_agent 的设计与实现，包括用户管理、会话管理、模型配置、Skill、MCP 工具调用以及完整的对话流程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ai开发篇 1.制作agent">
+<meta property="og:url" content="https://zusda.github.io/2026/11/06/ai%E5%BC%80%E5%8F%91%E7%AF%87-1-%E5%88%B6%E4%BD%9Cagent/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言 本文主要介绍个人 Agent 框架 cc_agent 的设计与实现，包括用户管理、会话管理、模型配置、Skill、MCP 工具调用以及完整的对话流程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zusda.github.io/2026/11/06/ai%E5%BC%80%E5%8F%91%E7%AF%87-1-%E5%88%B6%E4%BD%9Cagent/image-20261106020505571.png">
+<meta property="article:published_time" content="2026-11-06T08:17:01.000Z">
+<meta property="article:modified_time" content="2026-11-07T08:22:34.888Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ai系列">
+<meta property="article:tag" content="ai开发篇">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zusda.github.io/2026/11/06/ai%E5%BC%80%E5%8F%91%E7%AF%87-1-%E5%88%B6%E4%BD%9Cagent/image-20261106020505571.png">
+
+
+<link rel="canonical" href="https://zusda.github.io/2026/11/06/ai%E5%BC%80%E5%8F%91%E7%AF%87-1-%E5%88%B6%E4%BD%9Cagent/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zusda.github.io/2026/11/06/ai%E5%BC%80%E5%8F%91%E7%AF%87-1-%E5%88%B6%E4%BD%9Cagent/","path":"2026/11/06/ai开发篇-1-制作agent/","title":"ai开发篇 1.制作agent"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ai开发篇 1.制作agent | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E6%A6%82%E8%A7%88"><span class="nav-text">1. 框架概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E4%BB%8B%E7%BB%8D"><span class="nav-text">2. 组件介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E7%BB%84%E5%90%88%E8%AE%BE%E8%AE%A1"><span class="nav-text">2.1 组件组合设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#message-%E4%B8%8E-sessionhistory"><span class="nav-text">2.1.1 Message 与 SessionHistory</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#modelcfg%E6%A8%A1%E5%9E%8B%E9%85%8D%E7%BD%AE"><span class="nav-text">2.1.2 ModelCfg（模型配置）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#skill%E6%8A%80%E8%83%BD"><span class="nav-text">2.1.3 Skill（技能）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#agent-%E7%BB%84%E5%90%88"><span class="nav-text">2.1.4 Agent 组合</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E8%BD%AE%E5%AF%B9%E8%AF%9D%E7%9A%84%E5%AE%8C%E6%95%B4%E7%A4%BA%E4%BE%8B"><span class="nav-text">2.2 一轮对话的完整示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#user%E7%94%A8%E6%88%B7"><span class="nav-text">2.3 User（用户）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#message%E6%B6%88%E6%81%AF"><span class="nav-text">2.4 Message（消息）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E5%AD%97%E6%AE%B5"><span class="nav-text">2.4.1 消息字段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B"><span class="nav-text">2.4.2 消息类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E5%88%9B%E5%BB%BA%E4%B8%8E%E8%BD%AC%E6%8D%A2"><span class="nav-text">2.4.3 消息创建与转换</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sessionhistory%E4%BC%9A%E8%AF%9D%E5%8E%86%E5%8F%B2"><span class="nav-text">2.5 SessionHistory（会话历史）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%96%B9%E6%B3%95"><span class="nav-text">2.5.1 基本方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#jsonl-%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8"><span class="nav-text">2.5.2 JSONL 消息存储</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E7%AA%97%E5%8F%A3"><span class="nav-text">2.5.3 消息窗口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%86%E5%8F%B2%E6%B6%88%E6%81%AF%E5%8E%8B%E7%BC%A9"><span class="nav-text">2.5.4 历史消息压缩</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#modelcfg%E6%A8%A1%E5%9E%8B%E9%85%8D%E7%BD%AE-1"><span class="nav-text">2.6 ModelCfg（模型配置）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E9%85%8D%E7%BD%AE%E5%AD%97%E6%AE%B5"><span class="nav-text">2.6.1 初始化与配置字段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#mcp-%E6%9C%8D%E5%8A%A1%E4%B8%8E%E5%B7%A5%E5%85%B7%E7%AE%A1%E7%90%86"><span class="nav-text">2.6.2 MCP 服务与工具管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#skill-%E7%AE%A1%E7%90%86"><span class="nav-text">2.6.3 Skill 管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86"><span class="nav-text">2.6.4 配置文件管理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#skill%E6%8A%80%E8%83%BD-1"><span class="nav-text">2.7 Skill（技能）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#agent%E6%99%BA%E8%83%BD%E4%BD%93"><span class="nav-text">2.8 Agent（智能体）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#model-%E4%B8%8E%E6%A8%A1%E5%9E%8B%E7%B1%BB"><span class="nav-text">2.9 Model 与模型类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mcp-%E6%9C%8D%E5%8A%A1%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-text">2.10 MCP 服务与客户端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#config.py"><span class="nav-text">2.11 config.py</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-text">3. 组件之间的关系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E7%94%A8%E6%88%B7%E9%9A%94%E7%A6%BB%E5%85%A8%E5%B1%80%E4%B8%8E%E7%94%A8%E6%88%B7%E4%B8%A4%E7%BA%A7%E5%AD%98%E5%82%A8"><span class="nav-text">3.1
+按用户隔离，全局与用户两级存储</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E4%BC%9A%E8%AF%9D%E4%B8%8E-agent"><span class="nav-text">3.2 用户、会话与 Agent</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7skill-%E4%B8%8E-modelcfg"><span class="nav-text">3.3 工具、Skill 与 ModelCfg</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B"><span class="nav-text">4. 使用流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%94%A8%E6%88%B7"><span class="nav-text">4.1 创建用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-session"><span class="nav-text">4.2 创建 session</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%A8%A1%E5%9E%8B%E9%85%8D%E7%BD%AE%E5%B9%B6%E6%B7%BB%E5%8A%A0%E5%B7%A5%E5%85%B7"><span class="nav-text">4.3 创建模型配置并添加工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0-skill"><span class="nav-text">4.4 添加 Skill</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E8%BD%AE%E5%AF%B9%E8%AF%9D%E7%9A%84%E5%AE%8C%E6%95%B4%E7%A4%BA%E4%BE%8B-1"><span class="nav-text">4.5 一轮对话的完整示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%8D%E6%AC%A1%E4%BD%BF%E7%94%A8%E5%B7%B2%E6%9C%89%E7%94%A8%E6%88%B7%E5%92%8C%E4%BC%9A%E8%AF%9D"><span class="nav-text">4.6 再次使用已有用户和会话</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">91</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">32</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zusda.github.io/2026/11/06/ai%E5%BC%80%E5%8F%91%E7%AF%87-1-%E5%88%B6%E4%BD%9Cagent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ai开发篇 1.制作agent | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ai开发篇 1.制作agent
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-11-06 16:17:01" itemprop="dateCreated datePublished" datetime="2026-11-06T16:17:01+08:00">2026-11-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-11-07 16:22:34" itemprop="dateModified" datetime="2026-11-07T16:22:34+08:00">2026-11-07</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言</h2>
+<p>本文主要介绍个人 Agent 框架 cc_agent
+的设计与实现，包括用户管理、会话管理、模型配置、Skill、MCP
+工具调用以及完整的对话流程。</p>
+<span id="more"></span>
+<p>姑且将 AI 系列后续内容分为以下 4 个部分：</p>
+<ol type="1">
+<li><strong>学术篇：</strong> LLM
+基础知识、模型训练、各类算法的原理与实现等。</li>
+<li><strong>开发篇：</strong> Agent 框架、各类 AI 应用的开发等。</li>
+<li><strong>运维篇：</strong> Agent 应用的部署、推理参数测试等。</li>
+<li><strong>杂项：</strong> AI
+渗透、视频生成、音频生成、超分辨率等其他内容。</li>
+</ol>
+<hr>
+<p>前天已经完成了 Agent 框架的全部基础组件，不过目前还在开发类似 Voyager
+的自学习 Skill
+功能。考虑到博客已经有一段时间没有更新了，就先整理一下目前的开发成果。</p>
+<p>这次主要介绍自己开发的 Agent 框架。</p>
+<p>首先需要明确一点：Agent 并不是简单地接入一个
+LLM，再封装一层输入输出就能实现的。LLM 只是 Agent
+的一部分，可以把它理解为 Agent
+的「大脑」，负责理解、思考和决策，而其他组件则负责提供必要的功能和支持。</p>
+<p>以人为例，人由大脑、眼睛、耳朵、四肢等多个部分组成，各个部分相互配合才能构成一个完整的人。Agent
+也是如此，需要多个组件协同工作，才能完成完整的任务流程。</p>
+<p>因此，这篇文章主要介绍如何构建 Agent
+的各个组件，以及如何将它们组织起来，最终组成一个完整的
+Agent。具体实现会在正文中逐一介绍。</p>
+<p>开发 Agent，本质上也是在开发 Agent 框架。</p>
+<p>那么，什么是 Agent 框架？简单来说，就是一套用于组织 Agent
+组件、管理组件之间交互，以及实现任务执行流程的方法和规则。</p>
+<p>既然市面上已经有这么多成熟的框架，为什么还要自己开发？</p>
+<p>主要有三个原因：</p>
+<ol type="1">
+<li>学习目的：阅读源码固然能够了解框架的实现原理，但很多东西只有自己动手实现一遍，才能真正理解其中的设计思路和组件之间的关系。</li>
+<li>满足自己的需求：现有框架不一定完全符合自己的使用习惯和开发需求。可能缺少某些功能，也可能在扩展已有功能时受到框架本身的限制。自己开发则可以根据实际需求灵活调整。</li>
+<li>方便后续复用：后续还会尝试开发各种 Agent
+功能和相关项目。如果每次都从头实现一遍基础组件，显然没有必要。拥有一套自己的框架，就可以直接复用已有功能，在此基础上进行扩展。</li>
+</ol>
+<hr>
+<h2 id="框架概览">1. 框架概览</h2>
+<p>自己开发的框架总觉得应该起个名字，否则连导入包的时候都不知道该叫什么。</p>
+<p>这里将其命名为 cc_agent。</p>
+<p>cc_agent 是一个单 Agent
+框架，以用户为隔离单位。每个用户拥有独立的会话（session）、模型配置（model_cfg）和技能（skill）。</p>
+<p>工具统一添加到模型配置中，并通过 MCP 服务提供和调用。</p>
+<p>源码目录（包名 <code>cc_agent</code>）：</p>
+<ul>
+<li><code>config.py</code>：全局目录与窗口参数，包括
+<code>USER_DIR</code>、<code>MODEL_CFG_DIR</code>、<code>SKILL_DIR</code>、<code>MAX_MESSAGES</code>、<code>COMPACT_COUNT</code>。</li>
+<li><code>users/user.py</code>：<code>User</code>
+类，负责用户相关信息的管理。</li>
+<li><code>users/model_cfg.py</code>：<code>ModelCfg</code> 类和
+<code>check_name</code> 函数，负责模型配置及相关检查。</li>
+<li><code>skill.py</code>：<code>Skill</code> 类，负责技能的管理。</li>
+<li><code>agent/agent.py</code>：<code>Agent</code>
+类，负责整合各个组件，构建完整的 Agent 实例。</li>
+<li><code>message/message.py</code>：<code>Message</code>
+数据类和各种消息创建函数。</li>
+<li><code>message/SessionHistory.py</code>：<code>SessionHistory</code>
+类，负责会话历史的读取、保存与压缩。</li>
+<li><code>mcp_server/</code>：MCP 服务端与客户端，包含
+<code>get_tools</code>、<code>execute_tool</code>、<code>ToolExecuteError</code>
+等功能，以及相关工具函数。</li>
+<li><code>model/</code>：模型层封装，统一不同模型的调用接口，提供具有统一调用方法的模型实例。</li>
+</ul>
+<p> </p>
+<p> </p>
+<hr>
+<h2 id="组件介绍">2. 组件介绍</h2>
+<p>cc_agent 主要由以下组件组成：</p>
+<ol type="1">
+<li>User（用户）</li>
+<li>Message（消息）</li>
+<li>SessionHistory（会话历史）</li>
+<li>ModelCfg（模型配置）</li>
+<li>Skill（技能）</li>
+<li>Agent（智能体）</li>
+<li>Model（模型类）</li>
+<li>Tool（工具，包括 MCP 服务端与客户端）</li>
+</ol>
+<h3 id="组件组合设计">2.1 组件组合设计</h3>
+<p>在 cc_agent 中，User
+是数据隔离的最小单位，用户名全局唯一。每个用户在本地
+<code>USER_DIR</code>
+下拥有独立的目录，用于存放自己的会话、模型配置和技能。</p>
+<p>用户的本地目录结构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">USER_DIR/</span><br><span class="line">└── &lt;user_name&gt;/</span><br><span class="line">    ├── &lt;user_name&gt;.json          记录 user_name、session_id、model_cfg</span><br><span class="line">    ├── session/</span><br><span class="line">    │   └── &lt;session_id&gt;.jsonl    一个会话一个文件，每行一条消息</span><br><span class="line">    ├── model_cfg/</span><br><span class="line">    │   └── &lt;cfg_name&gt;.json       用户自己的模型配置</span><br><span class="line">    └── skills/</span><br><span class="line">        └── &lt;skill_name&gt;/</span><br><span class="line">            └── SKILL.md         用户自己的技能</span><br></pre></td></tr></table></figure>
+<p>User 内部维护两个主要列表：</p>
+<ul>
+<li><code>session_id</code>：记录用户拥有的会话 ID。</li>
+<li><code>model_cfg</code>：记录用户拥有的模型配置名称。</li>
+</ul>
+<p> </p>
+<p> </p>
+<h4 id="message-与-sessionhistory">2.1.1 Message 与 SessionHistory</h4>
+<p><code>session_id</code> 用于标识用户与 Agent
+之间的一段会话。每段会话对应一个 JSONL
+文件，其中每一行都是一条独立的消息。</p>
+<p>消息由 <code>Message</code>
+类管理，负责定义和创建不同类型的消息。例如：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;role&quot;</span><span class="punctuation">:</span> <span class="string">&quot;user&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;北京今天天气怎么样？&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;role&quot;</span><span class="punctuation">:</span> <span class="string">&quot;agent&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;北京今天晴，气温 8 到 18 度，早晚温差较大，建议带件外套。&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>这里的 <code>Message</code> 负责消息结构的定义，而
+<code>SessionHistory</code> 负责会话历史的管理。</p>
+<p><code>SessionHistory</code> 根据 <code>session_id</code> 读取对应的
+JSONL 文件，将当前需要使用的历史消息加载到 <code>history_message</code>
+中，并提供消息保存、历史压缩等功能。</p>
+<p>它并不需要始终将整个 JSONL 文件加载到内存中，只需要保留 Agent
+当前运行所需的历史消息即可。</p>
+<h4 id="modelcfg模型配置">2.1.2 ModelCfg（模型配置）</h4>
+<p><code>ModelCfg</code> 是模型配置类，用于管理 Agent 使用的模型、工具和
+Skill。</p>
+<p>User 的 <code>model_cfg</code>
+列表只记录模型配置名称，而不是直接保存模型配置实例。需要使用某个配置时，再通过
+User 加载对应的 <code>ModelCfg</code> 实例。</p>
+<p>模型配置支持全局和用户两种归属方式：</p>
+<ul>
+<li>全局配置：新创建的 <code>ModelCfg</code> 默认没有用户归属，即
+<code>self.belong = None</code>。此时调用
+<code>save()</code>，配置会保存到全局的模型配置目录，供后续加载和复用。</li>
+<li>用户配置：当 User
+添加一个模型配置时，会将配置复制并保存到该用户自己的
+<code>model_cfg</code> 目录中。后续调用
+<code>user.get_model_cfg(cfg_name)</code>，即可根据名称加载该用户对应的配置实例。</li>
+</ul>
+<h4 id="skill技能">2.1.3 Skill（技能）</h4>
+<p>Skill 的存储和归属机制与 ModelCfg 类似。</p>
+<p>默认情况下，Skill 保存到全局目录。只有当一个具有用户归属的
+<code>ModelCfg</code> 添加 Skill 时，才会将对应的 Skill
+复制到该用户自己的 <code>skills</code> 目录下。</p>
+<p>如果没有用户归属的全局 <code>ModelCfg</code> 添加 Skill，那么该 Skill
+仍然保存到全局目录。</p>
+<p>模型配置中会记录所使用的 Skill 名称。虽然用户目录下可能存放多个
+Skill，但只有被当前 <code>ModelCfg</code> 记录的
+Skill，才会被加载到对应的 Agent 中。</p>
+<h4 id="agent-组合">2.1.4 Agent 组合</h4>
+<p>ModelCfg 中主要记录以下内容：</p>
+<ul>
+<li>使用什么模型：由 Model 层提供。</li>
+<li>拥有哪些工具：通过 MCP 服务添加。</li>
+<li>拥有哪些 Skill：根据 Skill 名称加载对应技能。</li>
+</ul>
+<p>一次完整的 Agent 初始化，需要准备两个核心对象：</p>
+<ol type="1">
+<li>通过 User 提供的 <code>session_id</code>，创建对应的
+<code>SessionHistory</code> 实例，获取会话历史。</li>
+<li>通过 User 提供的模型配置名称，加载对应的 <code>ModelCfg</code>
+实例。</li>
+</ol>
+<p>随后，将这两个实例和系统提示词（<code>system_prompt</code>）传入
+Agent，即可完成 Agent 的初始化。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Agent</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, history, model_cfg, system_prompt=<span class="string">&quot;&quot;</span></span>):</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
+<p>Agent
+内部包含许多辅助功能，但其核心是实现一个持续运行的交互循环（Loop），负责协调模型调用、工具执行、消息处理等操作。</p>
+<figure>
+<img src="/2026/11/06/ai%E5%BC%80%E5%8F%91%E7%AF%87-1-%E5%88%B6%E4%BD%9Cagent/image-20261106020505571.png" alt="loop工作循环图">
+<figcaption aria-hidden="true">loop工作循环图</figcaption>
+</figure>
+<h3 id="一轮对话的完整示例">2.2 一轮对话的完整示例</h3>
+<p>下面通过一个实际示例，将前面介绍的组件串联起来。</p>
+<p>运行前需要满足以下条件：</p>
+<ul>
+<li>Ollama 中已经下载 <code>qwen3:8b</code>。</li>
+<li>MCP 服务已经在 <code>http://localhost:8000/mcp</code> 启动。</li>
+<li>MCP 服务已经注册了 <code>add</code> 工具。</li>
+</ul>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> asyncio</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> cc_agent.agent.agent <span class="keyword">import</span> Agent</span><br><span class="line"><span class="keyword">from</span> cc_agent.message.SessionHistory <span class="keyword">import</span> SessionHistory</span><br><span class="line"><span class="keyword">from</span> cc_agent.skill <span class="keyword">import</span> Skill</span><br><span class="line"><span class="keyword">from</span> cc_agent.users.model_cfg <span class="keyword">import</span> ModelCfg</span><br><span class="line"><span class="keyword">from</span> cc_agent.users.user <span class="keyword">import</span> User</span><br><span class="line"></span><br><span class="line">USER_NAME = <span class="string">&quot;demo_user&quot;</span></span><br><span class="line">CFG_NAME = <span class="string">&quot;qwen3_8b&quot;</span></span><br><span class="line">SERVER_NAME = <span class="string">&quot;local&quot;</span></span><br><span class="line">MCP_URL = <span class="string">&quot;http://localhost:8000/mcp&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    <span class="comment"># 1. 创建用户</span></span><br><span class="line">    user = User.create_user(USER_NAME)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 2. 创建 session 和历史对象</span></span><br><span class="line">    session_id = user.new_session()</span><br><span class="line">    history = SessionHistory(USER_NAME, session_id)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 3. 创建模型配置并添加到用户</span></span><br><span class="line">    new_cfg = ModelCfg(</span><br><span class="line">        CFG_NAME,</span><br><span class="line">        model_name=<span class="string">&quot;qwen3:8b&quot;</span>,</span><br><span class="line">        url=<span class="string">&quot;http://localhost:11434/v1&quot;</span>,</span><br><span class="line">        <span class="built_in">type</span>=<span class="string">&quot;ollama&quot;</span>,</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    user.add_model_cfg(new_cfg)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 根据 cfg_name 获取用户自己的配置实例</span></span><br><span class="line">    model_cfg = user.get_model_cfg(CFG_NAME)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 4. 登记 MCP 服务并添加工具</span></span><br><span class="line">    model_cfg.add_server(SERVER_NAME, MCP_URL)</span><br><span class="line"></span><br><span class="line">    tool_name = <span class="keyword">await</span> model_cfg.add_tool(SERVER_NAME, <span class="string">&quot;add&quot;</span>)</span><br><span class="line">    <span class="comment"># 返回 &quot;local__add&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 目前仅支持最基础的单工具添加方式</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 5. 添加 Skill</span></span><br><span class="line">    <span class="comment"># 结构：&#123;name, description, content&#125;</span></span><br><span class="line">    skill = Skill(</span><br><span class="line">        <span class="string">&quot;answer-format&quot;</span>,</span><br><span class="line">        <span class="string">&quot;用户要求计算时使用，规定回复的格式&quot;</span>,</span><br><span class="line">        <span class="string">&quot;计算完成后，回复只能写成：计算结果：&lt;数字&gt;&quot;</span>,</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 自动复制到用户的 skills 目录</span></span><br><span class="line">    <span class="comment"># 因为当前 model_cfg 已经具有用户归属</span></span><br><span class="line">    model_cfg.add_skill(skill)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 6. 创建 Agent</span></span><br><span class="line">    <span class="comment"># 工具和 Skill 需要在创建 Agent 之前添加完成</span></span><br><span class="line">    agent = Agent(</span><br><span class="line">        history,</span><br><span class="line">        model_cfg,</span><br><span class="line">        system_prompt=<span class="string">&quot;You are a helpful assistant.&quot;</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 7. 发起一轮对话</span></span><br><span class="line">    reply = <span class="keyword">await</span> agent.generate(<span class="string">&quot;请用工具计算 123.5 加 876.5&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(reply)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">asyncio.run(main())</span><br></pre></td></tr></table></figure>
+<p>以上代码展示了从创建用户、初始化会话、配置模型，到添加工具和
+Skill，最后创建 Agent 并完成一次交互的完整过程。</p>
+<hr>
+<h3 id="user用户">2.3 User（用户）</h3>
+<p>前面介绍了 User
+在整个框架中的作用：它是数据隔离的最小单位，负责管理用户自己的会话、模型配置和技能。</p>
+<p>采用这种以用户为单位的目录结构，主要是为了方便后续扩展。</p>
+<p>例如：</p>
+<ul>
+<li>单机个体agent：只需要固定一个 User 和一个 Session，即可作为个体
+Agent 使用。</li>
+<li>团队协作：可以在此基础上扩展用户体系，将不同用户或团队的数据进行隔离。</li>
+<li>Web 聊天应用：类似 GPT 的聊天机器人，可以为用户创建多个
+Session，并允许用户添加和管理不同的模型配置。</li>
+</ul>
+<p>目前框架没有设计用户等级、权限等分级系统，主要考虑的是单用户 Agent
+的使用场景。后续如果有需要，再扩展相关功能。</p>
+<ol type="1">
+<li>用户管理</li>
+</ol>
+<p>以下均为类方法，可以直接通过 <code>User.xxx()</code> 调用。</p>
+<ul>
+<li><code>User.create_user(user_name)</code>：创建用户，同时生成对应的目录结构。</li>
+<li><code>User.open_user(user_name)</code>：打开已有用户，返回对应的
+User 实例。</li>
+<li><code>User.delete_user(user_name)</code>：删除用户及其整个目录。</li>
+<li><code>User.list_user()</code>：打印并返回所有用户名，以
+<code>USER_DIR</code> 下的子文件夹作为用户记录。</li>
+</ul>
+<p> </p>
+<p> </p>
+<ol start="2" type="1">
+<li>会话管理</li>
+</ol>
+<ul>
+<li><code>new_session()</code>：创建一个新的空 JSONL 文件，并返回对应的
+<code>session_id</code>。</li>
+<li><code>delete_session(session_id)</code>：删除指定 Session
+对应的文件及用户记录中的 ID。</li>
+<li><code>list_session()</code>：打印并返回当前用户拥有的 Session ID
+列表。</li>
+</ul>
+<p> </p>
+<p> </p>
+<ol start="3" type="1">
+<li>模型配置管理</li>
+</ol>
+<ul>
+<li><code>add_model_cfg(model_cfg, cfg_name=None)</code>：将传入的模型配置复制到用户自己的目录中，并返回最终使用的配置名称。</li>
+<li><code>get_model_cfg(cfg_name)</code>：根据配置名称，加载用户自己的
+<code>ModelCfg</code> 实例。</li>
+<li><code>list_model_cfg()</code>：打印并返回当前用户拥有的模型配置名称列表。</li>
+<li><code>delete_model_cfg(cfg_name)</code>：删除指定模型配置文件及其记录。</li>
+</ul>
+<p> </p>
+<p> </p>
+<ol start="4" type="1">
+<li>技能查询</li>
+</ol>
+<p>- <code>list_skill_name()</code>：打印并返回当前用户拥有的 Skill
+名称列表。</p>
+<p>这里需要特别说明一下，<code>list_skill_name()</code>
+并不是直接扫描用户的 <code>skills</code>
+目录，而是读取用户所有模型配置中记录的 Skill 名称，然后合并去重。</p>
+<p>这样设计是因为 Skill 文件可能被多个模型配置共同使用。</p>
+<p>例如，模型配置 A 和 B 都使用了 Skill X。如果删除模型配置 A 时直接删除
+Skill X，那么模型配置 B 就无法继续使用该技能。</p>
+<p>因此，目前删除模型配置时，只会移除对应配置中记录的 Skill
+名称，不会直接删除 Skill 文件。通过汇总所有模型配置中的 Skill
+名称，就可以得到当前仍被使用的技能列表。</p>
+<p>后续可以在此基础上增加无用 Skill 的清理功能，目前暂不实现。</p>
+<hr>
+<h3 id="message消息">2.4 Message（消息）</h3>
+<p>Message 是会话历史中的最小单位，一条 Message 对应 JSONL
+文件中的一行记录。</p>
+<h4 id="消息字段">2.4.1 消息字段</h4>
+<p>Message 包含以下字段：</p>
+<ul>
+<li><code>role</code>：消息角色，包括
+<code>user</code>、<code>agent</code>、<code>tool</code>、<code>context</code>。</li>
+<li><code>type</code>：消息类型，包括 <code>plain</code> 和
+<code>tool_call</code>。</li>
+<li><code>content</code>：消息内容。<code>plain</code>
+类型为字符串，<code>tool_call</code>
+类型为字典，记录工具名称和调用参数。</li>
+<li><code>seq</code>：消息在会话中的序号，从 1 开始递增，由
+SessionHistory 在添加消息时自动分配。</li>
+<li><code>call_id</code>：工具调用
+ID，用于关联工具调用消息与对应的执行结果。</li>
+<li><code>start</code>、<code>end</code>：context
+消息的摘要范围，记录本次摘要覆盖的消息序号。</li>
+</ul>
+<h4 id="消息类型">2.4.2 消息类型</h4>
+<p>根据 <code>role</code> 和 <code>type</code>
+的组合，目前有以下五种消息：</p>
+<ol type="1">
+<li><code>user</code> + <code>plain</code>：用户输入。</li>
+<li><code>agent</code> + <code>plain</code>：Agent 的普通回复。</li>
+<li><code>agent</code> + <code>tool_call</code>：Agent
+发起的工具调用。</li>
+<li><code>tool</code> + <code>plain</code>：工具执行结果，执行失败时以
+<code>tool error:</code> 开头。</li>
+<li><code>context</code> +
+<code>plain</code>：历史消息压缩后的摘要，作为当前消息窗口的第一条消息。</li>
+</ol>
+<h4 id="消息创建与转换">2.4.3 消息创建与转换</h4>
+<p>提供以下函数创建不同类型的消息：</p>
+<ol type="1">
+<li><code>createUserMessage(text)</code>：创建用户消息。</li>
+<li><code>createAiMessage(text)</code>：创建 Agent 普通回复。</li>
+<li><code>create_AiToolCall_Message(name, arguments, call_id=None)</code>：创建工具调用消息，不传入
+<code>call_id</code> 时自动生成。</li>
+<li><code>create_ToolResult_Message(text, call_id)</code>：创建工具执行结果。</li>
+<li><code>createContextMessage(text, start, end)</code>：创建历史摘要消息。</li>
+</ol>
+<p>此外，还提供两个转换方法：</p>
+<ul>
+<li><code>toJson()</code>：将 Message 实例转换为 JSON 字符串。</li>
+<li><code>Message.fromJson(text)</code>：将 JSON 字符串解析为 Message
+实例。</li>
+</ul>
+<hr>
+<h3 id="sessionhistory会话历史">2.5 SessionHistory（会话历史）</h3>
+<p>每个 Session 对应一个 JSONL 文件，存储路径为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">USER_DIR/&lt;user_name&gt;/session/&lt;session_id&gt;.jsonl</span><br></pre></td></tr></table></figure>
+<p>SessionHistory
+是会话历史的内存管理器，负责消息的读取、写入和压缩。Agent
+不直接操作会话文件，而是通过 SessionHistory 管理消息。</p>
+<p>初始化方式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">messages = SessionHistory(user_id, session_id)</span><br></pre></td></tr></table></figure>
+<p>其中 <code>user_id</code> 实际上是用户名，对应的 Session
+文件必须已经存在。</p>
+<p>SessionHistory 内部维护一个 <code>messages</code> 列表，每个元素都是
+Message 实例。初始化时逐行读取 JSONL 文件，并通过
+<code>Message.fromJson(line)</code> 转换为对象。</p>
+<p>Agent 与 SessionHistory 共用同一个对象引用，因此 Agent
+对消息的修改会直接反映在 SessionHistory 中。</p>
+<p>目前框架没有实现文件锁或并发写入保护，因此同一个 Session
+同一时间只应由一个 Agent 写入。</p>
+<h4 id="基本方法">2.5.1 基本方法</h4>
+<ul>
+<li><code>add(message)</code>：为消息分配序号，并添加到内存中的
+<code>messages</code> 列表，不立即写入文件。</li>
+<li><code>save()</code>：将新增消息追加写入 JSONL 文件。</li>
+<li><code>load()</code>：重新读取 JSONL 文件，并返回消息列表。</li>
+<li><code>await checkCompact()</code>：检查是否满足压缩条件，满足时执行压缩。</li>
+<li><code>await compact()</code>：执行历史消息压缩。</li>
+</ul>
+<h4 id="jsonl-消息存储">2.5.2 JSONL 消息存储</h4>
+<p>会话文件采用 JSONL 格式，每行保存一条完整的 JSON
+消息。普通保存采用追加写入，不会覆盖之前的记录。</p>
+<p>例如，一轮包含工具调用的对话：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;role&quot;</span><span class="punctuation">:</span> <span class="string">&quot;user&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;plain&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;请用工具计算 123.5 加 876.5&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;seq&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span> <span class="attr">&quot;call_id&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;role&quot;</span><span class="punctuation">:</span> <span class="string">&quot;agent&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;tool_call&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local__add&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;arguments&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;a&quot;</span><span class="punctuation">:</span> <span class="number">123.5</span><span class="punctuation">,</span> <span class="attr">&quot;b&quot;</span><span class="punctuation">:</span> <span class="number">876.5</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span> <span class="attr">&quot;seq&quot;</span><span class="punctuation">:</span> <span class="number">2</span><span class="punctuation">,</span> <span class="attr">&quot;call_id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;a1b2c3d4&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;role&quot;</span><span class="punctuation">:</span> <span class="string">&quot;tool&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;plain&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1000.0&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;seq&quot;</span><span class="punctuation">:</span> <span class="number">3</span><span class="punctuation">,</span> <span class="attr">&quot;call_id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;a1b2c3d4&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;role&quot;</span><span class="punctuation">:</span> <span class="string">&quot;agent&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;plain&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;结果是 1000。&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;seq&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span> <span class="attr">&quot;call_id&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h4 id="消息窗口">2.5.3 消息窗口</h4>
+<p>JSONL 文件保留完整的历史记录，而内存中的 <code>messages</code>
+只加载当前消息窗口。</p>
+<p>加载规则：</p>
+<ul>
+<li>如果文件中没有 <code>context</code> 消息，则加载全部历史记录。</li>
+<li>如果存在 <code>context</code> 消息，则从最后一条
+<code>context</code> 消息开始，加载该消息及其后面的所有记录。</li>
+</ul>
+<p><code>context</code> 保存此前历史消息的摘要。生成模型输入时，Agent
+会将其内容拼接到 System Prompt 后面，而不是作为独立消息发送。</p>
+<p>因此，两者的区别是：</p>
+<ul>
+<li><code>messages</code>：当前窗口中的消息。</li>
+<li>JSONL 文件：完整的历史记录，包括压缩前的旧消息。</li>
+</ul>
+<h4 id="历史消息压缩">2.5.4 历史消息压缩</h4>
+<p>当一轮对话结束并保存消息后，SessionHistory
+会检查当前窗口的消息数量。如果达到
+<code>MAX_MESSAGES</code>，则触发压缩。</p>
+<p><strong>压缩范围</strong></p>
+<p>从当前窗口中取最旧的 <code>COMPACT_COUNT</code>
+条消息进行压缩。如果第一条消息是上一次压缩生成的
+<code>context</code>，也会一并纳入本次压缩，使摘要逐级叠加。</p>
+<p>切分位置会向后移动到下一条文字消息，避免在切分后留下不完整的工具调用记录。</p>
+<p><strong>生成摘要</strong></p>
+<p><code>CompressModel</code> 只处理 <code>plain</code>
+类型的消息，将其整理为“角色: 内容”的文本，再调用本地 Ollama 的
+<code>qwen3:8b</code> 生成摘要。</p>
+<p>提示词要求模型保留关键事实，并将内容压缩至原文长度的约
+70%。这个比例是提示词要求的目标，并不保证实际输出长度。</p>
+<p><strong>压缩结果</strong></p>
+<p>压缩完成后，内存中的消息窗口变为：</p>
+<ul>
+<li>一条新的 <code>context</code> 摘要消息。</li>
+<li>尚未参与压缩的剩余消息。</li>
+</ul>
+<p>随后重新分配消息序号，并将整个新窗口追加写入 JSONL 文件。</p>
+<p>默认配置为：</p>
+<ul>
+<li><code>MAX_MESSAGES = 300</code></li>
+<li><code>COMPACT_COUNT = 200</code></li>
+</ul>
+<p>因此，触发压缩时会处理约 200 条消息，保留约 100
+条未压缩消息，最终窗口约为 101 条。</p>
+<p>压缩不会删除文件中的旧记录，而是将新的消息窗口追加到文件末尾。由于加载时只读取最后一条
+<code>context</code> 及其后续记录，因此不会重复加载旧消息。</p>
+<p><strong>注意事项</strong></p>
+<ol type="1">
+<li><code>tool_call</code>
+类型的消息不会参与摘要，因此工具名称和调用参数不会保留在摘要中。工具执行结果属于
+<code>plain</code>
+消息，会参与摘要，但摘要可能无法准确保留它与原工具调用之间的对应关系。</li>
+<li>压缩使用的 <code>CompressModel</code> 独立于 ModelCfg，默认调用本地
+Ollama 的 <code>qwen3:8b</code>。执行压缩前，需要确保 Ollama
+服务和对应模型可用。</li>
+</ol>
+<hr>
+<h3 id="modelcfg模型配置-1">2.6 ModelCfg（模型配置）</h3>
+<p>ModelCfg 用于管理 Agent 的模型配置，同时记录 MCP 服务、工具和
+Skill。</p>
+<p>工具与 Skill 都绑定在 ModelCfg 上。Agent 使用不同的 ModelCfg
+时，会加载对应配置中记录的工具和 Skill。</p>
+<h4 id="初始化与配置字段">2.6.1 初始化与配置字段</h4>
+<p>初始化方式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ModelCfg(cfg_name, model_name, url, key=<span class="literal">None</span>, <span class="built_in">type</span>=<span class="string">&quot;ollama&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>主要字段：</p>
+<ul>
+<li><code>cfg_name</code>：配置名称，必填，同时作为配置文件名。</li>
+<li><code>model_name</code>：模型名称。</li>
+<li><code>url</code>：模型 API 服务地址。</li>
+<li><code>key</code>：服务商 API Key，使用本地 Ollama 时可以留空。</li>
+<li><code>type</code>：模型类型，目前定义了
+<code>ollama</code>、<code>vllm</code>、<code>deepseek</code>，但 Agent
+当前只支持 <code>ollama</code>。</li>
+<li><code>belong</code>：配置归属用户名，<code>None</code>
+表示全局配置。</li>
+</ul>
+<h4 id="mcp-服务与工具管理">2.6.2 MCP 服务与工具管理</h4>
+<p>ModelCfg 提供以下方法管理 MCP 服务和工具：</p>
+<p><strong>MCP 服务管理</strong></p>
+<ul>
+<li><code>add_server(server_name, url)</code>：添加 MCP
+服务，建立服务别名与 URL 的映射。</li>
+<li><code>list_server()</code>：列出已添加的 MCP 服务。</li>
+<li><code>delete_server(server_name)</code>：删除指定 MCP 服务。</li>
+</ul>
+<p><strong>工具管理</strong></p>
+<ul>
+<li><code>await add_tool(server_name, func_name)</code>：从指定 MCP
+服务获取工具并添加到配置中，返回带服务别名前缀的工具名称，例如
+<code>local__add</code>。</li>
+<li><code>list_tool()</code>：列出已添加的工具。</li>
+<li><code>delete_tool(tool_name)</code>：删除指定工具。</li>
+<li><code>to_openai_tools()</code>：将工具转换为 OpenAI API
+兼容的工具格式。</li>
+</ul>
+<p>Agent 调用模型时，会将转换后的工具列表传入模型：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">llm.generate(openai_messages, <span class="variable language_">self</span>.tools)</span><br></pre></td></tr></table></figure>
+<p>具体的消息和工具格式处理由模型类负责。对于非 OpenAI
+兼容的模型，需要在对应模型类中将这些数据转换为模型支持的输入格式。</p>
+<h4 id="skill-管理">2.6.3 Skill 管理</h4>
+<p>ModelCfg 通过以下方法管理 Skill：</p>
+<ul>
+<li><code>add_skill(skill)</code>：添加 Skill。</li>
+<li><code>list_skill()</code>：列出已添加的 Skill。</li>
+<li><code>delete_skill(skill_name)</code>：移除指定 Skill。</li>
+</ul>
+<p>ModelCfg 只记录 Skill 名称，不直接保存 Skill 内容。删除 Skill
+时，也只会从配置中移除名称，不会删除对应的 Skill 文件。</p>
+<h4 id="配置文件管理">2.6.4 配置文件管理</h4>
+<p>ModelCfg 提供以下方法管理配置文件：</p>
+<ul>
+<li><code>save()</code>：保存配置。</li>
+<li><code>delete()</code>：删除配置文件。</li>
+<li><code>ModelCfg.load_global(cfg_name)</code>：根据配置名称，从全局配置目录加载配置。</li>
+<li><code>ModelCfg.load(file_path)</code>：根据指定路径加载配置。</li>
+</ul>
+<p>配置文件采用 JSON 格式，以 <code>cfg_name</code> 命名。</p>
+<p><strong>保存规则</strong></p>
+<ol type="1">
+<li>新建 ModelCfg 对象时，配置只保存在内存中，不会自动写入文件。</li>
+<li>全局配置需要显式调用 <code>save()</code>，保存到
+<code>MODEL_CFG_DIR</code>。如果存在同名配置，则报错。</li>
+<li>用户配置通过 <code>User.add_model_cfg()</code>
+复制到对应用户目录。</li>
+<li>配置文件创建后，后续对 MCP 服务、工具和 Skill
+的修改会自动写回配置文件。</li>
+</ol>
+<hr>
+<h3 id="skill技能-1">2.7 Skill（技能）</h3>
+<p>Skill 是一份提供给模型的指令文档，通常保存为
+<code>SKILL.md</code>。模型通过 <code>description</code>
+判断是否需要使用该 Skill，只有调用 <code>load_skill</code>
+工具后，才会获取完整的 <code>content</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Skill(name, description, content)  <span class="comment"># description 必须为单行</span></span><br></pre></td></tr></table></figure>
+<p>文件格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">name: code-review</span><br><span class="line">description: 审查 Python 代码时使用</span><br><span class="line">---</span><br><span class="line"></span><br><span class="line">（正文，可以很长）</span><br></pre></td></tr></table></figure>
+<p>存放位置：</p>
+<ul>
+<li>全局：<code>SKILL_DIR/&lt;name&gt;/SKILL.md</code></li>
+<li>用户：<code>USER_DIR/&lt;user_name&gt;/skills/&lt;name&gt;/SKILL.md</code></li>
+</ul>
+<p>每个 Skill 使用独立文件夹存放，而不是直接保存为单个文件。这样可以在
+Skill
+需要额外附件（如脚本、配置文件等）时，将它们放在对应目录下，方便统一管理。</p>
+<p>方法：</p>
+<ul>
+<li><code>save(overwrite=False)</code>：保存 Skill。<code>belong</code>
+为 <code>None</code>
+时保存到全局目录，否则保存到指定用户目录。默认不覆盖已有的同名文件。</li>
+<li><code>Skill.load(name, belong=None)</code>：加载 Skill，返回对应的
+Skill 对象。<code>belong=None</code> 时从全局目录加载；指定
+<code>belong=user_name</code> 时，从对应用户目录加载。</li>
+<li><code>Skill.exists(name, belong=None)</code>：判断指定目录下是否存在该
+Skill。</li>
+<li><code>Skill.path_of(name, belong=None)</code>：根据 Skill
+名称和归属生成文件路径，供加载等操作使用。</li>
+<li><code>copy_to_user(user_name)</code>：将 Skill
+复制到指定用户目录。如果目标目录已存在同名
+Skill，则直接复用，不覆盖。</li>
+<li><code>delete()</code>：删除 Skill 文件。如果仍有模型配置引用该
+Skill，则拒绝删除，并提示正在使用它的模型配置。</li>
+<li><code>prompt_line()</code>：将 Skill 转换为一行提示词，用于追加到
+system prompt 中。</li>
+</ul>
+<hr>
+<h3 id="agent智能体">2.8 Agent（智能体）</h3>
+<p>Agent
+负责执行一轮完整的对话。它将历史消息、用户输入和工具列表发送给模型；如果模型需要调用工具，就执行对应工具，并将执行结果返回给模型，直到模型生成最终回复。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Agent(history, model_cfg, system_prompt=&quot;&quot;)</span><br></pre></td></tr></table></figure>
+<p>参数：</p>
+<ul>
+<li><code>history</code>：当前会话的 <code>SessionHistory</code>
+对象。</li>
+<li><code>model_cfg</code>：当前用户的 <code>ModelCfg</code> 对象。</li>
+</ul>
+<p>初始化过程：</p>
+<p>创建 Agent 时，会读取一次模型配置，并完成以下操作：</p>
+<ol type="1">
+<li>根据配置中的 <code>type</code> 创建对应的模型对象。</li>
+<li>获取可用的工具列表。</li>
+<li>加载配置中记录的 Skill。如果对应的 Skill
+文件不存在，则直接报错。</li>
+<li>如果配置中包含 Skill，则在 system prompt 后追加 Skill
+列表，并注册一个内置工具 <code>load_skill</code>，供模型按需加载 Skill
+的完整内容。</li>
+</ol>
+<p>方法：</p>
+<ul>
+<li><code>await generate(user_input)</code>：执行一轮完整对话，返回最终回复文本。内部通过循环处理模型回复和工具调用，最多调用模型
+<code>MAX_STEPS</code> 次。超过限制后抛出异常，本轮消息不会保存。</li>
+<li><code>await run_tool(call_message)</code>：执行一条工具调用，并返回工具结果消息。如果执行出错，不会直接抛出异常，而是返回一段以
+<code>tool error:</code> 开头的错误信息，交给模型自行分析和修正。</li>
+<li><code>parse_arguments(raw_arguments)</code>：将模型返回的参数字符串解析为字典。</li>
+</ul>
+<hr>
+<h3 id="model-与模型类">2.9 Model 与模型类</h3>
+<p>Model 层负责封装不同服务商的模型接口，对上层 Agent
+提供统一的调用方式。无论底层使用哪种模型，最终都会通过统一的
+<code>Model</code> 接口供 Agent 调用。</p>
+<p><strong>Model 基类</strong></p>
+<p><code>Model</code> 是模型基类，只定义了一个接口方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">await generate(messages, tools=None)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>messages</code>：消息列表。</li>
+<li><code>tools</code>：工具列表，可选。</li>
+</ul>
+<p>该方法负责将消息和工具发送给底层模型，并返回模型的回复内容。</p>
+<p><strong>OllamaOpenAI</strong></p>
+<p>目前实现的一个模型类是
+<code>OllamaOpenAI(model_name, base_url)</code>。</p>
+<p>该类通过 Ollama 提供的 OpenAI 兼容接口调用模型，API Key 固定设置为
+<code>"ollama"</code>。</p>
+<p>目前本地使用的是 <code>qwen3:8b</code>，因此 <code>generate()</code>
+内部实现 接收的 <code>messages</code> 和 <code>tools</code> 均采用
+OpenAI 兼容格式。</p>
+<p><strong>CompressModel</strong></p>
+<p>另一个模型类是 <code>CompressModel</code>，同样继承自
+<code>Model</code>，但用途不同。</p>
+<p>它专门用于历史消息压缩，不参与 Agent 的常规对话和工具调用流程。</p>
+<hr>
+<h3 id="mcp-服务与客户端">2.10 MCP 服务与客户端</h3>
+<p>cc_agent 内部的工具统一通过 MCP 服务提供，因此项目内部也实现了一个
+MCP 服务器。需要添加工具时，只需在
+<code>cc_agent/mcp_server/functions/</code>
+目录下编写工具函数，服务器启动时会自动加载该目录下定义的工具。</p>
+<p>例如，在 <code>cc_agent/mcp_server/functions/calc.py</code>
+中编写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">a: <span class="built_in">float</span>, b: <span class="built_in">float</span></span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;计算两个数之和。&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> a + b</span><br><span class="line"></span><br><span class="line">TOOLS = [add]</span><br></pre></td></tr></table></figure>
+<p>其中，<code>TOOLS</code> 用于指定该文件需要注册为 MCP
+工具的函数，服务器会自动加载其中的所有函数。</p>
+<p>启动 MCP 服务器：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -m cc_agent.mcp_server.server</span><br></pre></td></tr></table></figure>
+<p>当然，也可以直接使用自己的 MCP 服务器。cc_agent 不依赖特定的 MCP
+服务端实现，只要能够通过 MCP 协议获取工具列表并执行工具即可。</p>
+<p>MCP 客户端</p>
+<p><code>client.py</code> 提供了操作 MCP
+服务的辅助函数，主要负责获取工具列表和执行具体工具：</p>
+<ul>
+<li><code>client.get_tools(url)</code>：异步获取指定 MCP
+服务的工具列表，并转换为 OpenAI
+格式。获取结果带有缓存，避免重复请求。</li>
+<li><code>client.execute_tool(url, name, arguments)</code>：异步执行指定工具，传入服务地址、工具名称和参数。执行失败时抛出
+<code>ToolExecuteError</code>。</li>
+</ul>
+<p>客户端内部还实现了 <code>tools_cache</code>
+缓存机制。获取工具列表时，会优先检查缓存，只有缓存中不存在对应数据时，才会连接目标
+MCP 服务获取。</p>
+<h3 id="config.py">2.11 config.py</h3>
+<p><code>config.py</code>
+是项目的全局配置文件，主要用于统一管理数据存储路径和运行参数。</p>
+<p>所有路径均以运行脚本时的当前工作目录（<code>Path.cwd()</code>）为基准。因此，从不同目录启动脚本，生成的数据也会存放在不同位置。</p>
+<p>主要配置：</p>
+<ul>
+<li><code>USER_DIR</code>：<code>users_data/</code>，用户数据根目录。</li>
+<li><code>MODEL_CFG_DIR</code>：<code>model_cfg_data/</code>，全局模型配置目录。</li>
+<li><code>SKILL_DIR</code>：<code>skills_data/</code>，全局 Skill
+存储目录。</li>
+<li><code>MAX_MESSAGES</code>：<code>300</code>，会话历史达到该消息数量时触发压缩。</li>
+<li><code>COMPACT_COUNT</code>：<code>200</code>，每次压缩时选取最旧的消息数量。</li>
+</ul>
+<p> </p>
+<p> </p>
+<hr>
+<h2 id="组件之间的关系">3. 组件之间的关系</h2>
+<h3 id="按用户隔离全局与用户两级存储">3.1
+按用户隔离，全局与用户两级存储</h3>
+<p><code>ModelCfg</code> 和 <code>Skill</code>
+都支持全局和用户两种归属，通过 <code>belong</code> 区分：</p>
+<ul>
+<li>全局配置：<code>belong=None</code>，保存在全局目录（<code>MODEL_CFG_DIR</code>、<code>SKILL_DIR</code>）。创建时如果没有指定用户，则默认保存在全局目录。</li>
+<li>用户配置：<code>belong</code>
+为用户名，保存在对应用户的目录下。不同用户的数据相互隔离。</li>
+</ul>
+<h3 id="用户会话与-agent">3.2 用户、会话与 Agent</h3>
+<ul>
+<li>用户名唯一，一个用户可以创建多个 session，每个 session
+独立记录对话历史。</li>
+<li>每个 session 对应一个 <code>SessionHistory</code>
+对象，通过读取对应的 JSONL 文件恢复历史消息。</li>
+<li>创建 Agent 需要两个核心对象：当前 session 的
+<code>SessionHistory</code> 和一个 <code>ModelCfg</code>。</li>
+<li>Agent 根据 <code>SessionHistory</code> 获取对话历史，根据
+<code>ModelCfg</code> 获取模型、工具和 Skill 配置。</li>
+</ul>
+<h3 id="工具skill-与-modelcfg">3.3 工具、Skill 与 ModelCfg</h3>
+<p>工具和 Skill 都需要添加到指定的 <code>ModelCfg</code>
+中才能使用。它们绑定在具体的模型配置上，不同的 <code>ModelCfg</code>
+可以拥有不同的工具和 Skill。</p>
+<ul>
+<li>Skill：每个 <code>ModelCfg</code> 只记录自己添加过的 Skill
+名称，不需要包含所有 Skill。Agent 初始化时根据这些名称加载对应的
+Skill。</li>
+<li>工具：只能通过 MCP 服务获取，<code>ModelCfg</code> 记录 MCP
+服务的别名与 URL，以及已添加的工具。</li>
+<li>工具命名：工具名会添加服务别名前缀，格式为
+<code>服务别名__原始名称</code>，例如
+<code>local__add</code>，用于避免不同 MCP 服务之间出现工具重名。</li>
+<li>重复添加：同一个 <code>ModelCfg</code>
+中添加同名工具会抛出异常。</li>
+</ul>
+<p>3.4 关系图</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">User ──┬── session(xxx.jsonl) ──── SessionHistory ─────┐</span><br><span class="line">       │                                               ├──► Agent(history, model_cfg, system_prompt)</span><br><span class="line">       ├── model_cfg ──┬── servers (别名→url) ─────────┘               │</span><br><span class="line">       │               ├── tools   (来自 MCP)                          ├─ 调用模型 (OllamaOpenAI)</span><br><span class="line">       │               └── skill 名字 ──► skills/&lt;name&gt;/SKILL.md       │</span><br><span class="line">       │                                             		          └─ 执行工具 (mcp client)</span><br><span class="line">       └── skills (用户目录下的副本)</span><br><span class="line"></span><br><span class="line">全局目录：MODEL_CFG_DIR、SKILL_DIR</span><br><span class="line">          用户 add 时，复制一份到用户目录</span><br></pre></td></tr></table></figure>
+<p> </p>
+<p> </p>
+<hr>
+<h2 id="使用流程">4. 使用流程</h2>
+<h3 id="创建用户">4.1 创建用户</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">user = User.create_user(<span class="string">&quot;demo_user&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>如果用户已经存在，可以使用 <code>User.open_user("demo_user")</code>
+打开已有用户。</p>
+<p>创建用户后，会在 <code>USER_DIR</code>
+下生成对应的用户目录，并自动创建三个子目录：</p>
+<ul>
+<li><code>session/</code>：存放用户的会话历史文件。</li>
+<li><code>model_cfg/</code>：存放用户的模型配置。</li>
+<li><code>skills/</code>：存放用户的 Skill 副本。</li>
+</ul>
+<h3 id="创建-session">4.2 创建 session</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">session_id = user.new_session()</span><br><span class="line">history = SessionHistory(<span class="string">&quot;demo_user&quot;</span>, session_id)</span><br></pre></td></tr></table></figure>
+<p><code>new_session()</code> 只负责创建会话并返回
+<code>session_id</code>，不会直接返回历史对象。因此，还需要通过用户名和会话
+ID 创建
+<code>SessionHistory</code>，用于读取和管理该会话的消息历史。</p>
+<h3 id="创建模型配置并添加工具">4.3 创建模型配置并添加工具</h3>
+<ol type="1">
+<li>创建 <code>ModelCfg</code> 对象，通过
+<code>user.add_model_cfg(...)</code> 将其添加到用户配置中。</li>
+<li>使用 <code>user.get_model_cfg(cfg_name)</code>
+获取用户目录下的模型配置对象。后续操作应针对这个对象，而不是最初创建的对象。</li>
+<li>使用 <code>add_server(server_name, url)</code> 登记 MCP
+服务，建立服务别名与 URL 的对应关系。</li>
+<li>使用 <code>await add_tool(server_name, func_name)</code>
+添加工具。每次只能添加一个工具，没有批量添加接口。</li>
+<li>使用 <code>list_tool()</code> 查看已添加的工具，使用
+<code>to_openai_tools()</code> 查看最终提供给模型的 OpenAI
+格式工具列表。</li>
+</ol>
+<p>准备工作： 添加工具前，必须确保对应的 MCP 服务已经启动，因为
+<code>add_tool()</code> 需要连接 MCP 服务并获取工具列表。</p>
+<h3 id="添加-skill">4.4 添加 Skill</h3>
+<ol type="1">
+<li>创建 <code>Skill(name, description, content)</code> 对象。</li>
+<li>调用用户模型配置的 <code>model_cfg.add_skill(skill)</code> 添加
+Skill。该操作会自动将 Skill 复制到用户的 <code>skills/</code>
+目录，而模型配置中只记录 Skill 名称。</li>
+<li>也可以先通过 <code>skill.save()</code> 将 Skill
+保存到全局目录，再供多个用户使用；或者使用
+<code>Skill.from_file(path)</code> 导入已有的 <code>SKILL.md</code>
+文件。</li>
+</ol>
+<h3 id="一轮对话的完整示例-1">4.5 一轮对话的完整示例</h3>
+<p>下面将前面的操作串联起来，演示从创建用户到完成一轮对话的完整流程。</p>
+<p>运行前需要准备：</p>
+<ul>
+<li>Ollama 已下载 <code>qwen3:8b</code> 模型。</li>
+<li>MCP 服务已启动，地址为 <code>http://localhost:8000/mcp</code>。</li>
+<li>MCP 服务中已注册 <code>add</code> 工具。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> asyncio</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> cc_agent.agent.agent <span class="keyword">import</span> Agent</span><br><span class="line"><span class="keyword">from</span> cc_agent.message.SessionHistory <span class="keyword">import</span> SessionHistory</span><br><span class="line"><span class="keyword">from</span> cc_agent.skill <span class="keyword">import</span> Skill</span><br><span class="line"><span class="keyword">from</span> cc_agent.users.model_cfg <span class="keyword">import</span> ModelCfg</span><br><span class="line"><span class="keyword">from</span> cc_agent.users.user <span class="keyword">import</span> User</span><br><span class="line"></span><br><span class="line">USER_NAME = <span class="string">&quot;demo_user&quot;</span></span><br><span class="line">CFG_NAME = <span class="string">&quot;qwen3_8b&quot;</span></span><br><span class="line">SERVER_NAME = <span class="string">&quot;local&quot;</span></span><br><span class="line">MCP_URL = <span class="string">&quot;http://localhost:8000/mcp&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    <span class="comment"># 1. 创建用户</span></span><br><span class="line">    user = User.create_user(USER_NAME)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 2. 创建 session 和历史对象</span></span><br><span class="line">    session_id = user.new_session()</span><br><span class="line">    history = SessionHistory(USER_NAME, session_id)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 3. 创建模型配置，添加到用户，再获取用户自己的配置对象</span></span><br><span class="line">    new_cfg = ModelCfg(</span><br><span class="line">        CFG_NAME,</span><br><span class="line">        model_name=<span class="string">&quot;qwen3:8b&quot;</span>,</span><br><span class="line">        url=<span class="string">&quot;http://localhost:11434/v1&quot;</span>,</span><br><span class="line">        <span class="built_in">type</span>=<span class="string">&quot;ollama&quot;</span>,</span><br><span class="line">    )</span><br><span class="line">    user.add_model_cfg(new_cfg)</span><br><span class="line">    model_cfg = user.get_model_cfg(CFG_NAME)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 4. 登记 MCP 服务并添加工具</span></span><br><span class="line">    model_cfg.add_server(SERVER_NAME, MCP_URL)</span><br><span class="line">    tool_name = <span class="keyword">await</span> model_cfg.add_tool(SERVER_NAME, <span class="string">&quot;add&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 5. 添加 Skill（自动复制到用户的 skills 目录）</span></span><br><span class="line">    skill = Skill(</span><br><span class="line">        <span class="string">&quot;answer-format&quot;</span>,</span><br><span class="line">        <span class="string">&quot;用户要求计算时使用，规定回复的格式&quot;</span>,</span><br><span class="line">        <span class="string">&quot;计算完成后，回复只能写成：计算结果：&lt;数字&gt;&quot;</span>,</span><br><span class="line">    )</span><br><span class="line">    model_cfg.add_skill(skill)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 6. 创建 Agent，必须先完成工具和 Skill 的配置</span></span><br><span class="line">    agent = Agent(history, model_cfg, <span class="string">&quot;You are a helpful assistant.&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 7. 执行一轮对话</span></span><br><span class="line">    reply = <span class="keyword">await</span> agent.generate(<span class="string">&quot;请用工具计算 123.5 加 876.5&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(reply)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">asyncio.run(main())</span><br></pre></td></tr></table></figure>
+<p>一轮对话内部的执行过程：</p>
+<ol type="1">
+<li>Agent 将 system prompt（包含 Skill
+列表）、<code>history.messages</code>（当前窗口内的历史消息）和本次用户输入组合成
+OpenAI 格式的消息列表。其中，context 消息（旧消息摘要）会合并到 system
+prompt 中；连续的多条 <code>tool_call</code> 消息会合并为一条带有
+<code>tool_calls</code> 的 assistant 消息。</li>
+<li>Agent 调用模型。如果模型返回了工具调用请求，则进入工具执行流程：
+<ul>
+<li>模型可能先调用 <code>load_skill</code> 获取 Skill
+的完整内容，也可能直接调用 <code>local__add</code> 等工具。</li>
+<li>Agent 通过 <code>run_tool</code> 执行每条工具调用。对于带有
+<code>服务别名__</code> 前缀的工具，根据前缀找到对应的 MCP 服务
+URL，再通过 MCP Client 执行；对于
+<code>load_skill</code>，则直接返回对应 Skill 的正文。</li>
+<li>工具执行结果封装为 <code>tool</code>
+消息，追加到本轮消息中，再次发送给模型。</li>
+</ul></li>
+<li>重复上述过程，直到模型返回不包含工具调用的普通回复，作为本轮对话的最终结果。</li>
+<li>将本轮缓存的全部消息（用户输入、模型的工具调用、工具执行结果和最终回复）一次性添加到
+<code>history</code>，然后调用 <code>history.save()</code> 保存到 JSONL
+文件，最后执行
+<code>await history.checkCompact()</code>，检查是否达到压缩条件。</li>
+</ol>
+<p>本轮产生的消息示例：</p>
+<p>以下是实际测试中的一次对话记录：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">===== 对话之后（窗口 <span class="number">6</span> 条）=====</span><br><span class="line"><span class="punctuation">[</span>seq=<span class="number">1</span><span class="punctuation">]</span> role=user type=plain content=&#x27;我是 IT 部门的，电脑坏了，请帮我登记一个报修工单。&#x27;</span><br><span class="line"><span class="punctuation">[</span>seq=<span class="number">2</span><span class="punctuation">]</span> role=agent type=tool_call content=<span class="punctuation">&#123;</span>&#x27;name&#x27;<span class="punctuation">:</span> &#x27;load_skill&#x27;<span class="punctuation">,</span> &#x27;arguments&#x27;<span class="punctuation">:</span> <span class="punctuation">&#123;</span>&#x27;skill_name&#x27;<span class="punctuation">:</span> &#x27;test-ticket-format&#x27;<span class="punctuation">&#125;</span><span class="punctuation">&#125;</span> call_id=call_lpfdu0d7</span><br><span class="line"><span class="punctuation">[</span>seq=<span class="number">3</span><span class="punctuation">]</span> role=tool type=plain content=&#x27;登记工单时，严格按以下步骤执行：\n1. 先调用 local__get_ticket_id 工具获取工单号，参数 department 填用户所在部门的英文小写缩写（例如 it、hr）。\n2. 拿到工单号后，回复只能用下面这个格式，不要添加任何其他内容：\n工单已登记 | 编号：&lt;工单号&gt; | 处理人：Orion-Desk&#x27; call_id=call_lpfdu0d7</span><br><span class="line"><span class="punctuation">[</span>seq=<span class="number">4</span><span class="punctuation">]</span> role=agent type=tool_call content=<span class="punctuation">&#123;</span>&#x27;name&#x27;<span class="punctuation">:</span> &#x27;local__get_ticket_id&#x27;<span class="punctuation">,</span> &#x27;arguments&#x27;<span class="punctuation">:</span> <span class="punctuation">&#123;</span>&#x27;department&#x27;<span class="punctuation">:</span> &#x27;it&#x27;<span class="punctuation">&#125;</span><span class="punctuation">&#125;</span> call_id=call_j3sihoj3</span><br><span class="line"><span class="punctuation">[</span>seq=<span class="number">5</span><span class="punctuation">]</span> role=tool type=plain content=&#x27;TICKET-IT<span class="number">-4821</span>&#x27; call_id=call_j3sihoj3</span><br><span class="line"><span class="punctuation">[</span>seq=<span class="number">6</span><span class="punctuation">]</span> role=agent type=plain content=&#x27;工单已登记 | 编号：TICKET-IT<span class="number">-4821</span> | 处理人：Orion-Desk&#x27;</span><br></pre></td></tr></table></figure>
+<h3 id="再次使用已有用户和会话">4.6 再次使用已有用户和会话</h3>
+<p>程序重启后，可以通过用户信息和已有的 session ID 恢复之前的对话：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">user = User.open_user(<span class="string">&quot;demo_user&quot;</span>)</span><br><span class="line">session_ids = user.list_session()</span><br><span class="line">cfg_names = user.list_model_cfg()</span><br><span class="line"></span><br><span class="line">history = SessionHistory(<span class="string">&quot;demo_user&quot;</span>, session_ids[<span class="number">0</span>])</span><br><span class="line">model_cfg = user.get_model_cfg(cfg_names[<span class="number">0</span>])</span><br><span class="line">agent = Agent(history, model_cfg, <span class="string">&quot;You are a helpful assistant.&quot;</span>)</span><br><span class="line"></span><br><span class="line">reply = <span class="keyword">await</span> agent.generate(<span class="string">&quot;我刚才问了什么？&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>恢复过程：</p>
+<ol type="1">
+<li><code>User.open_user()</code> 打开已有用户。</li>
+<li><code>list_session()</code> 获取该用户的会话 ID 列表。</li>
+<li><code>list_model_cfg()</code> 获取该用户的模型配置名称列表。</li>
+<li><code>SessionHistory()</code> 根据用户名和 session ID
+加载对应的历史消息。</li>
+<li><code>get_model_cfg()</code> 获取已有的模型配置。</li>
+<li>使用历史对象和模型配置重新创建 Agent，即可继续之前的对话。</li>
+</ol>
+<p>需要注意，<code>SessionHistory</code>
+只会加载当前窗口中的消息，即最后一条 <code>context</code>
+消息之后的完整消息。模型实际能够看到的是压缩摘要（context）以及摘要之后的完整对话历史。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai%E7%B3%BB%E5%88%97/" rel="tag"># ai系列</a>
+              <a href="/tags/ai%E5%BC%80%E5%8F%91%E7%AF%87/" rel="tag"># ai开发篇</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/10/26/ai%E5%AD%A6%E6%9C%AF%E7%AF%87-4-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83-%E5%A4%8D%E7%8E%B0%E8%AE%BA%E6%96%87/" rel="prev" title="ai学术篇 4.模型训练(复现论文)">
+                  <i class="fa fa-angle-left"></i> ai学术篇 4.模型训练(复现论文)
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        访客数：<span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        阅读量：<span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
